@@ -1,0 +1,14 @@
+.home-page {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  }
+
+/* Global styles for Arabic text */
+body {
+  font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
+}

@@ -1,0 +1,1093 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Swiper Styles */
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
+
+/* Services Swiper - Hide default navigation */
+.services-swiper .swiper-button-next,
+.services-swiper .swiper-button-prev {
+  display: none !important;
+}
+
+/* Services Swiper - Ensure horizontal layout */
+.services-swiper {
+  width: 100%;
+  overflow: visible;
+}
+
+.services-swiper .swiper-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  transition-duration: 800ms !important;
+  will-change: transform;
+}
+
+.services-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* Smooth scrolling for services swiper */
+.services-swiper .swiper-container {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom Swiper Styles for Days */
+.days-swiper {
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+.days-swiper .swiper-wrapper {
+  display: flex !important;
+  align-items: stretch;
+  transform: translate3d(0px, 0, 0) !important;
+}
+
+.days-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.days-swiper .swiper-button-prev-days,
+.days-swiper .swiper-button-next-days {
+  color: #00adb5;
+}
+
+.days-swiper .swiper-button-prev-days:after,
+.days-swiper .swiper-button-next-days:after {
+  font-size: 20px;
+}
+
+.days-swiper .swiper-pagination-days {
+  position: relative;
+  margin-top: 16px;
+}
+
+.days-swiper .swiper-pagination-bullet {
+  background: #00adb5;
+  opacity: 0.3;
+}
+
+.days-swiper .swiper-pagination-bullet-active {
+  opacity: 1;
+  background: #00adb5;
+}
+
+@layer base {
+  * {
+    font-family: 'El Messiri', sans-serif;
+  }
+
+  body {
+    @apply min-h-screen min-w-[320px] m-0;
+    direction: rtl;
+    font-family: 'El Messiri', sans-serif;
+  }
+
+  #root {
+    @apply w-full min-h-screen;
+  }
+
+  a {
+    @apply font-medium no-underline;
+    font-family: 'El Messiri', sans-serif;
+    color: inherit;
+  }
+
+  a:hover {
+    color: inherit;
+  }
+
+  button {
+    @apply cursor-pointer;
+    font-family: 'El Messiri', sans-serif;
+  }
+
+  /* Fix white text on hover - override any conflicting styles including text-primary */
+  .hover\:text-white:hover,
+  button.hover\:text-white:hover {
+    color: #ffffff !important;
+  }
+  
+  /* Override text-primary on hover when hover:text-white is used */
+  .hover\:text-white:hover.text-primary,
+  button.hover\:text-white:hover {
+    color: #ffffff !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  span,
+  p {
+    @apply font-semibold;
+    font-family: 'El Messiri', sans-serif;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: 'El Messiri', sans-serif;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  75% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-float-image {
+  animation: float 2s ease-in infinite;
+}
+
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-25%);
+  }
+}
+
+.animate-scroll-infinite {
+  animation: scroll-infinite 30s linear infinite;
+  display: flex;
+  width: fit-content;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 30s linear infinite;
+}
+
+/* Slide In Up Animation for Testimonials */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Floating Left-Right Animation for Testimonials */
+@keyframes float-left-right {
+
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+
+  25% {
+    transform: translateX(-10px) translateY(-5px);
+  }
+
+  50% {
+    transform: translateX(0) translateY(-10px);
+  }
+
+  75% {
+    transform: translateX(10px) translateY(-5px);
+  }
+}
+
+.animate-float-left-right {
+  animation: float-left-right 6s ease-in-out infinite;
+}
+
+/* Floating Right-Left Animation for Testimonials */
+@keyframes float-right-left {
+
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+
+  25% {
+    transform: translateX(10px) translateY(-5px);
+  }
+
+  50% {
+    transform: translateX(0) translateY(-10px);
+  }
+
+  75% {
+    transform: translateX(-10px) translateY(-5px);
+  }
+}
+
+.animate-float-right-left {
+  animation: float-right-left 8s ease-in-out infinite;
+}
+
+/* Pulse Slow Animation for Circle Background */
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+/* Primary color utilities - using CSS variables for consistency */
+:root {
+  --color-primary: #FDB103;
+  --color-primary-dark: #d89402;
+  --color-primary-light: #ffc433;
+  --color-primary-rgb: 253, 177, 3;
+}
+
+/* Ensure primary color is applied everywhere */
+.text-primary,
+.text-primary\:DEFAULT {
+  color: var(--color-primary) !important;
+}
+
+/* Override text-primary on hover when hover:text-white is used */
+.hover\:text-white:hover.text-primary,
+button.hover\:text-white:hover,
+.hover\:text-white:hover {
+  color: #ffffff !important;
+}
+
+.bg-primary,
+.bg-primary\:DEFAULT {
+  background-color: var(--color-primary) !important;
+}
+
+.border-primary,
+.border-primary\:DEFAULT {
+  border-color: var(--color-primary) !important;
+}
+
+/* Support for primary color opacity variants - Tailwind format */
+.bg-primary\/10,
+.bg-primary\/\[0\.1\] {
+  background-color: rgba(253, 177, 3, 0.1) !important;
+}
+
+.hover\:bg-primary\/10:hover,
+.hover\:bg-primary\/\[0\.1\]:hover {
+  background-color: rgba(253, 177, 3, 0.1) !important;
+}
+
+.bg-primary\/20,
+.bg-primary\/\[0\.2\] {
+  background-color: rgba(253, 177, 3, 0.2) !important;
+}
+
+.bg-primary\/50,
+.bg-primary\/\[0\.5\] {
+  background-color: rgba(253, 177, 3, 0.5) !important;
+}
+
+.bg-primary\/80,
+.bg-primary\/\[0\.8\] {
+  background-color: rgba(253, 177, 3, 0.8) !important;
+}
+
+/* Support for text-primary with opacity */
+.text-primary\/10 {
+  color: rgba(253, 177, 3, 0.1) !important;
+}
+
+.text-primary\/50 {
+  color: rgba(253, 177, 3, 0.5) !important;
+}
+
+.text-primary\/80 {
+  color: rgba(253, 177, 3, 0.8) !important;
+}
+
+.text-primary-dark {
+  color: var(--color-primary-dark) !important;
+}
+
+.bg-primary-dark {
+  background-color: var(--color-primary-dark) !important;
+}
+
+.border-primary-dark {
+  border-color: var(--color-primary-dark) !important;
+}
+
+.text-primary-light {
+  color: var(--color-primary-light) !important;
+}
+
+.bg-primary-light {
+  background-color: var(--color-primary-light) !important;
+}
+
+.from-primary {
+  --tw-gradient-from: #FDB103 !important;
+}
+
+.to-primary-dark {
+  --tw-gradient-to: #d89402 !important;
+}
+
+.to-primary-light {
+  --tw-gradient-to: #33c4cc !important;
+}
+
+/* SweetAlert2 Customization - Modern & Animated */
+/* Ensure SweetAlert2 appears above all other elements */
+.swal2-container {
+  z-index: 99999 !important;
+  position: fixed !important;
+}
+
+.swal2-container.swal2-backdrop-show {
+  z-index: 99999 !important;
+}
+
+.swal2-popup {
+  font-family: 'El Messiri', sans-serif !important;
+  direction: rtl;
+  border-radius: 24px !important;
+  padding: 2rem !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(10px);
+  animation: swal2-show 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  z-index: 100000 !important;
+  position: relative !important;
+}
+
+/* Ensure buttons are clickable */
+.swal2-actions {
+  z-index: 100001 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+}
+
+.swal2-confirm,
+.swal2-cancel,
+.swal2-deny {
+  z-index: 100002 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Ensure popup is clickable */
+.swal2-popup {
+  pointer-events: auto !important;
+}
+
+/* Hide backdrop when closed */
+.swal2-container.swal2-hide {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Force close animation */
+.swal2-container.swal2-backdrop-hide {
+  opacity: 0 !important;
+  transition: opacity 0.1s !important;
+}
+
+.swal2-container.swal2-backdrop-hide .swal2-popup {
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: all 0.1s !important;
+}
+
+@keyframes swal2-show {
+  0% {
+    transform: scale(0.7) translateY(-20px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05) translateY(5px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.swal2-backdrop-show {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px);
+  animation: swal2-backdrop-show 0.3s ease-out !important;
+  z-index: 99998 !important;
+}
+
+@keyframes swal2-backdrop-show {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.swal2-title {
+  font-family: 'El Messiri', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 1.75rem !important;
+  margin-bottom: 1rem !important;
+  color: #1e293b !important;
+  line-height: 1.4 !important;
+}
+
+.swal2-content {
+  font-family: 'El Messiri', sans-serif !important;
+  font-size: 1rem !important;
+  color: #64748b !important;
+  line-height: 1.6 !important;
+  margin-top: 0.5rem !important;
+}
+
+/* Icon Styling */
+.swal2-icon {
+  width: 80px !important;
+  height: 80px !important;
+  margin: 1.5rem auto 1rem !important;
+  border: none !important;
+  animation: iconPulse 2s ease-in-out infinite !important;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.swal2-icon.swal2-warning {
+  border-color: #f59e0b !important;
+  color: #f59e0b !important;
+}
+
+.swal2-icon.swal2-error {
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+.swal2-icon.swal2-success {
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+}
+
+.swal2-icon.swal2-question {
+  border-color: #3b82f6 !important;
+  color: #3b82f6 !important;
+}
+
+.swal2-icon.swal2-info {
+  border-color: #00adb5 !important;
+  color: #00adb5 !important;
+}
+
+/* Buttons */
+.swal2-actions {
+  margin-top: 2rem !important;
+  gap: 0.75rem !important;
+  z-index: 100001 !important;
+  position: relative !important;
+}
+
+.swal2-confirm {
+  font-family: 'El Messiri', sans-serif !important;
+  background: linear-gradient(135deg, #00adb5 0%, #008a91 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 2rem !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  box-shadow: 0 4px 15px rgba(0, 173, 181, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden;
+  z-index: 100002 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.swal2-confirm::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.swal2-confirm:hover {
+  background: linear-gradient(135deg, #008a91 0%, #006d73 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 173, 181, 0.5) !important;
+}
+
+.swal2-confirm:hover::before {
+  left: 100%;
+}
+
+.swal2-confirm:active {
+  transform: translateY(0) !important;
+}
+
+/* Delete/Error Button */
+.swal2-confirm.swal2-confirm-danger,
+.swal2-confirm[style*="background-color: rgb(220, 38, 38)"] {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4) !important;
+}
+
+.swal2-confirm.swal2-confirm-danger:hover,
+.swal2-confirm[style*="background-color: rgb(220, 38, 38)"]:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5) !important;
+}
+
+.swal2-cancel {
+  font-family: 'El Messiri', sans-serif !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 2rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  border: 2px solid #e2e8f0 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  z-index: 100002 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+
+.swal2-cancel:hover {
+  background: #e2e8f0 !important;
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.swal2-cancel:active {
+  transform: translateY(0) !important;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .swal2-popup {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .swal2-title {
+    color: #f1f5f9 !important;
+  }
+
+  .swal2-content {
+    color: #cbd5e1 !important;
+  }
+
+  .swal2-cancel {
+    background: #334155 !important;
+    color: #cbd5e1 !important;
+    border-color: #475569 !important;
+  }
+
+  .swal2-cancel:hover {
+    background: #475569 !important;
+    color: #e2e8f0 !important;
+    border-color: #64748b !important;
+  }
+}
+
+/* Custom Scrollbar for Sidebar - Brand Identity */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #00adb5 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00adb5 0%, #008a91 100%);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #008a91 0%, #006d73 100%);
+  background-clip: padding-box;
+  box-shadow: 0 0 8px rgba(0, 173, 181, 0.5);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #006d73 0%, #005a60 100%);
+  background-clip: padding-box;
+}
+
+/* Dark Mode Scrollbar */
+.dark .custom-scrollbar {
+  scrollbar-color: #00adb5 rgba(30, 41, 59, 0.5);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.3);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00adb5 0%, #008a91 100%);
+  box-shadow: inset 0 0 4px rgba(0, 173, 181, 0.3);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #33c4cc 0%, #00adb5 100%);
+  box-shadow: 0 0 12px rgba(0, 173, 181, 0.6);
+}
+
+/* Legacy scrollbar-thin for backward compatibility */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 173, 181, 0.2);
+  border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 173, 181, 0.4);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Custom Slick Carousel Arrow Styles */
+.slick-prev,
+.slick-next {
+  z-index: 20;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  display: none;
+}
+
+.slick-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Custom Slick Dots Styles for Testimonials */
+.testimonials-slider .slick-dots {
+  position: relative;
+  bottom: 0;
+  margin-top: 2rem;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.testimonials-slider .slick-dots li {
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+
+.testimonials-slider .slick-dots li button {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border-radius: 9999px;
+  background-color: #d1d5db;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0;
+  line-height: 0;
+}
+
+.testimonials-slider .slick-dots li button:hover {
+  background-color: rgba(0, 173, 181, 0.5);
+}
+
+.testimonials-slider .slick-dots li.slick-active button {
+  width: 2rem;
+  height: 0.75rem;
+  background-color: #00adb5;
+  transform: scale(1.1);
+}
+
+@media (min-width: 768px) {
+  .testimonials-slider .slick-dots li button {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+  
+  .testimonials-slider .slick-dots li.slick-active button {
+    width: 2rem;
+    height: 0.75rem;
+  }
+}
+
+/* تحسينات السحب المرن للـ Slider */
+.slick-slider {
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.slick-list {
+  overflow: hidden;
+  position: relative;
+  display: block;
+  margin: 0;
+  padding: 0;
+  touch-action: pan-y;
+}
+
+.slick-track {
+  position: relative;
+  left: 0;
+  top: 0;
+  display: flex;
+  transition: transform 0.3s ease-in-out;
+  will-change: transform;
+}
+
+.slick-slide {
+  display: block;
+  height: 100%;
+  min-height: 1px;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.slick-slide.slick-active {
+  pointer-events: auto;
+}
+
+/* Companies Marquee Slider */
+.companies-marquee-slider .slick-track {
+  display: flex !important;
+  align-items: center;
+  transition: transform 8000ms linear !important; /* Slow, constant speed */
+}
+
+.companies-marquee-slider .slick-slide {
+  height: auto;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.companies-marquee-slider .slick-list {
+  overflow: hidden;
+}
+
+/* Ensure smooth constant speed animation */
+.companies-marquee-slider .slick-track {
+  will-change: transform;
+  transition-timing-function: linear !important;
+}
+
+/* Services Slider */
+.services-slider {
+  position: relative;
+}
+
+.services-slider .slick-track {
+  display: flex !important;
+  align-items: stretch;
+}
+
+.services-slider .slick-slide {
+  height: auto;
+  display: flex !important;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0 0.25rem;
+}
+
+.services-slider .slick-list {
+  overflow: hidden;
+  margin: 0 -0.25rem;
+}
+
+/* Services Slider Arrows */
+.services-slider .slick-prev,
+.services-slider .slick-next {
+  z-index: 30 !important;
+  width: 48px !important;
+  height: 48px !important;
+  display: none !important; /* Hidden by default on mobile */
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Show arrows only on medium screens and up */
+@media (min-width: 768px) {
+  .services-slider .slick-prev,
+  .services-slider .slick-next {
+    display: flex !important;
+  }
+}
+
+.services-slider .slick-prev {
+  left: -16px !important; /* Adjusted to be inside container */
+}
+
+.services-slider .slick-next {
+  right: -16px !important; /* Adjusted to be inside container */
+}
+
+.services-slider .slick-prev:before,
+.services-slider .slick-next:before {
+  display: none !important;
+  content: '' !important;
+}
+
+.services-slider .slick-prev:hover,
+.services-slider .slick-next:hover {
+  opacity: 1 !important;
+}
+
+.services-slider .slick-disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+}
+
+/* تحسينات للتفاعل على الأجهزة المحمولة */
+@media (hover: none) and (pointer: coarse) {
+  .slick-slider {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slick-list {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 3D Animations for New Sections */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.step-card.animate-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.testimonial-card.animate-in {
+  animation: scaleIn 0.6s ease-out forwards;
+}
+
+.feature-card.animate-in {
+  animation: rotateIn 0.6s ease-out forwards;
+}
+
+/* 3D Transform Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+/* Smooth 3D Hover Effects */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-3d:hover {
+  transform: translateY(-8px) rotateX(2deg) rotateY(2deg);
+}
+
+/* Glass Morphism Effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient Text Animation */
+@keyframes gradient-shift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+
+/* في ملف الـ CSS بتاعك */
+.slick-prev,
+.slick-next {
+  display: block !important;
+  z-index: 30 !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  display: none; /* علشان نخفي الأسهم الافتراضية */
+}

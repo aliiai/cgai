@@ -22,7 +22,8 @@ import {
   HelpCircle,
   Coins,
   Package,
-  ShoppingBag
+  ShoppingBag,
+  Sparkles
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { DashboardLink } from '../../types/types';
@@ -64,6 +65,8 @@ const getIcon = (iconName?: string): ReactNode => {
       return <Package size={20} />;
     case 'ShoppingBag':
       return <ShoppingBag size={20} />;
+    case 'Sparkles':
+      return <Sparkles size={20} />;
     default:
       return <Settings size={20} />;
   }
@@ -75,7 +78,6 @@ const getTranslatedName = (routeId: string, t: (key: string) => string): string 
     'admin-dashboard': t('sidebar.dashboard'),
     'admin-sections': t('sidebar.services'),
     'admin-subscriptions': t('sidebar.subscriptions'),
-    'admin-works': t('sidebar.works'),
     'admin-bookings': t('sidebar.bookings'),
     'admin-previous-works': t('sidebar.previousWorks'),
     'admin-settings': t('sidebar.settings'),
@@ -90,6 +92,7 @@ const getTranslatedName = (routeId: string, t: (key: string) => string): string 
     'admin-wallet': t('sidebar.wallet'),
     'admin-ready-apps': t('sidebar.readyApps') || 'التطبيقات الجاهزة',
     'admin-my-purchases': t('sidebar.myPurchases') || 'مشترياتي',
+    'admin-ai-services': t('sidebar.aiServices') || 'أدوات الذكاء الاصطناعي',
   };
 
   return translationMap[routeId] || routeId;
@@ -109,11 +112,11 @@ export const getDashboardLinks = (t: (key: string) => string): DashboardLink[] =
   const sections: Record<string, string> = {
     'admin-dashboard': 'main',
     'admin-sections': 'services',
-    'admin-works': 'works',
     'admin-bookings': 'works', // جزء من إدارة الأعمال
     'admin-completed-works': 'works', // جزء من إدارة الأعمال
     'admin-my-purchases': 'works', // جزء من إدارة الأعمال
     'admin-ready-apps': 'ready-apps',
+    'admin-ai-services': 'ready-apps',
     'admin-subscriptions': 'subscriptions',
     'admin-payments': 'subscriptions',
     'admin-wallet': 'subscriptions',

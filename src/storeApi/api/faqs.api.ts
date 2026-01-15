@@ -8,9 +8,13 @@ import { axiosInstance } from '../config/axios';
 
 export interface FAQ {
     id: number;
-    question: string;
-    answer: string;
+    question?: string;
+    question_en?: string;
+    answer?: string;
+    answer_en?: string;
     category: string;
+    category_en?: string | null;
+    role?: string;
     is_active: number;
     sort_order: number;
     created_at: string;
@@ -27,9 +31,9 @@ export interface FAQsResponse {
 /**
  * الحصول على جميع الأسئلة الشائعة مجمعة حسب الفئة
  */
-export const getFAQs = async (): Promise<FAQsResponse> => {
+export const getFAQs = async (locale: string = 'ar'): Promise<FAQsResponse> => {
     try {
-        const response = await axiosInstance.get('/faqs');
+        const response = await axiosInstance.get('/faqs', { params: { locale } });
         return {
             success: true,
             data: response.data.data || {},

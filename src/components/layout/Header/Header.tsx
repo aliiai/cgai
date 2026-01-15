@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import Logo from '../../Logo';
 import LanguageSelector from '../../LanguageSelector';
 import AuthButtons from '../../AuthButtons';
@@ -8,42 +9,52 @@ import { useThemeStore } from '../../../storeApi/storeApi';
 import HeaderNav from './HeaderNav';
 import HeaderActions from './HeaderActions';
 
-const navLinks = [
-  { id: 'home', label: 'الرئيسية', path: '/' },
-  { id: 'technologies', label: 'التقنيات', path: '/technologies' },
-  { id: 'news', label: 'أخبار', path: '/news' },
-  { id: 'request-service', label: 'طلب الخدمة', path: '/request-service' },
-  { id: 'contact', label: 'تواصل معنا', path: '/contact' },
-];
-
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeLink, setActiveLink] = useState('الرئيسية');
+  const { i18n, t } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Theme state
   const { isDarkMode, toggleDarkMode } = useThemeStore();
+  
+  // تحديد الاتجاه بناءً على اللغة
+  const isRTL = i18n.language === 'ar';
 
-  // Sync active link with current path
+  // روابط التنقل مع الترجمة
+  const navLinks = useMemo(() => [
+    { id: 'home', label: t('header.home'), path: '/' },
+    { id: 'technologies', label: t('header.technologies'), path: '/technologies' },
+    { id: 'news', label: t('header.news'), path: '/news' },
+    { id: 'request-service', label: t('header.requestService'), path: '/request-service' },
+    { id: 'contact', label: t('header.contact'), path: '/contact' },
+  ], [t]);
+
+  const [activeLink, setActiveLink] = useState(navLinks[0].label);
+
+  // Sync active link with current path وعند تغيير اللغة
   useEffect(() => {
     const currentPath = location.pathname;
     const activeNav = navLinks.find(link => link.path === currentPath);
     if (activeNav) {
       setActiveLink(activeNav.label);
     } else if (currentPath === '/') {
-      setActiveLink('الرئيسية');
+      setActiveLink(navLinks[0].label);
     }
-  }, [location.pathname]);
+  }, [location.pathname, navLinks, i18n.language]);
 
   const handleNavClick = (path: string, label: string) => {
+    // Prevent navigation for request-service and contact pages
+    if (path === '/request-service' || path === '/contact' || path === '/contact-us') {
+      return;
+    }
     setActiveLink(label);
     navigate(path);
   };
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    handleNavClick('/', 'الرئيسية');
+    handleNavClick('/', navLinks[0].label);
   };
 
   // Animation variants
@@ -52,7 +63,7 @@ const Header = () => {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.6, ease: 'easeOut' },
+      transition: { duration: 0.6, ease: 'easeOut' as const },
     },
   };
 
@@ -61,7 +72,7 @@ const Header = () => {
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.5, delay: 0.2, ease: 'easeOut' },
+      transition: { duration: 0.5, delay: 0.2, ease: 'easeOut' as const },
     },
   };
 
@@ -69,7 +80,7 @@ const Header = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { duration: 0.5, delay: 0.3, ease: 'easeOut' },
+      transition: { duration: 0.5, delay: 0.3, ease: 'easeOut' as const },
     },
   };
 
@@ -78,18 +89,18 @@ const Header = () => {
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.5, delay: 0.4, ease: 'easeOut' },
+      transition: { duration: 0.5, delay: 0.4, ease: 'easeOut' as const },
     },
   };
 
   const mobileMenuVariants = {
-    hidden: { opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeIn' } },
+    hidden: { opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeIn' as const } },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3, ease: 'easeOut', staggerChildren: 0.02 },
+      transition: { duration: 0.3, ease: 'easeOut' as const, staggerChildren: 0.02 },
     },
-    exit: { opacity: 0, y: -10, transition: { duration: 0.2, ease: 'easeIn' } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.2, ease: 'easeIn' as const } },
   };
 
   const menuItemVariants = {
@@ -97,7 +108,7 @@ const Header = () => {
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.2, ease: 'easeOut' },
+      transition: { duration: 0.2, ease: 'easeOut' as const },
     },
   };
 
@@ -105,7 +116,7 @@ const Header = () => {
     <motion.header
       className={`w-full sticky top-0 z-[1000] border-b transition-colors duration-300 shadow-sm ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'
         }`}
-      dir="rtl"
+      dir={isRTL ? 'rtl' : 'ltr'}
       variants={headerVariants}
       initial="hidden"
       animate="visible"
@@ -160,8 +171,8 @@ const Header = () => {
                         handleNavClick(link.path, link.label);
                       }}
                       className={`block py-3 px-4 rounded-lg transition-colors ${isActive
-                          ? 'bg-primary/10 text-primary font-semibold'
-                          : isDarkMode ? 'text-gray-300 hover:bg-slate-800' : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-primary/10 text-primary font-semibold'
+                        : isDarkMode ? 'text-gray-300 hover:bg-slate-800' : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       variants={menuItemVariants}
                       custom={index}

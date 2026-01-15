@@ -1,54 +1,120 @@
 import { useState } from 'react';
-import { LayoutGrid, FileText, TrendingUp, ListPlus, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { LayoutGrid, FileText, TrendingUp, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+interface Technology {
+    id: number;
+    title: string;
+    description: string;
+    image: string;
+    category: string;
+}
+
+// Static data
+const latestTechnologies: Technology[] = [
+    {
+        id: 1,
+        title: 'تطورات جديدة في الذكاء الاصطناعي',
+        description: 'اكتشف أحدث التطورات في مجال الذكاء الاصطناعي والتعلم الآلي التي ستغير مستقبل التكنولوجيا.',
+        image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800&h=400',
+        category: 'ذكاء اصطناعي'
+    },
+    {
+        id: 2,
+        title: 'مستقبل التعلم الآلي',
+        description: 'كيف سيغير التعلم الآلي طريقة عملنا وحياتنا اليومية في السنوات القادمة.',
+        image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&q=80&w=800&h=400',
+        category: 'تعلم آلي'
+    },
+    {
+        id: 3,
+        title: 'تطبيقات الذكاء الاصطناعي في الطب',
+        description: 'استكشف كيف يساعد الذكاء الاصطناعي في تحسين الرعاية الصحية والتشخيص الطبي.',
+        image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&q=80&w=800&h=400',
+        category: 'صحة'
+    },
+    {
+        id: 4,
+        title: 'الذكاء الاصطناعي في التعليم',
+        description: 'كيف يمكن للذكاء الاصطناعي أن يحدث ثورة في مجال التعليم والتعلم.',
+        image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=800&h=400',
+        category: 'تعليم'
+    }
+];
+
+const bestTechnologies: Technology[] = [
+    {
+        id: 5,
+        title: 'أفضل أدوات الذكاء الاصطناعي لعام 2024',
+        description: 'تعرف على أفضل وأحدث أدوات الذكاء الاصطناعي التي يجب أن تعرفها هذا العام.',
+        image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800&h=400',
+        category: 'أدوات'
+    },
+    {
+        id: 6,
+        title: 'الذكاء الاصطناعي في الأعمال',
+        description: 'كيف تستخدم الشركات الذكاء الاصطناعي لتحسين عملياتها وزيادة الإنتاجية.',
+        image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800&h=400',
+        category: 'أعمال'
+    },
+    {
+        id: 7,
+        title: 'أمان الذكاء الاصطناعي',
+        description: 'التحديات والحلول المتعلقة بأمان أنظمة الذكاء الاصطناعي وحماية البيانات.',
+        image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800&h=400',
+        category: 'أمان'
+    },
+    {
+        id: 8,
+        title: 'الذكاء الاصطناعي والبيئة',
+        description: 'كيف يمكن للذكاء الاصطناعي أن يساعد في حل المشاكل البيئية والاستدامة.',
+        image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=800&h=400',
+        category: 'بيئة'
+    }
+];
+
 const News = () => {
+    const { t } = useTranslation();
+    const isRTL = true; // Always RTL for Arabic content
     const [activeFilter, setActiveFilter] = useState('all');
 
     const filters = [
-        { id: 'all', label: 'الكل', icon: LayoutGrid },
-        { id: 'latest', label: 'أحدث التقنيات', icon: FileText },
-        { id: 'best', label: 'أفضل التقنيات', icon: TrendingUp },
-        { id: 'add', label: 'أضف محتوى', icon: ListPlus },
+        { id: 'all', label: t('news.filters.all') || 'الكل', icon: LayoutGrid },
+        { id: 'latest', label: t('news.filters.latest') || 'أحدث التقنيات', icon: FileText },
+        { id: 'best', label: t('news.filters.best') || 'أفضل التقنيات', icon: TrendingUp },
     ];
 
-    const newsItems = [
-        {
-            id: 1,
-            title: "Agentic AI",
-            category: "Generative AI",
-            description: "تُعد هذه التقنية الأبرز في 2026، حيث لم يعد الذكاء الاصطناعي يقتصر على الرد على الأسئلة، بل أصبح 'وكيلاً' يقوم بتنفيذ مهام كاملة عبر تطبيقات متعددة بشكل مستقل، مثل التخطيط للسفر، إدارة جداول الأعمال، أو البرمجة الذاتية دون تدخل بشري مستمر.",
-            image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2070&auto=format&fit=crop",
-            link: "#"
-        },
-        {
-            id: 2,
-            title: "Future of Robots",
-            category: "Robotics",
-            description: "تطور الروبوتات في السنوات القادمة سيشهد طفرة كبيرة في القدرة على التفاعل مع البيئة المحيطة بشكل طبيعي أكثر، مما يفتح آفاقاً جديدة في مجالات الصناعة والخدمات المنزلية.",
-            image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2070&auto=format&fit=crop",
-            link: "#"
-        },
-        {
-            id: 3,
-            title: "Quantum Computing",
-            category: "Computing",
-            description: "الحوسبة الكمومية تعد بإحداث ثورة في كيفية معالجة البيانات، مما يسمح بحل مشكلات معقدة كانت تعتبر مستحيلة سابقاً في ثوانٍ معدودة.",
-            image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop",
-            link: "#"
+    // Get filtered items
+    const getFilteredItems = (): Technology[] => {
+        if (activeFilter === 'latest') {
+            return latestTechnologies;
+        } else if (activeFilter === 'best') {
+            return bestTechnologies;
+        } else {
+            // Combine and remove duplicates
+            const combined = [...latestTechnologies, ...bestTechnologies];
+            const unique = combined.filter((item, index, self) => 
+                index === self.findIndex(t => t.id === item.id)
+            );
+            return unique;
         }
-    ];
+    };
+
+    const newsItems = getFilteredItems();
 
     return (
-        <div className="news-page bg-white min-h-screen" dir="rtl">
+        <div className="news-page bg-white min-h-screen" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
                 {/* Main Title */}
                 <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 text-center">
-                    آخر أخبار الذكاء الاصطناعي        </h1>
+                    {t('news.title') || 'آخر أخبار الذكاء الاصطناعي'}
+                </h1>
 
                 {/* Subtitle */}
                 <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-8 text-center">
-                    أحدث أخبار، أحداث، وتقارير تقنيات الذكاء الاصطناعي في مكان واحد.        </p>
+                    {t('news.subtitle') || 'أحدث أخبار، أحداث، وتقارير تقنيات الذكاء الاصطناعي في مكان واحد.'}
+                </p>
 
                 {/* Gradient Line */}
                 <div className="w-full max-w-4xl mx-auto mb-8">
@@ -61,7 +127,7 @@ const News = () => {
                 </div>
 
                 {/* Filters Section */}
-                <div className="flex flex-wrap items-center justify-center gap-4 mb-12" dir="rtl">
+                <div className="flex flex-wrap items-center justify-center gap-4 mb-12" dir={isRTL ? 'rtl' : 'ltr'}>
                     {filters.map((filter) => {
                         const Icon = filter.icon;
                         const isActive = activeFilter === filter.id;
@@ -108,7 +174,7 @@ const News = () => {
                             </div>
 
                             {/* Content Section */}
-                            <div className="px-8 pb-8 pt-2" dir="rtl">
+                            <div className="px-8 pb-8 pt-2" dir={isRTL ? 'rtl' : 'ltr'}>
                                 {/* Badge */}
                                 <div className="flex justify-start mb-4">
                                     <span className="bg-[#FFB200] text-white px-3 py-1 rounded-full text-sm font-bold shadow-sm">

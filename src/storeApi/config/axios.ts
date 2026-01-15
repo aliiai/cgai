@@ -33,8 +33,7 @@ axiosInstance.interceptors.request.use(
         if (token && token !== 'null' && token !== 'undefined' && token.trim() !== '') {
           config.headers.Authorization = `Bearer ${token.trim()}`;
         } else {
-          console.warn('Invalid token detected, removing auth header');
-          // إزالة header المصادقة إذا كان التوكن غير صحيح
+          // إزالة header المصادقة إذا كان التوكن غير صحيح (سلوك طبيعي عند عدم وجود token)
           delete config.headers.Authorization;
         }
       } catch (error) {

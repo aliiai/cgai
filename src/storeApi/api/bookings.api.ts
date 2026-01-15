@@ -295,9 +295,43 @@ export const payBookingOnline = async (bookingId: number): Promise<{
 };
 
 /**
+ * الحصول على حجز واحد بالتفاصيل
+ */
+export const getCustomerBooking = async (bookingId: number) => {
+  try {
+    const token = getAuthToken();
+    if (!token || token === 'null' || token === 'undefined' || token.trim() === '') {
+      return { success: false, message: 'يجب تسجيل الدخول أولاً' };
+    }
+
+    const url = addLocaleToUrl(`${API_BASE}/customer/bookings/${bookingId}`);
+    const response = await axios.get(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token.trim()}`
+      },
+      timeout: 30000,
+    });
+
+    return {
+      success: true,
+      data: response.data.data
+    };
+  } catch (error: any) {
+    console.error('Get booking error:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'فشل في جلب تفاصيل الحجز',
+      data: null
+    };
+  }
+};
+
+/**
  * الحصول على حجوزات العميل
  */
-export const getCustomerBookings = async (params?: { status?: string; payment_status?: string }) => {
+export const getCustomerBookings = async (params?: { status?: string; payment_status?: string; page?: number }) => {
   try {
     const token = getAuthToken();
     if (!token || token === 'null' || token === 'undefined' || token.trim() === '') {
@@ -307,6 +341,7 @@ export const getCustomerBookings = async (params?: { status?: string; payment_st
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append('status', params.status);
     if (params?.payment_status) queryParams.append('payment_status', params.payment_status);
+    if (params?.page) queryParams.append('page', params.page.toString());
 
     const url = addLocaleToUrl(`${API_BASE}/customer/bookings?${queryParams.toString()}`);
     const response = await axios.get(url, {

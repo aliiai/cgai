@@ -1,29 +1,48 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import { getFAQs, type FAQ } from '../../storeApi/api';
+import { useThemeStore } from '../../storeApi/store/theme.store';
 
 const FAQSection = () => {
+  const { isDarkMode } = useThemeStore();
+  const { i18n, t } = useTranslation();
   const [openIndex, setOpenIndex] = useState<string | null>(null);
+  // ... rest of the code ...
   const [faqsData, setFaqsData] = useState<{ [category: string]: FAQ[] }>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchFAQs = async () => {
-      setLoading(true);
-      try {
-        const response = await getFAQs();
-        if (response.success && response.data) {
-          setFaqsData(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching FAQs:', error);
-      } finally {
-        setLoading(false);
+  const fetchFAQs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const locale = i18n.language === 'ar' ? 'ar' : 'en';
+      const response = await getFAQs(locale);
+      if (response.success && response.data) {
+        setFaqsData(response.data);
       }
+    } catch (error) {
+      console.error('Error fetching FAQs:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [i18n.language]);
+
+  useEffect(() => {
+    fetchFAQs();
+  }, [fetchFAQs]);
+
+  // إعادة جلب البيانات عند تغيير اللغة
+  useEffect(() => {
+    const handleLanguageChanged = async (lng: string) => {
+      console.log('Language changed to:', lng, '- Refetching FAQs...');
+      await fetchFAQs();
     };
 
-    fetchFAQs();
-  }, []);
+    i18n.on('languageChanged', handleLanguageChanged);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChanged);
+    };
+  }, [i18n, fetchFAQs]);
 
   const toggleFAQ = (id: string) => {
     setOpenIndex(openIndex === id ? null : id);
@@ -38,16 +57,21 @@ const FAQSection = () => {
   });
 
   return (
-    <section className="py-12 md:py-16 lg:py-20 xl:py-24 bg-gradient-to-br from-white via-gray-50 to-primary/5 relative overflow-hidden">
+    <section className={`py-12 md:py-16 lg:py-20 xl:py-24 relative overflow-hidden transition-colors duration-300 ${isDarkMode
+      ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-t border-slate-800'
+      : 'bg-gradient-to-br from-white via-gray-50 to-primary/5'
+      }`}>
       {/* Background Elements */}
-      <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl animate-pulse-slow" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+      <div className={`absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 rounded-full blur-3xl animate-pulse-slow ${isDarkMode ? 'bg-primary/5' : 'bg-gradient-to-br from-primary/10 to-transparent'
+        }`} />
+      <div className={`absolute bottom-0 left-0 w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 rounded-full blur-3xl animate-pulse-slow ${isDarkMode ? 'bg-primary/5' : 'bg-gradient-to-tr from-primary/10 to-transparent'
+        }`} style={{ animationDelay: '1s' }} />
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-10 md:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-5xl font-black text-gray-900 mb-3 md:mb-4 lg:mb-6 leading-tight px-4">
-          الأسئلة الشائعة
+          <h2 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-5xl font-black text-gray-900 mb-3 md:mb-4 lg:mb-6 leading-tight px-4  ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {t('home.faq.title')}
           </h2>
         </div>
 
@@ -64,12 +88,17 @@ const FAQSection = () => {
                   {allFAQs.map((faq) => {
                     const faqId = `${faq.category}-${faq.id}`;
                     const isOpen = openIndex === faqId;
+                    
+                    // عرض البيانات مباشرة كما تأتي من API
+                    const question = faq.question_en || faq.question || '';
+                    const answer = faq.answer_en || faq.answer || '';
 
                     return (
                       <div
                         key={faqId}
                         className={`
-                          bg-[#EEEEEE] rounded-xl md:rounded-2xl transition-all duration-300`}
+                          rounded-xl md:rounded-2xl transition-all duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-[#EEEEEE]'
+                          }`}
                       >
                         <button
                           className="w-full p-2 text-right flex justify-between items-center gap-4 transition-all duration-300 group"
@@ -77,24 +106,25 @@ const FAQSection = () => {
                         >
                           <span className={`
                             text-sm sm:text-base md:text-lg font-bold 
-                            transition-colors duration-300
+                            transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                            }
                           `}>
-                            {faq.question}
+                            {question}
                           </span>
                           <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
-                            <svg 
+                            <svg
                               className={`transition-all duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                              width="32" 
-                              height="32" 
-                              viewBox="0 0 16 16" 
-                              fill="none" 
+                              width="32"
+                              height="32"
+                              viewBox="0 0 16 16"
+                              fill="none"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path 
-                                d="M8 12L2.5 5H13.5L8 12Z" 
+                              <path
+                                d="M8 12L2.5 5H13.5L8 12Z"
                                 fill="#FFB200"
                                 rx="1"
-                                style={{ 
+                                style={{
                                   filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
                                 }}
                               />
@@ -110,8 +140,9 @@ const FAQSection = () => {
                         >
                           <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6 ">
                             <div className=" ">
-                              <p className="text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed">
-                                {faq.answer}
+                              <p className={`text-xs sm:text-sm md:text-base leading-relaxed transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                }`}>
+                                {answer}
                               </p>
                             </div>
                           </div>
@@ -122,7 +153,7 @@ const FAQSection = () => {
                 </div>
               ) : (
                 <div className="text-center py-12 md:py-16">
-                  <p className="text-gray-500 text-sm md:text-base">لا توجد أسئلة في هذه الفئة</p>
+                  <p className="text-gray-500 text-sm md:text-base">{t('home.faq.noQuestions')}</p>
                 </div>
               )}
             </div>

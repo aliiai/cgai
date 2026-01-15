@@ -16,6 +16,9 @@
     "notifications": "Notifications",
     "viewAllNotifications": "View All Notifications",
     "home": "Home",
+    "technologies": "Technologies",
+    "news": "News",
+    "requestService": "Request Service",
     "services": "Our Services",
     "howItWorks": "How It Works",
     "whyChooseUs": "Why Choose Us",
@@ -811,6 +814,34 @@
     "messages": {
       "booking_created_successfully": "Booking created successfully",
       "new_booking_created_for_servic": "New booking created for service"
+    }
+  },
+  "home": {
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "noQuestions": "No questions in this category"
+    }
+  },
+  "technologies": {
+    "title": "Complete AI Guide",
+    "subtitle": "Your comprehensive guide to collecting and categorizing AI tools",
+    "searchPlaceholder": "Search for an AI tool...",
+    "popularCategories": "Most Popular Categories",
+    "popularTechnologies": "Most Used Technologies",
+    "allCategories": "All Categories",
+    "paid": "Paid",
+    "free": "Free",
+    "loading": "Loading tools...",
+    "retry": "Retry",
+    "noResults": "No results match your search",
+    "categories": {
+      "images": "Images & Video",
+      "design": "Design & Creativity",
+      "chat": "Chat"
+    },
+    "error": {
+      "loadingError": "Failed to load services",
+      "connectionError": "An error occurred while connecting to the server"
     }
   }
 }

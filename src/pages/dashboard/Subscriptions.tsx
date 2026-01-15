@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 import {
   CheckCircle,
   Clock,
@@ -31,7 +30,6 @@ import Swal from 'sweetalert2';
 
 const Subscriptions = () => {
   const { t, i18n } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   
   // تحديد الاتجاه بناءً على اللغة
   const isRTL = i18n.language === 'ar';
@@ -101,9 +99,11 @@ const Subscriptions = () => {
   const getDurationText = (durationType: string) => {
     const durationMap: Record<string, string> = {
       monthly: t('dashboard.subscriptions.monthly'),
+      month: t('dashboard.subscriptions.monthly'),
       '3months': t('dashboard.subscriptions.threeMonths'),
       '6months': t('dashboard.subscriptions.sixMonths'),
-      yearly: t('dashboard.subscriptions.yearly')
+      yearly: t('dashboard.subscriptions.yearly'),
+      year: t('dashboard.subscriptions.yearly')
     };
     return durationMap[durationType] || durationType;
   };
@@ -175,7 +175,7 @@ const Subscriptions = () => {
         title: t('dashboard.subscriptions.pendingRequest'),
         text: t('dashboard.subscriptions.pendingRequestMessage'),
         confirmButtonText: t('logout.ok'),
-        confirmButtonColor: '#00adb5',
+        confirmButtonColor: '#FFB200',
       });
       return;
     }
@@ -215,7 +215,7 @@ const Subscriptions = () => {
           title: t('dashboard.subscriptions.success'),
           text: result.message || t('dashboard.subscriptions.requestSent'),
           confirmButtonText: t('logout.ok'),
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#114C5A',
         });
 
         setShowSubscribeModal(false);
@@ -257,7 +257,7 @@ const Subscriptions = () => {
     const statusInfo = statusMap[status] || {
       text: status,
       icon: <AlertCircle className="w-3.5 h-3.5" />,
-      class: 'bg-slate-50 text-slate-700 border-slate-200'
+      class: 'bg-gray-100 text-gray-700 border-gray-200'
     };
 
     return (
@@ -284,7 +284,7 @@ const Subscriptions = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           {activeSubscription ? (
-            <div className="relative overflow-hidden bg-gradient-to-br from-[#00adb5] to-[#008a91] rounded-3xl shadow-xl shadow-primary/20 text-white p-8 animate-scaleIn">
+            <div className="relative overflow-hidden bg-gradient-to-br from-[#114C5A] to-[#114C5A]/90 rounded-xl shadow-lg text-white p-8 border border-[#114C5A]/20">
               <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
                 <div className="absolute top-[-10%] right-[-5%] w-64 h-64 rounded-full bg-white opacity-20 blur-3xl"></div>
                 <div className="absolute bottom-[-10%] left-[-5%] w-48 h-48 rounded-full bg-black opacity-20 blur-3xl"></div>
@@ -336,8 +336,8 @@ const Subscriptions = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-amber-50 border border-amber-100 rounded-3xl p-8 flex items-center gap-6 animate-scaleIn">
-              <div className="bg-amber-100 p-4 rounded-2xl">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 flex items-center gap-6">
+              <div className="bg-amber-100 p-4 rounded-xl">
                 <AlertCircle className="w-8 h-8 text-amber-600" />
               </div>
               <div>
@@ -349,9 +349,9 @@ const Subscriptions = () => {
 
           {/* Pending Request Alert */}
           {pendingRequest && (
-            <div className="bg-white border-r-4 border-amber-400 rounded-2xl shadow-sm p-6 flex items-center justify-between group hover:shadow-md transition-all duration-300">
+            <div className="border-r-4 border-[#FFB200] rounded-xl shadow-sm p-6 flex items-center justify-between group hover:shadow-md transition-all duration-300 bg-white border-[#FFB200]/20">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 animate-pulse">
+                <div className="rounded-xl flex items-center justify-center text-[#FFB200] animate-pulse bg-[#FFB200]/10 w-12 h-12">
                   <Clock className="w-6 h-6" />
                 </div>
                 <div>
@@ -359,22 +359,20 @@ const Subscriptions = () => {
                     <h3 className="font-bold text-gray-900">{t('dashboard.subscriptions.pendingReview')}</h3>
                     {getStatusBadge('pending')}
                   </div>
-                  <p className="text-sm text-gray-500 font-normal">
+                  <p className="text-sm font-normal text-gray-600">
                     {t('dashboard.subscription.subscriptionName')} {getLocalizedName(pendingRequest.subscription)} - {formatDate(pendingRequest.created_at)}
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-lg">{t('dashboard.subscriptions.activateAccount')}</p>
+              <p className="text-xs px-3 py-1 rounded-lg text-gray-600 bg-gray-50">{t('dashboard.subscriptions.activateAccount')}</p>
             </div>
           )}
 
           {/* Available Subscriptions Grid */}
           <section className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className={`text-2xl font-black ${
-                isDarkMode ? 'text-white' : 'text-slate-800'
-              }`}>{t('dashboard.subscriptions.availablePackages')}</h3>
-              <div className="h-1 flex-1 mx-4 bg-slate-100 rounded-full"></div>
+              <h3 className="text-2xl font-black text-gray-900">{t('dashboard.subscriptions.availablePackages')}</h3>
+              <div className="h-1 flex-1 mx-4 rounded-full bg-gray-100"></div>
             </div>
 
             {subscriptions.length === 0 ? (
@@ -396,71 +394,62 @@ const Subscriptions = () => {
                   return (
                     <div
                       key={subscription.id}
-                      className={`card-3d rounded-3xl border p-8 shadow-sm hover:shadow-xl transition-all duration-500 relative flex flex-col group overflow-hidden ${
-                        isDarkMode 
-                          ? isCurrentSubscription
-                            ? 'bg-slate-800 border-primary shadow-primary/10 ring-2 ring-primary/20'
-                            : 'bg-slate-800 border-slate-700 hover:border-primary/20'
-                          : isCurrentSubscription
-                            ? 'bg-white border-primary shadow-primary/10 ring-2 ring-primary/20'
-                            : 'bg-white border-slate-100 hover:border-primary/20'
+                      className={`rounded-xl border border-[#114C5A]/10 p-8 shadow-sm hover:shadow-md transition-all duration-300 relative flex flex-col group overflow-hidden bg-white ${
+                        isCurrentSubscription
+                          ? 'border-[#FFB200] shadow-[#FFB200]/10 ring-2 ring-[#FFB200]/20'
+                          : 'hover:border-[#114C5A]/20'
                       }`}
                     >
                       {isCurrentSubscription && (
-                        <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} bg-primary text-white px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider shadow-xl z-50 flex items-center gap-1.5`}>
+                        <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} bg-[#FFB200] text-white px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider shadow-xl z-50 flex items-center gap-1.5`}>
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                           {t('dashboard.subscription.activeBadge')}
                         </div>
                       )}
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110"></div>
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-[#114C5A]/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110"></div>
 
                       <div className="mb-8">
-                        <h4 className={`text-xl font-black mb-2 group-hover:text-primary transition-colors ${
-                          isDarkMode ? 'text-white' : 'text-slate-800'
-                        }`}>
+                        <h4 className="text-xl font-black mb-2 group-hover:text-[#114C5A] transition-colors text-gray-900">
                           {getLocalizedName(subscription)}
                         </h4>
-                        <p className={`text-sm leading-relaxed font-normal min-h-[40px] ${
-                          isDarkMode ? 'text-slate-400' : 'text-slate-500'
-                        }`}>
+                        <p className="text-sm leading-relaxed font-normal min-h-[40px] text-gray-600">
                           {getLocalizedDescription(subscription)}
                         </p>
                       </div>
 
-                      <div className={`mb-8 rounded-2xl p-6 flex flex-col items-center ${
-                        isDarkMode ? 'bg-slate-700' : 'bg-slate-50'
-                      }`}>
+                      <div className="mb-8 rounded-xl p-6 flex flex-col items-center bg-[#114C5A]/5 border border-[#114C5A]/10">
                         <div className="flex items-baseline gap-1">
-                          <span className={`text-4xl font-black leading-none ${
-                            isDarkMode ? 'text-white' : 'text-slate-900'
-                          }`}>
+                          <span className="text-4xl font-black leading-none text-gray-900">
                             {subscription.price === '0.00' ? t('dashboard.subscriptions.free') : subscription.price}
                           </span>
                           {subscription.price !== '0.00' && (
-                            <span className={`font-bold text-sm ${
-                              isDarkMode ? 'text-slate-400' : 'text-slate-500'
-                            }`}>{t('dashboard.stats.currency')}</span>
+                            <span className="font-bold text-sm text-gray-600">{t('dashboard.stats.currency')}</span>
                           )}
                         </div>
-                        <span className={`text-xs mt-2 font-bold uppercase tracking-widest leading-none ${
-                          isDarkMode ? 'text-slate-400' : 'text-slate-400'
-                        }`}>
+                        <span className="text-xs mt-2 font-bold uppercase tracking-widest leading-none text-gray-500">
                           / {getDurationText(subscription.duration_type)}
                         </span>
                       </div>
 
                       {Array.isArray(subscription.features) && subscription.features.length > 0 && (
                         <ul className="space-y-4 mb-8 flex-grow">
-                          {subscription.features.map((feature, index) => (
-                            <li key={index} className={`text-sm flex items-start gap-3 ${
-                              isDarkMode ? 'text-slate-300' : 'text-slate-600'
-                            }`}>
-                              <span className="w-5 h-5 bg-emerald-50 text-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <CheckCircle className="w-3.5 h-3.5" />
-                              </span>
-                              <span className="font-semibold">{getLocalizedName(feature)}</span>
-                            </li>
-                          ))}
+                          {subscription.features.map((feature, index) => {
+                            // Handle both string array and object array
+                            const featureText = typeof feature === 'string' 
+                              ? (i18n.language === 'en' && subscription.features_en && subscription.features_en[index]
+                                  ? subscription.features_en[index]
+                                  : feature)
+                              : getLocalizedName(feature as any);
+                            
+                            return (
+                              <li key={index} className="text-sm flex items-start gap-3 text-gray-700">
+                                <span className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 bg-[#114C5A]/10 text-[#114C5A]">
+                                  <CheckCircle className="w-3.5 h-3.5" />
+                                </span>
+                                <span className="font-semibold">{featureText}</span>
+                              </li>
+                            );
+                          })}
                         </ul>
                       )}
 
@@ -469,10 +458,11 @@ const Subscriptions = () => {
                         <button
                           onClick={() => handleSubscribe(subscription)}
                           disabled={!!pendingRequest}
-                          className={`w-full py-4 rounded-2xl font-black text-sm transition-all duration-300 transform active:scale-95 ${pendingRequest
-                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                              : 'bg-slate-900 text-white hover:bg-primary hover:shadow-lg hover:shadow-primary/30'
-                            }`}
+                          className={`w-full py-4 rounded-xl font-black text-sm transition-all duration-300 transform active:scale-95 ${
+                            pendingRequest
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-[#114C5A] text-white hover:bg-[#114C5A]/90 hover:shadow-lg'
+                          }`}
                         >
                           {pendingRequest ? t('dashboard.subscriptions.pendingRequest') : t('dashboard.subscriptions.subscribeNow')}
                         </button>
@@ -487,18 +477,12 @@ const Subscriptions = () => {
 
         {/* Sidebar Column: Subscription History */}
         <div className="space-y-8">
-          <div className={`rounded-3xl border shadow-sm p-6 overflow-hidden ${
-            isDarkMode 
-              ? 'bg-slate-800 border-slate-700' 
-              : 'bg-white border-slate-100'
-          }`}>
+          <div className="rounded-xl border border-[#114C5A]/10 shadow-sm p-6 overflow-hidden bg-white">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+              <div className="w-10 h-10 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A]">
                 <Clock className="w-5 h-5" />
               </div>
-              <h3 className={`text-lg font-black tracking-tight ${
-                isDarkMode ? 'text-white' : 'text-slate-800'
-              }`}>{t('dashboard.subscriptions.subscriptionHistory')}</h3>
+              <h3 className="text-lg font-black tracking-tight text-gray-900">{t('dashboard.subscriptions.subscriptionHistory')}</h3>
             </div>
 
             {requests.length > 0 ? (
@@ -506,16 +490,14 @@ const Subscriptions = () => {
                 {requests.map((request) => (
                   <div
                     key={request.id}
-                    className="group border border-transparent hover:border-slate-100 hover:bg-slate-50/50 rounded-2xl p-4 transition-all duration-300"
+                    className="group border border-transparent rounded-xl p-4 transition-all duration-300 hover:border-[#114C5A]/20 hover:bg-[#114C5A]/5"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <h4 className={`font-black text-sm group-hover:text-primary transition-colors ${
-                          isDarkMode ? 'text-white' : 'text-slate-800'
-                        }`}>
+                        <h4 className="font-black text-sm group-hover:text-[#114C5A] transition-colors text-gray-900">
                           {getLocalizedName(request.subscription) || t('dashboard.subscription.subscriptionName')}
                         </h4>
-                        <p className="text-[11px] text-slate-400 font-bold mt-0.5 italic">
+                        <p className="text-[11px] font-bold mt-0.5 italic text-gray-500">
                           {formatDate(request.created_at)}
                         </p>
                       </div>
@@ -523,12 +505,8 @@ const Subscriptions = () => {
                     </div>
 
                     {request.admin_notes && (
-                      <div className={`border rounded-xl p-3 mb-3 text-[11px] font-medium ${
-                        isDarkMode 
-                          ? 'bg-slate-700 border-slate-600 text-slate-300' 
-                          : 'bg-white border-slate-100 text-slate-600'
-                      }`}>
-                        <p className="text-slate-400 mb-1 font-black uppercase text-[9px] tracking-wider">ملاحظات الإدارة:</p>
+                      <div className="border border-[#114C5A]/10 rounded-xl p-3 mb-3 text-[11px] font-medium bg-[#114C5A]/5 text-gray-700">
+                        <p className="mb-1 font-black uppercase text-[9px] tracking-wider text-gray-500">{t('dashboard.subscriptions.adminNotes')}</p>
                         {request.admin_notes}
                       </div>
                     )}
@@ -546,10 +524,10 @@ const Subscriptions = () => {
                             customClass: { popup: 'p-0 shadow-none border-0' }
                           });
                         }}
-                        className="text-[10px] font-black text-primary hover:underline flex items-center gap-1 mt-1"
+                        className="text-[10px] font-black hover:underline flex items-center gap-1 mt-1 text-[#114C5A]"
                       >
                         <Upload className="w-3 h-3" />
-                        عرض إثبات الدفع
+                        {t('dashboard.subscriptions.viewPaymentProof')}
                       </button>
                     )}
                   </div>
@@ -557,39 +535,37 @@ const Subscriptions = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-4">
+                <div className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 bg-gray-100 text-gray-400">
                   <Clock className="w-8 h-8" />
                 </div>
-                <p className="text-sm text-slate-400 font-bold uppercase tracking-wider font-normal">لا يوجد سجل حالياً</p>
+                <p className="text-sm font-bold uppercase tracking-wider font-normal text-gray-500">{t('dashboard.subscriptions.noHistory')}</p>
               </div>
             )}
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden group shadow-xl">
+          <div className="bg-gradient-to-br from-[#114C5A] to-[#114C5A]/90 rounded-xl p-8 text-white relative overflow-hidden group shadow-lg border border-[#114C5A]/20">
             <div className="absolute top-0 right-0 p-2 opacity-10 transform group-hover:scale-110 transition-transform">
               <Shield className="w-24 h-24" />
             </div>
             <h4 className="text-lg font-black mb-2 relative z-10">{t('dashboard.subscriptions.needHelp')}</h4>
-            <p className="text-sm text-white/70 mb-6 font-normal relative z-10 leading-relaxed">{t('dashboard.subscriptions.helpDescription')}</p>
-            <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 px-6 py-2 rounded-xl text-sm font-black transition-all relative z-10">{t('dashboard.subscriptions.contactUs')}</button>
+            <p className="text-sm text-white/80 mb-6 font-normal relative z-10 leading-relaxed">{t('dashboard.subscriptions.helpDescription')}</p>
+            <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 px-6 py-2 rounded-xl text-sm font-black transition-all relative z-10">{t('dashboard.subscriptions.contactUs')}</button>
           </div>
         </div>
       </div>
 
       {showSubscribeModal && selectedSubscription && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fadeIn">
-          <div className="bg-white rounded-[32px] shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn">
+        <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fadeIn bg-black/60">
+          <div className="rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn bg-white border border-[#114C5A]/10">
             <div className="p-8">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                  <div className="w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A]">
                     <Upload className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className={`text-2xl font-black ${
-                      isDarkMode ? 'text-white' : 'text-slate-800'
-                    }`}>{t('dashboard.subscriptions.confirmSubscription')}</h3>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">{t('dashboard.subscriptions.uploadPaymentProofDesc')}</p>
+                    <h3 className="text-2xl font-black text-gray-900">{t('dashboard.subscriptions.confirmSubscription')}</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest mt-0.5 text-gray-500">{t('dashboard.subscriptions.uploadPaymentProofDesc')}</p>
                   </div>
                 </div>
                 <button
@@ -600,17 +576,17 @@ const Subscriptions = () => {
                     setPaymentProofPreview(null);
                     setError(null);
                   }}
-                  className="w-10 h-10 bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all flex items-center justify-center"
+                  className="w-10 h-10 rounded-xl transition-all flex items-center justify-center bg-gray-100 text-gray-600 hover:text-rose-500 hover:bg-rose-50"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="mb-8 p-6 bg-slate-50 border border-slate-100 rounded-3xl">
+              <div className="mb-8 p-6 border border-[#114C5A]/10 rounded-xl bg-[#114C5A]/5">
                 {activeSubscription && activeSubscription.subscription_id === selectedSubscription.id ? (
-                  <div className="flex items-center gap-3 mb-4 p-3 bg-primary/10 border border-primary/20 rounded-xl">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                    <p className="text-sm font-black text-primary">{t('dashboard.subscriptions.currentlySubscribed')}</p>
+                  <div className="flex items-center gap-3 mb-4 p-3 border border-[#FFB200]/20 rounded-xl bg-[#FFB200]/10">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0 text-[#FFB200]" />
+                    <p className="text-sm font-black text-[#FFB200]">{t('dashboard.subscriptions.currentlySubscribed')}</p>
                   </div>
                 ) : activeSubscription ? (
                   <div className="flex items-center gap-3 mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
@@ -630,18 +606,14 @@ const Subscriptions = () => {
                 )}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className={`font-black mb-1 ${
-                      isDarkMode ? 'text-white' : 'text-slate-800'
-                    }`}>{getLocalizedName(selectedSubscription)}</h4>
-                    <div className={`flex items-center gap-1.5 text-xs ${
-                      isDarkMode ? 'text-slate-400' : 'text-slate-500'
-                    }`}>
+                    <h4 className="font-black mb-1 text-gray-900">{getLocalizedName(selectedSubscription)}</h4>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-600">
                       <Clock className="w-3.5 h-3.5" />
                       <span className="font-bold">{getDurationText(selectedSubscription.duration_type)}</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-black text-primary">
+                    <p className="text-2xl font-black text-[#114C5A]">
                       {selectedSubscription.price === '0.00' ? t('dashboard.subscriptions.free') : `${selectedSubscription.price} ${t('dashboard.stats.currency')}`}
                     </p>
                   </div>
@@ -650,7 +622,7 @@ const Subscriptions = () => {
 
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div>
-                  <label className="block text-sm font-black text-slate-700 mb-3 ml-2">
+                  <label className="block text-sm font-black mb-3 ml-2 text-gray-900">
                     {t('dashboard.subscriptions.paymentProofImage')}
                   </label>
                   {!paymentProofPreview ? (
@@ -664,23 +636,23 @@ const Subscriptions = () => {
                       />
                       <label
                         htmlFor="payment_proof"
-                        className="cursor-pointer flex flex-col items-center justify-center gap-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[28px] p-12 hover:border-primary hover:bg-primary/5 transition-all duration-300 group"
+                        className="cursor-pointer flex flex-col items-center justify-center gap-4 border-2 border-dashed rounded-xl p-12 transition-all duration-300 group bg-gray-50 border-gray-200 hover:border-[#114C5A] hover:bg-[#114C5A]/5"
                       >
-                        <div className="w-16 h-16 bg-white shadow-sm rounded-2xl flex items-center justify-center text-slate-300 group-hover:text-primary transition-colors">
+                        <div className="w-16 h-16 shadow-sm rounded-xl flex items-center justify-center transition-colors bg-white text-gray-400 group-hover:text-[#114C5A]">
                           <Upload className="w-10 h-10" />
                         </div>
                         <div className="text-center">
-                          <span className="block text-sm font-black text-slate-700 mb-1 group-hover:text-primary font-bold">
+                          <span className="block text-sm font-black mb-1 font-bold transition-colors text-gray-900 group-hover:text-[#114C5A]">
                             {t('dashboard.subscriptions.uploadFile')}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">
+                          <span className="text-[10px] font-bold uppercase tracking-widest leading-none text-gray-500">
                             PNG, JPG (MAX. 2MB)
                           </span>
                         </div>
                       </label>
                     </div>
                   ) : (
-                    <div className="relative rounded-[28px] overflow-hidden border border-slate-100 shadow-lg group">
+                    <div className="relative rounded-xl overflow-hidden border border-[#114C5A]/10 shadow-lg group">
                       <img
                         src={paymentProofPreview}
                         alt="Payment Proof Preview"
@@ -690,7 +662,7 @@ const Subscriptions = () => {
                         <button
                           type="button"
                           onClick={handleRemoveFile}
-                          className="w-12 h-12 bg-rose-500 text-white rounded-2xl shadow-lg hover:bg-rose-600 transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center"
+                          className="w-12 h-12 bg-rose-500 text-white rounded-xl shadow-lg hover:bg-rose-600 transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center"
                         >
                           <X className="w-6 h-6" />
                         </button>
@@ -698,7 +670,7 @@ const Subscriptions = () => {
                     </div>
                   )}
                   {error && (
-                    <p className="text-xs text-rose-500 mt-3 font-bold flex items-center gap-2 bg-rose-50 p-3 rounded-xl border border-rose-100 font-bold">
+                    <p className="text-xs text-rose-500 mt-3 font-bold flex items-center gap-2 bg-rose-50 p-3 rounded-xl border border-rose-100">
                       <XCircle className="w-4 h-4" />
                       {error}
                     </p>
@@ -715,17 +687,18 @@ const Subscriptions = () => {
                       setPaymentProofPreview(null);
                       setError(null);
                     }}
-                    className="flex-1 py-4 bg-slate-50 text-slate-400 font-black rounded-2xl hover:bg-slate-100 transition-all border border-slate-100 font-bold"
+                    className="flex-1 py-4 font-black rounded-xl transition-all border font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200"
                   >
                     {t('dashboard.booking.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={!paymentProof || isSubmitting}
-                    className={`flex-[2] py-4 rounded-2xl font-black text-white shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 ${!paymentProof || isSubmitting
-                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                      : 'bg-primary hover:bg-primary-dark shadow-primary/30'
-                      }`}
+                    className={`flex-[2] py-4 rounded-xl font-black text-white shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 ${
+                      !paymentProof || isSubmitting
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
+                        : 'bg-[#114C5A] hover:bg-[#114C5A]/90 shadow-[#114C5A]/30'
+                    }`}
                   >
                     {isSubmitting ? (
                       <>

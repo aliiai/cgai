@@ -64,89 +64,42 @@ export const updateProfile = async (profileData: {
     // إذا لم نجد user، ندمج البيانات المحدثة مع بيانات المستخدم الحالية
     if (!updatedUser) {
       const currentUser = useAuthStore.getState().user;
+      if (!currentUser) {
+        return {
+          success: false,
+          message: 'لا يمكن تحديث الملف الشخصي - المستخدم غير موجود'
+        };
+      }
       updatedUser = {
         ...currentUser,
         ...profileData,
-        birth_date: profileData.date_of_birth || currentUser?.birth_date,
+        birth_date: profileData.date_of_birth || currentUser.birth_date,
       } as User;
     }
 
     // تحديث بيانات المستخدم في الـ store
+    // Zustand persist سيتولى الحفظ في localStorage تلقائياً
     if (updatedUser) {
       console.log('Updating user in store:', updatedUser);
       
-      // دمج البيانات المحدثة مع البيانات الحالية
+      // دمج البيانات المحدثة مع البيانات الحالية للتأكد من عدم فقدان أي بيانات
       const currentUser = useAuthStore.getState().user;
-      const mergedUser = {
+      
+      // إنشاء object جديد تماماً لضمان أن Zustand يكتشف التغيير
+      const mergedUser: User = {
         ...currentUser,
         ...updatedUser,
         // التأكد من أن birth_date محدث
         birth_date: updatedUser.birth_date || updatedUser.date_of_birth || currentUser?.birth_date,
+        date_of_birth: updatedUser.date_of_birth || updatedUser.birth_date || currentUser?.date_of_birth,
       };
 
-      // تحديث الـ store باستخدام updateUser action
-      const store = useAuthStore.getState();
-      if (store.updateUser) {
-        // حساب التحديثات فقط (الحقول التي تغيرت)
-        const updates: Partial<User> = {};
-        if (mergedUser.name !== currentUser?.name) updates.name = mergedUser.name;
-        if (mergedUser.phone !== currentUser?.phone) updates.phone = mergedUser.phone;
-        if (mergedUser.email !== currentUser?.email) updates.email = mergedUser.email;
-        if (mergedUser.gender !== currentUser?.gender) updates.gender = mergedUser.gender;
-        if (mergedUser.birth_date !== currentUser?.birth_date) updates.birth_date = mergedUser.birth_date;
-        
-        // تحديث جميع الحقول
-        store.updateUser(mergedUser);
-      } else {
-        // Fallback: استخدام setState مباشرة
-        useAuthStore.setState({
-          user: mergedUser,
-          isAuthenticated: true,
-        });
-      }
+      // تحديث الـ store - Zustand persist سيتولى الحفظ تلقائياً
+      // استخدام setUser مباشرة لضمان تحديث جميع المكونات
+      useAuthStore.getState().setUser({ ...mergedUser });
       
-      // انتظار حتى يقوم Zustand بحفظ البيانات في localStorage
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      // تحديث localStorage يدوياً للتأكد من الحفظ
-      try {
-        // قراءة الحالة الحالية من الـ store (بعد التحديث)
-        const currentState = useAuthStore.getState();
-        const finalUser = currentState.user || mergedUser;
-        
-        const authStorage = localStorage.getItem('auth-storage');
-        if (authStorage) {
-          const authData = JSON.parse(authStorage);
-          if (authData.state) {
-            authData.state.user = finalUser;
-            authData.state.isAuthenticated = true;
-            localStorage.setItem('auth-storage', JSON.stringify(authData));
-            console.log('Updated auth-storage:', finalUser);
-          }
-        } else {
-          // إنشاء auth-storage جديد
-          const token = currentState.token || getAuthToken();
-          localStorage.setItem('auth-storage', JSON.stringify({
-            state: {
-              user: finalUser,
-              token: token,
-              isAuthenticated: true,
-              isLoading: false,
-            },
-            version: 0,
-          }));
-        }
-        
-        // تحديث user-data كنسخة احتياطية
-        localStorage.setItem('user-data', JSON.stringify(finalUser));
-        console.log('Updated user-data:', finalUser);
-        
-        // إرجاع المستخدم النهائي
-        updatedUser = finalUser;
-      } catch (error) {
-        console.error('Error updating localStorage:', error);
-      }
-
+      console.log('User updated in store successfully');
+      
       // إرجاع المستخدم المدمج
       updatedUser = mergedUser;
     }
@@ -164,4 +117,3 @@ export const updateProfile = async (profileData: {
     };
   }
 };
-

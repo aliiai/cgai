@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
-import { Loader2, ChevronRight, ChevronLeft, Coins } from "lucide-react";
-import { getConsultationAvailableDates, createConsultationBooking, useThemeStore, getWallet } from "../../storeApi/storeApi";
+import { Loader2, ChevronRight, ChevronLeft, Coins, X } from "lucide-react";
+import { getConsultationAvailableDates, createConsultationBooking, getWallet } from "../../storeApi/storeApi";
 import Swal from "sweetalert2";
 import type { Consultation, AvailableDate, TimeSlot } from "../../types/types";
 
@@ -22,7 +22,6 @@ interface BookingData {
 
 const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) => {
   const { t, i18n } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   
   // تحديد الاتجاه بناءً على اللغة
@@ -33,34 +32,22 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
   const PrevArrow = ({ onClick }: any) => (
     <button
       onClick={onClick}
-      className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 border hover:border-primary group ${
-        isDarkMode 
-          ? 'bg-slate-800/90 border-slate-600' 
-          : 'bg-white/90 border-gray-100'
-      }`}
+      className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-[#114C5A]/20 rounded-full shadow-sm flex items-center justify-center hover:bg-[#114C5A] hover:text-white hover:border-[#114C5A] transition-all duration-300 group"
       aria-label={t('dashboard.booking.previousDay')}
       type="button"
     >
-      <ChevronLeft className={`w-5 h-5 group-hover:text-white transition-colors ${
-        isDarkMode ? 'text-slate-300' : 'text-gray-600'
-      }`} />
+      <ChevronLeft className="w-5 h-5 text-[#114C5A] group-hover:text-white transition-colors" />
     </button>
   );
 
   const NextArrow = ({ onClick }: any) => (
     <button
       onClick={onClick}
-      className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 border hover:border-primary group ${
-        isDarkMode 
-          ? 'bg-slate-800/90 border-slate-600' 
-          : 'bg-white/90 border-gray-100'
-      }`}
+      className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-[#114C5A]/20 rounded-full shadow-sm flex items-center justify-center hover:bg-[#114C5A] hover:text-white hover:border-[#114C5A] transition-all duration-300 group"
       aria-label={t('dashboard.booking.nextDay')}
       type="button"
     >
-      <ChevronRight className={`w-5 h-5 group-hover:text-white transition-colors ${
-        isDarkMode ? 'text-slate-300' : 'text-gray-600'
-      }`} />
+      <ChevronRight className="w-5 h-5 text-[#114C5A] group-hover:text-white transition-colors" />
     </button>
   );
   const [availableDates, setAvailableDates] = useState<AvailableDate[]>([]);
@@ -230,7 +217,7 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
         showCancelButton: true,
         confirmButtonText: t('dashboard.wallet.goToWalletToPurchase'),
         cancelButtonText: t('dashboard.consultation.result.insufficientPoints.cancel'),
-        confirmButtonColor: '#00adb5',
+        confirmButtonColor: '#114C5A',
         cancelButtonColor: '#6b7280',
         customClass: {
           popup: 'font-ElMessiri',
@@ -290,7 +277,7 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
             showCancelButton: true,
             confirmButtonText: t('dashboard.consultation.result.insufficientPoints.goToWallet'),
             cancelButtonText: t('dashboard.consultation.result.insufficientPoints.cancel'),
-            confirmButtonColor: '#00adb5',
+            confirmButtonColor: '#114C5A',
             cancelButtonColor: '#6b7280',
             customClass: {
               popup: 'font-ElMessiri',
@@ -335,9 +322,47 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
       // استخراج payment_url من الرد
       const paymentUrl = bookingResult.data?.payment_url || bookingResult.data?.data?.payment_url;
       
+      // استخراج معلومات الدفع من الرد - التحقق من جميع المسارات المحتملة
+      const booking = bookingResult.data?.booking || bookingResult.data?.data?.booking;
+      const paymentMethod = booking?.payment_method || bookingResult.data?.payment_method;
+      const paymentStatus = booking?.payment_status || bookingResult.data?.payment_status;
+      const pointsUsed = booking?.points_used || bookingResult.data?.points_used;
+      
+      // بناءً على البيانات الفعلية من الـ response:
+      // - payment_method = "points" في data.booking.payment_method
+      // - payment_status = "paid" في data.booking.payment_status
+      // - لا يوجد payment_url عند الدفع بالنقاط
+      
+      const hasPaymentUrl = paymentUrl && paymentUrl !== null && paymentUrl !== '';
+      const isPointsPayment = paymentMethod === 'points';
+      const isPaid = paymentStatus === 'paid' || paymentStatus === 'confirmed';
+      
+      // الشرط المنطقي بناءً على البيانات الفعلية:
+      // 1. إذا payment_method = 'points' و payment_status = 'paid' → عرض النافذة
+      // 2. أو إذا usePoints مفعّل وليس هناك paymentUrl → عرض النافذة
+      const condition1 = isPointsPayment && isPaid; // الشرط الأساسي من البيانات
+      const condition2 = usePoints && !hasPaymentUrl; // الشرط الاحتياطي
+      
+      const showSuccessDialog = condition1 || condition2;
+      
+      console.log("=== CONSULTATION BOOKING SUCCESS CHECK ===");
+      console.log("usePoints:", usePoints);
+      console.log("paymentUrl:", paymentUrl);
+      console.log("hasPaymentUrl:", hasPaymentUrl);
+      console.log("paymentMethod:", paymentMethod);
+      console.log("paymentStatus:", paymentStatus);
+      console.log("isPointsPayment:", isPointsPayment);
+      console.log("isPaid:", isPaid);
+      console.log("condition1 (points && paid):", condition1);
+      console.log("condition2 (usePoints && !hasPaymentUrl):", condition2);
+      console.log("showSuccessDialog:", showSuccessDialog);
+      console.log("booking object:", booking);
+      console.log("Full bookingResult.data:", bookingResult.data);
+      console.log("==========================================");
+      
       // إذا كان المستخدم يستخدم النقاط، تحديث المحفظة
       if (usePoints) {
-        const requiredPoints = Math.ceil(consultationPrice * pointsPerRiyal);
+        const requiredPoints = pointsUsed ? parseFloat(pointsUsed) : Math.ceil(consultationPrice * pointsPerRiyal);
         // تحديث النقاط في المحفظة المحلية
         setWalletBalance(prev => Math.max(0, prev - requiredPoints));
         
@@ -345,23 +370,26 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
         window.dispatchEvent(new CustomEvent('wallet-updated'));
       }
       
-      // عرض نافذة نجاح الحجز
-      if (usePoints && !paymentUrl) {
+      // عرض نافذة نجاح الحجز - الشرط البسيط
+      if (showSuccessDialog) {
+        console.log("✅ SHOWING SUCCESS DIALOG FOR POINTS PAYMENT");
         // الدفع تم بالنقاط مباشرة
+        const pointsUsedValue = pointsUsed ? parseFloat(pointsUsed) : Math.ceil(consultationPrice * pointsPerRiyal);
+        
         await Swal.fire({
-          icon: 'info',
+          icon: 'success',
           title: t('dashboard.consultation.result.success.title'),
           html: `
             <div style="text-align: ${isRTL ? 'right' : 'left'}; direction: ${isRTL ? 'rtl' : 'ltr'};" class="font-ElMessiri">
               <p class="text-gray-700 text-base mb-4">${t('dashboard.consultation.result.success.message')}</p>
               <div class="bg-green-50 ${isRTL ? 'border-r-4' : 'border-l-4'} border-green-400 p-4 rounded-lg">
                 <p class="text-green-800 text-sm font-semibold">${t('dashboard.wallet.pointsPayment')}</p>
-                <p class="text-green-700 text-sm mt-2">${t('dashboard.wallet.pointsUsed')} ${Math.ceil(consultationPrice * pointsPerRiyal).toLocaleString()} ${t('dashboard.wallet.point')}</p>
+                <p class="text-green-700 text-sm mt-2">${t('dashboard.wallet.pointsUsed')} ${pointsUsedValue.toLocaleString()} ${t('dashboard.wallet.point')}</p>
               </div>
             </div>
           `,
           confirmButtonText: t('dashboard.consultation.result.success.ok'),
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#114C5A',
           customClass: {
             popup: 'font-ElMessiri',
           },
@@ -369,16 +397,18 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
           allowEscapeKey: false,
         });
         
+        console.log("✅ SUCCESS DIALOG SHOWN AND CLOSED");
+        
         // إغلاق النافذة بعد النجاح
         onClose();
       } else if (paymentUrl) {
-        // الدفع بالفيزا أو جزء من المبلغ بالفيزا
+        // الدفع بالفيزا أو جزء من المبلغ بالفيزا - الحجز لم يتم بعد، يحتاج دفع
         const successResult = await Swal.fire({
           icon: 'info',
-          title: t('dashboard.consultation.result.success.title'),
+          title: t('dashboard.booking.pendingPayment.title'),
           html: `
             <div style="text-align: ${isRTL ? 'right' : 'left'}; direction: ${isRTL ? 'rtl' : 'ltr'};" class="font-ElMessiri">
-              <p class="text-gray-700 text-base mb-4">${t('dashboard.consultation.redirectToPayment')}</p>
+              <p class="text-gray-700 text-base mb-4">${t('dashboard.booking.pendingPayment.message')}</p>
               ${usePoints ? `
                 <div class="bg-blue-50 ${isRTL ? 'border-r-4' : 'border-l-4'} border-blue-400 p-4 rounded-lg mb-4">
                   <p class="text-blue-800 text-sm font-semibold">${t('dashboard.wallet.pointsUsed')} ${Math.ceil(consultationPrice * pointsPerRiyal).toLocaleString()} ${t('dashboard.wallet.point')}</p>
@@ -387,10 +417,10 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
               ` : ''}
             </div>
           `,
-          confirmButtonText: t('dashboard.consultation.continueToPayment'),
-          confirmButtonColor: '#00adb5',
+          confirmButtonText: t('dashboard.booking.pendingPayment.continue'),
+          confirmButtonColor: '#114C5A',
           showCancelButton: true,
-          cancelButtonText: t('dashboard.booking.cancel'),
+          cancelButtonText: t('dashboard.booking.pendingPayment.cancel'),
           cancelButtonColor: '#dc2626',
           customClass: {
             popup: 'font-ElMessiri',
@@ -417,7 +447,7 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
             </div>
           `,
           confirmButtonText: t('dashboard.consultation.result.success.ok'),
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#114C5A',
           customClass: {
             popup: 'font-ElMessiri',
           },
@@ -542,31 +572,21 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className={`relative rounded-3xl w-[90%]  h-[90vh] p-8 overflow-y-auto shadow-2xl ${
-        isDarkMode ? 'bg-slate-800' : 'bg-white'
-      }`}>
+      <div className="relative rounded-xl w-[90%] max-w-5xl h-[90vh] p-6 overflow-y-auto shadow-2xl bg-white">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} hover:text-red-500 text-2xl w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 z-30 ${
-            isDarkMode 
-              ? 'text-slate-400 hover:bg-red-900/30' 
-              : 'text-gray-400 hover:bg-red-50'
-          }`}
+          className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} text-gray-400 hover:text-red-500 w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-50 transition-all duration-200 z-30`}
         >
-          ✕
+          <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
-        <div className={`mb-8 pb-6 border-b ${
-          isDarkMode ? 'border-slate-700' : 'border-gray-200'
-        }`}>
-          <h2 className={`text-3xl md:text-4xl font-bold mb-2 ${textAlign} ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
+        <div className="mb-6 pb-6 border-b border-[#114C5A]/10">
+          <h2 className={`text-2xl md:text-3xl font-bold mb-2 text-[#114C5A] ${textAlign}`}>
             {t('dashboard.consultation.title')}
           </h2>
-          <p className={`text-lg text-primary font-semibold ${textAlign}`}>
+          <p className={`text-lg text-[#114C5A] font-semibold ${textAlign}`}>
             {consultation.name}
           </p>
         </div>
@@ -574,23 +594,19 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
         {/* Loading or No Dates */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <Loader2 className="w-8 h-8 text-[#114C5A] animate-spin" />
           </div>
         ) : availableDates.length === 0 ? (
           <div className="text-center py-20">
-            <p className={`text-lg ${
-              isDarkMode ? 'text-slate-400' : 'text-gray-500'
-            }`}>
+            <p className="text-lg text-gray-600">
               {t('dashboard.consultation.noDates')}
             </p>
           </div>
         ) : (
           <>
             {/* Days Slider */}
-            <div className="mb-10">
-              <h3 className={`text-xl font-bold mb-6 ${textAlign} ${
-                isDarkMode ? 'text-white' : 'text-gray-800'
-              }`}>
+            <div className="mb-8">
+              <h3 className={`text-xl font-semibold mb-6 text-[#114C5A] ${textAlign}`}>
                 {t('dashboard.consultation.selectDay')}
               </h3>
               <div className="px-14 h-80 flex flex-col justify-center ">
@@ -608,42 +624,35 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
                               isManualSelection.current = false;
                             }, 500);
                           }}
-                          className={`group relative w-full rounded-[2rem] transition-all duration-500 ease-out flex flex-col justify-center items-center gap-2 overflow-hidden ${
+                          className={`group relative w-full rounded-xl transition-all duration-300 ease-out flex flex-col justify-center items-center gap-2 overflow-hidden ${
                             active
-                              ? "h-40 bg-primary text-white shadow-sm shadow-primary/40 scale-110 z-10"
-                              : isDarkMode
-                                ? "h-32 bg-slate-700 text-slate-400 border border-slate-600 hover:border-slate-500 hover:shadow-lg scale-90 opacity-60 hover:opacity-100 mt-5"
-                                : "h-32 bg-white text-gray-400 border border-gray-800 hover:border-gray-200 hover:shadow-lg scale-90 opacity-60 hover:opacity-100 mt-5"
+                              ? "h-36 bg-[#114C5A] text-white shadow-md shadow-[#114C5A]/30 scale-105 z-10"
+                              : "h-32 bg-white text-gray-600 border border-[#114C5A]/20 hover:border-[#114C5A]/40 hover:shadow-md scale-95 opacity-70 hover:opacity-100 mt-4"
                           }`}
                         >
-                          {active && (
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-dark opacity-100" />
-                          )}
                           <div className="relative z-10 flex flex-col items-center">
                             <span
-                              className={`text-4xl font-medium ${
+                              className={`text-3xl font-semibold ${
                                 active
-                                  ? "text-white/90"
-                                  : isDarkMode
-                                    ? "text-white group-hover:text-primary transition-colors"
-                                    : "text-gray-800 group-hover:text-primary transition-colors"
+                                  ? "text-white"
+                                  : "text-gray-800 group-hover:text-[#114C5A] transition-colors"
                               }`}
                             >
                               {date.day_name}
                             </span>
                             <span
-                              className={`text-xl ${
-                                active ? "text-white/75" : isDarkMode ? "text-slate-300" : "text-gray-800"
+                              className={`text-lg mt-1 ${
+                                active ? "text-white/90" : "text-gray-600"
                               }`}
                             >
                               {date.formatted_date}
                             </span>
                             {isToday(date) && (
                               <span
-                                className={`mt-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                className={`mt-2 px-3 py-1 rounded-lg text-xs font-medium ${
                                   active
-                                    ? "bg-white/20 text-white backdrop-blur-sm"
-                                    : "bg-primary/10 text-primary"
+                                    ? "bg-white/20 text-white"
+                                    : "bg-[#114C5A]/10 text-[#114C5A]"
                                 }`}
                               >
                                 {t('dashboard.consultation.today')}
@@ -662,40 +671,28 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
             {selectedDay && (
               <>
                 <div className="mb-6">
-                  <h3 className={`text-xl font-bold mb-2 ${textAlign} ${
-                    isDarkMode ? 'text-white' : 'text-gray-800'
-                  }`}>
+                  <h3 className={`text-xl font-semibold mb-2 text-[#114C5A] ${textAlign}`}>
                     {t('dashboard.consultation.selectTime')}
                   </h3>
-                  <p className={`text-sm ${textAlign} mb-4 ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                  }`}>
+                  <p className={`text-sm text-gray-600 ${textAlign} mb-4`}>
                     {t('dashboard.consultation.selectTimeSlot')}
                   </p>
                 </div>
 
                 {validFutureTimeSlots.length === 0 ? (
-                  <div className={`text-center py-12 rounded-2xl border-2 border-dashed ${
-                    isDarkMode 
-                      ? 'bg-slate-700 border-slate-600' 
-                      : 'bg-gray-50 border-gray-200'
-                  }`}>
-                    <p className={`text-lg font-medium ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                  <div className="text-center py-12 rounded-xl border-2 border-dashed bg-gray-50 border-[#114C5A]/20">
+                    <p className="text-lg font-medium text-gray-600">
                       {t('dashboard.consultation.noTimeSlots')}
                     </p>
                   </div>
                 ) : (
                   <>
                     <div className="mb-4">
-                      <p className={`text-sm ${textAlign} ${
-                        isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                      }`}>
+                      <p className={`text-sm text-gray-600 ${textAlign}`}>
                         {t('dashboard.consultation.availableTimes', { date: selectedDay.formatted_date })}
                       </p>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                       {validFutureTimeSlots.map((timeSlot) => {
                         const isSelected = isTimeSlotSelected(timeSlot);
                         const slotId = timeSlot.id || (timeSlot as any).time_slot_id;
@@ -707,39 +704,35 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
                             onClick={() => selectTimeSlot(timeSlot)}
                             disabled={!timeSlot.is_available}
                             className={`
-                              relative overflow-hidden group flex flex-col items-center justify-center py-3 px-4 rounded-2xl border transition-all duration-300
+                              relative overflow-hidden group flex flex-col items-center justify-center py-3 px-4 rounded-xl border transition-all duration-300
                               ${
                                 isSelected
-                                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/25 scale-[1.02] ring-2 ring-primary/20"
-                                  : isDarkMode
-                                    ? "bg-slate-700 text-slate-300 border-slate-600 hover:border-primary/50 hover:bg-primary/10 hover:shadow-md"
-                                    : "bg-white text-gray-600 border-gray-100 hover:border-primary/50 hover:bg-primary/5 hover:shadow-md"
+                                  ? "bg-[#114C5A] text-white border-[#114C5A] shadow-md shadow-[#114C5A]/25 scale-[1.02]"
+                                  : "bg-white text-gray-700 border-[#114C5A]/20 hover:border-[#114C5A]/40 hover:bg-[#114C5A]/5 hover:shadow-sm"
                               }
                               ${
                                 !timeSlot.is_available
-                                  ? isDarkMode
-                                    ? "opacity-40 cursor-not-allowed bg-slate-800"
-                                    : "opacity-40 cursor-not-allowed bg-gray-50"
+                                  ? "opacity-40 cursor-not-allowed bg-gray-50"
                                   : "cursor-pointer"
                               }
                             `}
                           >
                             <span
-                              className={`text-xl font-bold tracking-wide ${
-                                isSelected ? "text-white" : isDarkMode ? "text-white" : "text-gray-800"
+                              className={`text-lg font-semibold ${
+                                isSelected ? "text-white" : "text-gray-900"
                               }`}
                             >
                               {timeSlot.start_time}
                             </span>
                             <span
-                              className={`text-xl mt-0.5 font-medium ${
-                                isSelected ? "text-white/80" : isDarkMode ? "text-slate-400" : "text-gray-400"
+                              className={`text-sm mt-0.5 ${
+                                isSelected ? "text-white/90" : "text-gray-600"
                               }`}
                             >
                               {t('dashboard.consultation.to')} {timeSlot.end_time}
                             </span>
                             {isSelected && (
-                              <div className={`absolute top-2 ${isRTL ? 'right-2' : 'left-2'} w-1.5 h-1.5 rounded-full bg-white shadow-sm`} />
+                              <div className={`absolute top-2 ${isRTL ? 'right-2' : 'left-2'} w-2 h-2 rounded-full bg-white shadow-sm`} />
                             )}
                           </button>
                         );
@@ -750,31 +743,21 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
 
                 {/* Use Points Section */}
                 {walletBalance > 0 && selectedTimeSlotId && (
-                  <div className={`mt-8 pt-6 border-t ${
-                    isDarkMode ? 'border-slate-700' : 'border-gray-200'
-                  }`}>
-                    <div className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                  <div className="mt-8 pt-6 border-t border-[#114C5A]/10">
+                    <div className={`p-5 rounded-xl border-2 transition-all duration-300 ${
                       usePoints 
-                        ? isDarkMode 
-                          ? 'bg-primary/10 border-primary/30' 
-                          : 'bg-primary/5 border-primary/20'
-                        : isDarkMode
-                          ? 'bg-slate-700/50 border-slate-600'
+                        ? 'bg-[#114C5A]/5 border-[#114C5A]/20' 
                           : 'bg-gray-50 border-gray-200'
                     }`}>
                       <div className={`flex items-center justify-between mb-4 ${flexDirection}`}>
                         <div className={`flex items-center gap-3 ${flexDirection}`}>
-                          <Coins className={`w-6 h-6 ${usePoints ? 'text-primary' : isDarkMode ? 'text-slate-400' : 'text-gray-500'}`} />
+                          <Coins className={`w-6 h-6 ${usePoints ? 'text-[#114C5A]' : 'text-gray-500'}`} />
                           <div>
-                            <h3 className={`text-lg font-bold ${textAlign} ${
-                              isDarkMode ? 'text-white' : 'text-gray-800'
-                            }`}>
+                            <h3 className={`text-lg font-semibold text-[#114C5A] ${textAlign}`}>
                               {t('dashboard.wallet.useYourPoints')}
                             </h3>
-                            <p className={`text-sm ${textAlign} ${
-                              isDarkMode ? 'text-slate-400' : 'text-gray-600'
-                            }`}>
-                              {t('dashboard.wallet.yourBalance')} <span className="font-bold text-primary">{walletBalance.toLocaleString()}</span> {t('dashboard.wallet.point')}
+                            <p className={`text-sm text-gray-600 ${textAlign}`}>
+                              {t('dashboard.wallet.yourBalance')} <span className="font-bold text-[#114C5A]">{walletBalance.toLocaleString()}</span> {t('dashboard.wallet.point')}
                             </p>
                           </div>
                         </div>
@@ -786,7 +769,7 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
                             className="sr-only peer"
                           />
                           <div className={`relative w-14 h-7 rounded-full peer transition-colors duration-300 ${
-                            usePoints ? 'bg-primary' : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
+                            usePoints ? 'bg-[#114C5A]' : 'bg-gray-300'
                           }`}>
                             <div className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
                               usePoints ? 'translate-x-7' : 'translate-x-0'
@@ -805,42 +788,34 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
                         const finalPriceWithPoints = Math.max(0, originalPrice - maxDiscount);
                         
                         return (
-                          <div className="mt-4 pt-4 border-t border-primary/20 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="mt-4 pt-4 border-t border-[#114C5A]/20 space-y-3">
                             <div className={`flex items-center justify-between ${flexDirection}`}>
-                              <span className={`text-sm ${textAlign} ${
-                                isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                              }`}>
+                              <span className={`text-sm text-gray-700 ${textAlign}`}>
                                 {t('dashboard.wallet.originalPrice')}
                               </span>
-                              <span className={`text-base font-bold ${
-                                isDarkMode ? 'text-white' : 'text-gray-900'
-                              }`}>
+                              <span className="text-base font-semibold text-gray-900">
                                 {originalPrice.toFixed(2)} {t('dashboard.stats.currency')}
                               </span>
                             </div>
                             <div className={`flex items-center justify-between ${flexDirection}`}>
-                              <span className={`text-sm ${textAlign} ${
-                                isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                              }`}>
+                              <span className={`text-sm text-gray-700 ${textAlign}`}>
                                 {t('dashboard.wallet.pointsUsed')}
                               </span>
-                              <span className="text-base font-bold text-primary">
+                              <span className="text-base font-semibold text-[#114C5A]">
                                 - {pointsToUse.toLocaleString()} {t('dashboard.wallet.point')}
                               </span>
                             </div>
-                            <div className={`flex items-center justify-between pt-2 border-t border-primary/20 ${flexDirection}`}>
-                              <span className={`text-base font-bold ${textAlign} ${
-                                isDarkMode ? 'text-white' : 'text-gray-900'
-                              }`}>
+                            <div className={`flex items-center justify-between pt-2 border-t border-[#114C5A]/10 ${flexDirection}`}>
+                              <span className={`text-base font-semibold text-gray-900 ${textAlign}`}>
                                 {t('dashboard.wallet.finalPrice')}
                               </span>
-                              <span className="text-xl font-black text-primary">
+                              <span className="text-xl font-bold text-[#114C5A]">
                                 {finalPriceWithPoints.toFixed(2)} {t('dashboard.stats.currency')}
                               </span>
                             </div>
                             {maxDiscount > 0 && (
-                              <div className="mt-2 p-2 rounded-lg bg-green-50 border border-green-200">
-                                <p className={`text-xs text-center text-green-700`}>
+                              <div className="mt-2 p-3 rounded-lg bg-green-50 border border-green-200">
+                                <p className="text-xs text-center text-green-700">
                                   {t('dashboard.wallet.savings')} {maxDiscount.toFixed(2)} {t('dashboard.stats.currency')}
                                 </p>
                               </div>
@@ -853,18 +828,12 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
                 )}
 
                 {/* Notes Section */}
-                <div className={`mt-8 pt-6 border-t ${
-                  isDarkMode ? 'border-slate-700' : 'border-gray-200'
-                }`}>
+                <div className="mt-8 pt-6 border-t border-[#114C5A]/10">
                   <label htmlFor="consultation-notes" className={`block ${textAlign} mb-3`}>
-                    <h3 className={`text-xl font-bold mb-1 ${textAlign} ${
-                      isDarkMode ? 'text-white' : 'text-gray-800'
-                    }`}>
+                    <h3 className={`text-xl font-semibold mb-1 text-[#114C5A] ${textAlign}`}>
                       {t('dashboard.consultation.notes')}
                     </h3>
-                    <p className={`text-sm ${textAlign} ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                    <p className={`text-sm text-gray-600 ${textAlign}`}>
                       {t('dashboard.consultation.notesPlaceholder')}
                     </p>
                   </label>
@@ -876,16 +845,10 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
                     rows={4}
                     maxLength={500}
                     dir={isRTL ? 'rtl' : 'ltr'}
-                    className={`w-full px-4 py-3 rounded-xl border-2 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300 resize-none ${textAlign} shadow-sm hover:shadow-md ${
-                      isDarkMode 
-                        ? 'bg-slate-700 border-slate-600 text-white placeholder:text-slate-400' 
-                        : 'bg-white border-gray-200 placeholder:text-gray-400'
-                    }`}
+                    className={`w-full px-4 py-3 rounded-xl border-2 border-[#114C5A]/20 focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 outline-none transition-all duration-300 resize-none ${textAlign} shadow-sm hover:shadow-md bg-white text-gray-900 placeholder:text-gray-400`}
                   />
                   <div className={`flex ${isRTL ? 'justify-end' : 'justify-start'} mt-2`}>
-                    <span className={`text-xs ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-400'
-                    }`}>
+                    <span className="text-xs text-gray-500">
                       {notes.length} / 500 {t('dashboard.consultation.characters')}
                     </span>
                   </div>
@@ -918,17 +881,17 @@ const ConsultationPopup = ({ consultation, onClose }: ConsultationPopupProps) =>
                 disabled={isSubmitting}
                 className={`
                   px-10 py-4
-                  rounded-2xl
+                  rounded-xl
                   text-white
                   text-lg
-                  font-bold
-                  shadow-lg
+                  font-semibold
+                  shadow-md
                   transition-all duration-300
                   active:scale-95
                   flex items-center justify-center gap-2
                   ${isSubmitting 
-                    ? 'bg-primary/70 cursor-not-allowed' 
-                    : 'bg-primary hover:bg-primary-dark shadow-primary/30'
+                    ? 'bg-[#114C5A]/70 cursor-not-allowed' 
+                    : 'bg-[#114C5A] hover:bg-[#114C5A]/90 shadow-[#114C5A]/30'
                   }
                 `}
               >

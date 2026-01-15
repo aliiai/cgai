@@ -6,7 +6,6 @@ import CategoryIcon from './CategoryIcon';
 import ConsultationPopup from './ConsultationPopup';
 import { useLocalized } from '../../hooks/useLocalized';
 import { useLocalizedName } from '../../hooks/useLocalized';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 
 interface ConsultationCardProps {
   consultation: Consultation;
@@ -14,7 +13,6 @@ interface ConsultationCardProps {
 
 const ConsultationCard = ({ consultation }: ConsultationCardProps) => {
   const { t } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   const [open, setOpen] = useState(false);
   const localizedConsultation = useLocalized(consultation, ['name', 'description']);
   const categoryName = useLocalizedName(consultation.category);
@@ -23,41 +21,33 @@ const ConsultationCard = ({ consultation }: ConsultationCardProps) => {
     <>
       <div
         onClick={() => setOpen(true)}
-        className={`group relative backdrop-blur-xl rounded-3xl p-7 border shadow-lg hover:shadow-xl transition cursor-pointer ${
-          isDarkMode 
-            ? 'bg-slate-800/60 border-slate-700/40 hover:border-primary/40' 
-            : 'bg-white/60 border-white/40 hover:border-primary/40'
-        }`}
+        className="group bg-white border border-[#114C5A]/20 rounded-xl p-6 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all cursor-pointer"
       >
         <CategoryIcon item={consultation} />
 
-        <h3 className={`text-xl font-bold mt-5 mb-3 ${
-          isDarkMode ? 'text-white' : 'text-gray-800'
-        }`}>
+        <h3 className="text-lg font-semibold text-[#114C5A] mt-4 mb-2">
           {localizedConsultation.name}
         </h3>
 
-        <p className={`text-sm mb-4 ${
-          isDarkMode ? 'text-slate-300' : 'text-gray-600'
-        }`}>
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
           {localizedConsultation.description || ''}
         </p>
 
         {consultation.category && (
-          <div className="mb-4">
-            <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold">
+          <div className="mb-3">
+            <span className="inline-block bg-[#114C5A]/10 text-[#114C5A] px-3 py-1 rounded-lg text-xs font-medium border border-[#114C5A]/20">
               {categoryName}
             </span>
           </div>
         )}
 
-          <div className="flex items-center justify-between mt-auto">
-          <div className="text-xl font-black text-primary">
+        <div className="flex items-center justify-between pt-3 border-t border-[#114C5A]/10">
+          <div className="text-lg font-semibold text-[#114C5A]">
             {consultation.fixed_price || consultation.price} {t('dashboard.stats.currency')}
           </div>
-          <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+          <div className="flex items-center gap-2 text-[#114C5A] font-medium text-sm">
             <span>{t('dashboard.consultation.book')}</span>
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition" />
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           </div>
         </div>
       </div>
@@ -71,4 +61,3 @@ const ConsultationCard = ({ consultation }: ConsultationCardProps) => {
 };
 
 export default ConsultationCard;
-

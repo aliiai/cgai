@@ -1,23 +1,15 @@
 import { Calendar, Clock, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { DashboardRecentBooking } from '../../types/types';
+import type { DashboardUpcomingBooking } from '../../types/types';
 
-interface RecentBookingsSectionProps {
-  bookings: DashboardRecentBooking[];
+interface UpcomingBookingsSectionProps {
+  bookings: DashboardUpcomingBooking[];
   formatDate: (date: any) => string;
   formatTime: (timeString: string) => string;
-  getStatusText: (status: string) => string;
-  getStatusColor: (status: string) => string;
 }
 
-const RecentBookingsSection = ({
-  bookings,
-  formatDate,
-  formatTime,
-  getStatusText,
-  getStatusColor
-}: RecentBookingsSectionProps) => {
+const UpcomingBookingsSection = ({ bookings, formatDate, formatTime }: UpcomingBookingsSectionProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -29,15 +21,15 @@ const RecentBookingsSection = ({
             <Calendar className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-[#114C5A]">{t('dashboard.recentBookings.title')}</h3>
-            <p className="text-xs text-gray-600">{t('dashboard.recentBookings.subtitle')}</p>
+            <h3 className="text-lg font-semibold text-[#114C5A]">{t('dashboard.upcomingBookings.title')}</h3>
+            <p className="text-xs text-gray-600">{t('dashboard.upcomingBookings.subtitle')}</p>
           </div>
         </div>
         <button
           onClick={() => navigate('/admin/bookings')}
           className="text-sm text-[#114C5A] hover:text-[#114C5A]/80 flex items-center gap-1"
         >
-          <span>{t('dashboard.recentBookings.viewAll')}</span>
+          <span>{t('dashboard.upcomingBookings.viewAll')}</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
@@ -45,17 +37,11 @@ const RecentBookingsSection = ({
       <div className="p-5">
         {bookings.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-sm text-gray-600 mb-4">{t('dashboard.recentBookings.noBookings')}</p>
-            <button
-              onClick={() => navigate('/admin/sections')}
-              className="bg-[#114C5A] hover:bg-[#114C5A]/90 text-white px-4 py-2 rounded-lg text-sm transition-colors shadow-sm hover:shadow-md"
-            >
-              {t('dashboard.recentBookings.explore')}
-            </button>
+            <p className="text-sm text-gray-600">{t('dashboard.upcomingBookings.noBookings')}</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {bookings.map((booking) => (
+            {bookings.slice(0, 3).map((booking) => (
               <div
                 key={booking.id}
                 className="border border-[#114C5A]/10 rounded-lg p-4 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/20 transition-all cursor-pointer"
@@ -64,15 +50,12 @@ const RecentBookingsSection = ({
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
                     <h4 className="text-sm font-semibold text-gray-900 mb-1">
-                          {booking.service?.name || booking.consultation?.name || t('dashboard.recentBookings.service')}
-                        </h4>
+                      {booking.service?.name || t('dashboard.upcomingBookings.service')}
+                    </h4>
                     <span className="text-xs text-gray-600 px-2 py-1 bg-gray-100 rounded border border-gray-300">
-                            {booking.service?.sub_category?.category?.name || t('dashboard.recentBookings.category')}
-                          </span>
-                        </div>
-                  <span className={`text-xs px-2 py-1 rounded border ${getStatusColor(booking.actual_status)}`}>
-                      {getStatusText(booking.actual_status)}
+                      {booking.status}
                     </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3 pt-3 border-t border-[#114C5A]/10">
                   <div className="flex items-center gap-1 text-xs text-gray-600">
@@ -81,10 +64,7 @@ const RecentBookingsSection = ({
                   </div>
                   <div className="flex items-center gap-1 text-xs text-gray-600" dir="ltr">
                     <Clock className="w-3 h-3 text-[#114C5A]" />
-                    <span>{formatTime(booking.start_time)}</span>
-                      </div>
-                  <div className="text-xs text-[#114C5A] font-medium">
-                    {booking.total_price} {t('dashboard.stats.currency')}
+                    <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                   </div>
                 </div>
               </div>
@@ -96,4 +76,4 @@ const RecentBookingsSection = ({
   );
 };
 
-export default RecentBookingsSection;
+export default UpcomingBookingsSection;

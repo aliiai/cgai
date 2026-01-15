@@ -1,3 +1,5 @@
+import { STORAGE_BASE_URL } from '../storeApi/config/constants';
+
 interface ServiceCardProps {
   id: number;
   title: string;
@@ -12,17 +14,25 @@ const ServiceCard = ({ title, description, image, index }: ServiceCardProps) => 
   const bgColor = isEven ? 'bg-[#FDB103]' : 'bg-[#114C5A]';
   const textColor = isEven ? 'text-black' : 'text-white';
 
+  // Fix image URL - add base URL if it's a relative path
+  const imageUrl = image && image.startsWith('http') ? image : `${STORAGE_BASE_URL}${image}`;
+
   return (
-    <div className="!flex items-center justify-center px-2 sm:px-3 md:px-1">
+    <div className="!flex items-center justify-center px-2 sm:px-3 md:px-1 ">
       <div
-        className={`${bgColor} rounded-2xl md:rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow py-4 px-3 sm:py-5 sm:px-4 md:py-6 md:px-2 duration-300 flex ${isEven ? 'flex-col m-0' : 'flex-col-reverse mt-0 sm:mt-8 md:mt-16 lg:mt-32'} w-full max-w-full sm:max-w-[350px] md:max-w-[400px]`}
+        className={`!w-full ${bgColor} rounded-2xl md:rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow py-4 px-3 sm:py-5 sm:px-4 md:py-6 md:px-2 
+        duration-300 flex ${isEven ? 'flex-col m-0' : 'flex-col-reverse mt-0 sm:mt-8 md:mt-16 lg:mt-32'}`}
       >
         {/* Image Section */}
         <div className="relative w-full h-48 sm:h-56 md:h-64 overflow-hidden">
           <img
-            src={image}
+            src={imageUrl}
             alt={title}
             className="w-full h-full object-cover rounded-2xl md:rounded-3xl"
+            onError={(e) => {
+              // Fallback to placeholder if image fails to load
+              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=No+Image';
+            }}
           />
         </div>
 

@@ -16,42 +16,25 @@ import {
   ChevronRight,
   Filter,
   ArrowRight,
-  TrendingUp,
-  FileText
+  FileText,
+  Tag
 } from 'lucide-react';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
 import LoadingState from '../../components/dashboard/LoadingState';
 import EmptyState from '../../components/dashboard/EmptyState';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 import { getReadyAppOrders, type ReadyAppOrder } from '../../storeApi/api/ready-apps.api';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
 import { parseDate } from '../../utils/date.utils';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const { t } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   
-  const styles: Record<string, { bg: string; text: string; border: string }> = {
-    pending: {
-      bg: isDarkMode ? 'bg-amber-500/20' : 'bg-amber-50',
-      text: isDarkMode ? 'text-amber-400' : 'text-amber-700',
-      border: isDarkMode ? 'border-amber-500/30' : 'border-amber-200',
-    },
-    processing: {
-      bg: isDarkMode ? 'bg-blue-500/20' : 'bg-blue-50',
-      text: isDarkMode ? 'text-blue-400' : 'text-blue-700',
-      border: isDarkMode ? 'border-blue-500/30' : 'border-blue-200',
-    },
-    completed: {
-      bg: isDarkMode ? 'bg-green-500/20' : 'bg-green-50',
-      text: isDarkMode ? 'text-green-400' : 'text-green-700',
-      border: isDarkMode ? 'border-green-500/30' : 'border-green-200',
-    },
-    cancelled: {
-      bg: isDarkMode ? 'bg-red-500/20' : 'bg-red-50',
-      text: isDarkMode ? 'text-red-400' : 'text-red-700',
-      border: isDarkMode ? 'border-red-500/30' : 'border-red-200',
-    },
+  const styles: Record<string, string> = {
+    pending: 'bg-[#FFB200]/10 text-[#FFB200] border-[#FFB200]/20',
+    processing: 'bg-blue-50 text-blue-700 border-blue-200',
+    completed: 'bg-green-50 text-green-700 border-green-200',
+    cancelled: 'bg-red-50 text-red-700 border-red-200',
+    rejected: 'bg-red-50 text-red-700 border-red-200',
   };
 
   const labels: Record<string, string> = {
@@ -59,6 +42,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     processing: t('dashboard.myPurchases.status.processing') || 'قيد المعالجة',
     completed: t('dashboard.myPurchases.status.completed') || 'مكتمل',
     cancelled: t('dashboard.myPurchases.status.cancelled') || 'ملغي',
+    rejected: t('dashboard.myPurchases.status.rejected') || 'مرفوض',
   };
 
   const icons: Record<string, React.ReactNode> = {
@@ -66,15 +50,14 @@ const StatusBadge = ({ status }: { status: string }) => {
     processing: <Loader2 size={14} className="stroke-2 animate-spin" />,
     completed: <CheckCircle size={14} className="stroke-2" />,
     cancelled: <XCircle size={14} className="stroke-2" />,
+    rejected: <XCircle size={14} className="stroke-2" />,
   };
-
-  const style = styles[status] || styles.pending;
 
   return (
     <span className={`
-      flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border-2
-      ${style.bg} ${style.text} ${style.border}
-      shadow-md transition-all duration-300
+      flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border
+      ${styles[status] || styles.pending}
+      transition-all duration-300
     `}>
       {icons[status] || icons.pending}
       {labels[status] || status}
@@ -84,7 +67,6 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 const MyPurchases = () => {
   const { t, i18n } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<ReadyAppOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,8 +104,6 @@ const MyPurchases = () => {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   };
 
@@ -179,541 +159,321 @@ const MyPurchases = () => {
     { value: 'processing', label: t('dashboard.myPurchases.status.processing') || 'قيد المعالجة' },
     { value: 'completed', label: t('dashboard.myPurchases.status.completed') || 'مكتمل' },
     { value: 'cancelled', label: t('dashboard.myPurchases.status.cancelled') || 'ملغي' },
+    { value: 'rejected', label: t('dashboard.myPurchases.status.rejected') || 'مرفوض' },
   ];
 
-  return (
-    <div className={`pb-8 ${
-      isDarkMode ? 'bg-slate-900' : 'bg-gray-50'
-    }`}>
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
         <DashboardPageHeader
           title={t('dashboard.myPurchases.title') || 'مشترياتي'}
           subtitle={t('dashboard.myPurchases.subtitle') || 'عرض جميع طلبات شراء التطبيقات الجاهزة'}
         />
+        <div className="flex flex-col justify-center items-center py-32">
+          <Loader2 className="w-10 h-10 text-[#114C5A] animate-spin mb-4" />
+          <p className="text-gray-600 font-semibold text-lg">{t('dashboard.bookings.loading')}</p>
+          <p className="text-gray-500 text-sm mt-2">{t('dashboard.bookings.pleaseWait')}</p>
+        </div>
+      </div>
+    );
+  }
 
-        {/* Statistics Cards */}
-        {!isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className={`rounded-2xl p-6 border shadow-lg ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' 
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${
-                  isDarkMode ? 'bg-primary/20' : 'bg-primary/10'
-                }`}>
-                  <ShoppingBag className={`w-6 h-6 ${isDarkMode ? 'text-primary' : 'text-primary'}`} />
-                </div>
-              </div>
-              <div className={`text-3xl font-black mb-1 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {pagination?.total || orders.length}
-              </div>
-              <div className={`text-sm font-semibold ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>
-                {t('dashboard.myPurchases.totalOrders') || 'إجمالي الطلبات'}
-              </div>
-            </div>
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <DashboardPageHeader
+        title={t('dashboard.myPurchases.title') || 'مشترياتي'}
+        subtitle={t('dashboard.myPurchases.subtitle') || 'عرض جميع طلبات شراء التطبيقات الجاهزة'}
+      />
 
-            <div className={`rounded-2xl p-6 border shadow-lg ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' 
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${
-                  isDarkMode ? 'bg-amber-500/20' : 'bg-amber-500/10'
-                }`}>
-                  <Clock className={`w-6 h-6 ${isDarkMode ? 'text-amber-400' : 'text-amber-500'}`} />
-                </div>
-              </div>
-              <div className={`text-3xl font-black mb-1 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {orders.filter(o => o.status === 'pending').length}
-              </div>
-              <div className={`text-sm font-semibold ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>
-                {t('dashboard.myPurchases.status.pending') || 'قيد الانتظار'}
-              </div>
-            </div>
-
-            <div className={`rounded-2xl p-6 border shadow-lg ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' 
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${
-                  isDarkMode ? 'bg-blue-500/20' : 'bg-blue-500/10'
-                }`}>
-                  <Loader2 className={`w-6 h-6 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'}`} />
-                </div>
-              </div>
-              <div className={`text-3xl font-black mb-1 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {orders.filter(o => o.status === 'processing').length}
-              </div>
-              <div className={`text-sm font-semibold ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>
-                {t('dashboard.myPurchases.status.processing') || 'قيد المعالجة'}
-              </div>
-            </div>
-
-            <div className={`rounded-2xl p-6 border shadow-lg ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' 
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${
-                  isDarkMode ? 'bg-green-500/20' : 'bg-green-500/10'
-                }`}>
-                  <CheckCircle className={`w-6 h-6 ${isDarkMode ? 'text-green-400' : 'text-green-500'}`} />
-                </div>
-              </div>
-              <div className={`text-3xl font-black mb-1 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {orders.filter(o => o.status === 'completed').length}
-              </div>
-              <div className={`text-sm font-semibold ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>
-                {t('dashboard.myPurchases.status.completed') || 'مكتمل'}
-              </div>
+      {/* Statistics Cards - Similar to Dashboard */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-[#114C5A]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all duration-200 group">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A] group-hover:bg-[#114C5A]/20 transition-colors">
+              <ShoppingBag className="w-5 h-5" />
             </div>
           </div>
-        )}
-
-        {/* Filter */}
-        <div className={`mb-6 p-6 rounded-2xl border shadow-lg ${
-          isDarkMode 
-            ? 'bg-slate-800/80 backdrop-blur-sm border-slate-700' 
-            : 'bg-white/80 backdrop-blur-sm border-gray-200'
-        }`}>
-          <div className="flex items-center gap-4">
-            <div className={`p-2 rounded-xl ${
-              isDarkMode ? 'bg-slate-700' : 'bg-gray-100'
-            }`}>
-              <Filter className={`w-5 h-5 ${
-                isDarkMode ? 'text-slate-300' : 'text-gray-600'
-              }`} />
-            </div>
-            <select
-              value={filter}
-              onChange={(e) => {
-                setFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all ${
-                isDarkMode
-                  ? 'bg-slate-700/50 border-slate-600 text-white focus:border-primary'
-                  : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-primary'
-              } focus:outline-none focus:ring-2 focus:ring-primary/20 font-semibold`}
-              dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
-            >
-              {filterOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.myPurchases.totalOrders') || 'إجمالي الطلبات'}</p>
+          <p className="text-2xl font-bold text-[#114C5A]">{pagination?.total || orders.length}</p>
         </div>
 
-        {/* Loading State */}
-        {isLoading ? (
-          <LoadingState />
-        ) : (
-          <>
-            {/* Orders List */}
-            {orders.length > 0 ? (
-              <div className="space-y-6">
-                {orders.map((order) => {
-                  const appName = i18n.language === 'ar' 
-                    ? order.app.name 
-                    : (order.app.name_en || order.app.name);
-                  const categoryName = order.app.category
-                    ? (i18n.language === 'ar' 
-                        ? order.app.category.name 
-                        : (order.app.category.name_en || order.app.category.name))
-                    : '';
+        <div className="bg-white border border-[#FFB200]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#FFB200]/40 transition-all duration-200 group">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-[#FFB200]/10 rounded-xl flex items-center justify-center text-[#FFB200] group-hover:bg-[#FFB200]/20 transition-colors">
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.myPurchases.status.pending') || 'قيد الانتظار'}</p>
+          <p className="text-2xl font-bold text-[#FFB200]">{orders.filter(o => o.status === 'pending').length}</p>
+        </div>
 
-                  return (
-                    <div
-                      key={order.id}
-                      className={`group rounded-3xl border-2 overflow-hidden transition-all duration-300 hover:shadow-2xl ${
-                        isDarkMode 
-                          ? 'bg-slate-800/90 backdrop-blur-sm border-slate-700 hover:border-primary/50' 
-                          : 'bg-white/90 backdrop-blur-sm border-gray-200 hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="p-6 md:p-8">
-                        <div className="flex flex-col lg:flex-row gap-6">
-                          {/* App Image */}
-                          <div 
-                            className="flex-shrink-0 cursor-pointer group/image"
-                            onClick={() => navigate(`/admin/ready-apps/${order.app.id}`)}
-                          >
-                            {order.app.main_image ? (
-                              <div className="relative overflow-hidden rounded-2xl border-2 border-gray-200 group-hover/image:border-primary transition-all">
-                                <img
-                                  src={getImageUrl(order.app.main_image)}
-                                  alt={appName || 'App'}
-                                  className="w-40 h-40 md:w-48 md:h-48 object-cover group-hover/image:scale-110 transition-transform duration-500"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = '';
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                  }}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity" />
-                                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover/image:opacity-100 transition-opacity">
-                                  <div className="bg-white/90 backdrop-blur-sm rounded-full p-2">
-                                    <ArrowRight className="w-5 h-5 text-primary" />
-                                  </div>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className={`w-40 h-40 md:w-48 md:h-48 rounded-2xl flex items-center justify-center border-2 ${
-                                isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-100 border-gray-200'
-                              }`}>
-                                <Package className={`w-20 h-20 ${
-                                  isDarkMode ? 'text-slate-500' : 'text-gray-400'
-                                }`} />
-                              </div>
-                            )}
-                          </div>
+        <div className="bg-white border border-blue-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-blue-400 transition-all duration-200 group">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors">
+              <Loader2 className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.myPurchases.status.processing') || 'قيد المعالجة'}</p>
+          <p className="text-2xl font-bold text-blue-500">{orders.filter(o => o.status === 'processing').length}</p>
+        </div>
 
-                          {/* Order Details */}
-                          <div className="flex-1 space-y-5">
-                            {/* Header */}
-                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <h3 
-                                    className={`text-2xl font-black cursor-pointer hover:text-primary transition ${
-                                      isDarkMode ? 'text-white' : 'text-gray-900'
-                                    }`}
-                                    onClick={() => navigate(`/admin/ready-apps/${order.app.id}`)}
-                                  >
-                                    {appName || 'Untitled App'}
-                                  </h3>
-                                  <button
-                                    onClick={() => navigate(`/admin/ready-apps/${order.app.id}`)}
-                                    className={`p-2 rounded-lg transition ${
-                                      isDarkMode 
-                                        ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' 
-                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-                                    }`}
-                                  >
-                                    <ArrowRight className="w-4 h-4" />
-                                  </button>
-                                </div>
-                                {categoryName && (
-                                  <div className="flex items-center gap-2">
-                                    <Package className={`w-4 h-4 ${
-                                      isDarkMode ? 'text-primary/80' : 'text-primary'
-                                    }`} />
-                                    <p className={`text-sm font-semibold ${
-                                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                    }`}>
-                                      {categoryName}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-shrink-0">
-                                <StatusBadge status={order.status} />
-                              </div>
-                            </div>
+        <div className="bg-white border border-green-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-green-400 transition-all duration-200 group">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-500 group-hover:bg-green-100 transition-colors">
+              <CheckCircle className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.myPurchases.status.completed') || 'مكتمل'}</p>
+          <p className="text-2xl font-bold text-green-500">{orders.filter(o => o.status === 'completed').length}</p>
+        </div>
+      </div>
 
-                            {/* Order Info Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              <div className={`p-4 rounded-xl border ${
-                                isDarkMode 
-                                  ? 'bg-slate-700/50 border-slate-600' 
-                                  : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'
-                              }`}>
-                                <div className="flex items-center gap-3 mb-2">
-                                  <div className={`p-2 rounded-lg ${
-                                    isDarkMode ? 'bg-primary/20' : 'bg-primary/10'
-                                  }`}>
-                                    <DollarSign className={`w-5 h-5 ${
-                                      isDarkMode ? 'text-primary' : 'text-primary'
-                                    }`} />
-                                  </div>
-                                  <p className={`text-xs font-semibold uppercase tracking-wider ${
-                                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                  }`}>
-                                    {t('dashboard.myPurchases.price') || 'السعر'}
-                                  </p>
-                                </div>
-                                <p className={`text-2xl font-black ${
-                                  isDarkMode ? 'text-white' : 'text-gray-900'
-                                }`}>
-                                  {order.price.toLocaleString()} {order.currency || 'ر.س'}
-                                </p>
-                              </div>
+      {/* Filter */}
+      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-4">
+        <div className="flex items-center gap-4">
+          <div className="p-2 rounded-xl bg-[#114C5A]/10">
+            <Filter className="w-5 h-5 text-[#114C5A]" />
+          </div>
+          <select
+            value={filter}
+            onChange={(e) => {
+              setFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="flex-1 px-4 py-3 rounded-xl border border-[#114C5A]/10 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] font-semibold transition-all"
+            dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
+          >
+            {filterOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-                              <div className={`p-4 rounded-xl border ${
-                                isDarkMode 
-                                  ? 'bg-slate-700/50 border-slate-600' 
-                                  : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'
-                              }`}>
-                                <div className="flex items-center gap-3 mb-2">
-                                  <div className={`p-2 rounded-lg ${
-                                    isDarkMode ? 'bg-blue-500/20' : 'bg-blue-500/10'
-                                  }`}>
-                                    <Calendar className={`w-5 h-5 ${
-                                      isDarkMode ? 'text-blue-400' : 'text-blue-500'
-                                    }`} />
-                                  </div>
-                                  <p className={`text-xs font-semibold uppercase tracking-wider ${
-                                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                  }`}>
-                                    {t('dashboard.myPurchases.orderDate') || 'تاريخ الطلب'}
-                                  </p>
-                                </div>
-                                <p className={`text-sm font-bold ${
-                                  isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                                }`}>
-                                  {formatDate(order.created_at)}
-                                </p>
-                              </div>
+      {/* Orders Grid - Similar to Dashboard Cards */}
+      {orders.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {orders.map((order) => {
+            const appName = i18n.language === 'ar' 
+              ? order.app.name 
+              : (order.app.name_en || order.app.name);
+            const categoryName = order.app.category
+              ? (i18n.language === 'ar' 
+                  ? order.app.category.name 
+                  : (order.app.category.name_en || order.app.category.name))
+              : '';
 
-                              <div className={`p-4 rounded-xl border ${
-                                isDarkMode 
-                                  ? 'bg-slate-700/50 border-slate-600' 
-                                  : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'
-                              }`}>
-                                <div className="flex items-center gap-3 mb-2">
-                                  <div className={`p-2 rounded-lg ${
-                                    isDarkMode 
-                                      ? order.contact_preference === 'phone' ? 'bg-green-500/20' : 'bg-purple-500/20'
-                                      : order.contact_preference === 'phone' ? 'bg-green-500/10' : 'bg-purple-500/10'
-                                  }`}>
-                                    {order.contact_preference === 'phone' ? (
-                                      <Phone className={`w-5 h-5 ${
-                                        isDarkMode ? 'text-green-400' : 'text-green-500'
-                                      }`} />
-                                    ) : (
-                                      <Mail className={`w-5 h-5 ${
-                                        isDarkMode ? 'text-purple-400' : 'text-purple-500'
-                                      }`} />
-                                    )}
-                                  </div>
-                                  <p className={`text-xs font-semibold uppercase tracking-wider ${
-                                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                  }`}>
-                                    {t('dashboard.myPurchases.contactPreference') || 'تفضيل التواصل'}
-                                  </p>
-                                </div>
-                                <p className={`text-sm font-bold ${
-                                  isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                                }`}>
-                                  {order.contact_preference === 'phone' 
-                                    ? (t('dashboard.myPurchases.phone') || 'هاتف')
-                                    : (t('dashboard.myPurchases.email') || 'بريد إلكتروني')
-                                  }
-                                </p>
-                              </div>
-
-                              {order.processed_at && (
-                                <div className={`p-4 rounded-xl border ${
-                                  isDarkMode 
-                                    ? 'bg-slate-700/50 border-slate-600' 
-                                    : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'
-                                }`}>
-                                  <div className="flex items-center gap-3 mb-2">
-                                    <div className={`p-2 rounded-lg ${
-                                      isDarkMode ? 'bg-green-500/20' : 'bg-green-500/10'
-                                    }`}>
-                                      <CheckCircle className={`w-5 h-5 ${
-                                        isDarkMode ? 'text-green-400' : 'text-green-500'
-                                      }`} />
-                                    </div>
-                                    <p className={`text-xs font-semibold uppercase tracking-wider ${
-                                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                    }`}>
-                                      {t('dashboard.myPurchases.processedAt') || 'تاريخ المعالجة'}
-                                    </p>
-                                  </div>
-                                  <p className={`text-sm font-bold ${
-                                    isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                                  }`}>
-                                    {formatDate(order.processed_at)}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Notes */}
-                            {order.notes && (
-                              <div className={`p-5 rounded-xl border ${
-                                isDarkMode 
-                                  ? 'bg-slate-700/50 border-slate-600' 
-                                  : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'
-                              }`}>
-                                <div className="flex items-center gap-2 mb-3">
-                                  <FileText className={`w-5 h-5 ${
-                                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                  }`} />
-                                  <p className={`text-sm font-bold ${
-                                    isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                                  }`}>
-                                    {t('dashboard.myPurchases.notes') || 'ملاحظات'}
-                                  </p>
-                                </div>
-                                <p className={`text-sm leading-relaxed ${
-                                  isDarkMode ? 'text-slate-400' : 'text-gray-600'
-                                }`}>
-                                  {order.notes}
-                                </p>
-                              </div>
-                            )}
-
-                            {/* Order ID */}
-                            <div className={`flex items-center justify-between pt-4 border-t ${
-                              isDarkMode ? 'border-slate-700' : 'border-gray-200'
-                            }`}>
-                              <div className="flex items-center gap-2">
-                                <span className={`text-xs font-semibold ${
-                                  isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                }`}>
-                                  {t('dashboard.myPurchases.orderId') || 'رقم الطلب'}:
-                                </span>
-                                <span className={`text-sm font-black ${
-                                  isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                                }`}>
-                                  #{order.id}
-                                </span>
-                              </div>
-                              <button
-                                onClick={() => navigate(`/admin/ready-apps/${order.app.id}`)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition ${
-                                  isDarkMode
-                                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                                    : 'bg-primary/10 text-primary hover:bg-primary/20'
-                                }`}
-                              >
-                                {t('dashboard.myPurchases.viewApp') || 'عرض التطبيق'}
-                                <ArrowRight className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+            return (
+              <div
+                key={order.id}
+                className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm hover:shadow-md hover:border-[#114C5A]/20 transition-all duration-300 group overflow-hidden flex flex-col"
+              >
+                {/* Header with gradient */}
+                <div className="bg-gradient-to-br from-[#114C5A] to-[#114C5A]/90 p-4 text-white">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 border border-white/20 rounded-lg flex items-center justify-center font-bold text-xs bg-white/10">
+                        #{order.id}
                       </div>
+                      <StatusBadge status={order.status} />
                     </div>
-                  );
-                })}
+                    <Package size={18} className="text-white/80" />
+                  </div>
+                  <h3 className="text-lg font-bold mb-1 line-clamp-2">{appName || 'Untitled App'}</h3>
+                  {categoryName && (
+                    <p className="text-xs text-white/80 flex items-center gap-1.5 mt-1">
+                      <Tag size={12} />
+                      {categoryName}
+                    </p>
+                  )}
+                </div>
 
-                {/* Pagination */}
-                {pagination && pagination.last_page > 1 && (
-                  <div className={`mt-8 p-6 rounded-2xl border ${
-                    isDarkMode 
-                      ? 'bg-slate-800/80 backdrop-blur-sm border-slate-700' 
-                      : 'bg-white/80 backdrop-blur-sm border-gray-200'
-                  }`}>
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className={`text-sm font-semibold ${
-                        isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                      }`}>
-                        {t('dashboard.myPurchases.showing') || 'عرض'} {pagination.from}-{pagination.to} {t('dashboard.myPurchases.of') || 'من'} {pagination.total} {t('dashboard.myPurchases.results') || 'نتيجة'}
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className={`p-2.5 rounded-xl transition-all ${
-                            currentPage === 1
-                              ? 'opacity-50 cursor-not-allowed'
-                              : isDarkMode
-                                ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                          }`}
-                        >
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
+                {/* Content */}
+                <div className="p-4 space-y-3 flex-grow">
+                  {/* App Image */}
+                  {order.app.main_image && (
+                    <div 
+                      className="w-full h-32 rounded-xl overflow-hidden border border-[#114C5A]/10 cursor-pointer group/image"
+                      onClick={() => navigate(`/admin/ready-apps/${order.app.id}`)}
+                    >
+                      <img
+                        src={getImageUrl(order.app.main_image)}
+                        alt={appName || 'App'}
+                        className="w-full h-full object-cover group-hover/image:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '';
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
 
-                        <div className="flex gap-1">
-                          {[...Array(pagination.last_page)].map((_, index) => {
-                            const page = index + 1;
-                            if (
-                              page === 1 ||
-                              page === pagination.last_page ||
-                              (page >= currentPage - 1 && page <= currentPage + 1)
-                            ) {
-                              return (
-                                <button
-                                  key={page}
-                                  onClick={() => handlePageChange(page)}
-                                  className={`px-4 py-2 rounded-xl font-bold transition-all min-w-[44px] ${
-                                    currentPage === page
-                                      ? 'bg-primary text-white shadow-lg scale-105'
-                                      : isDarkMode
-                                        ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                                  }`}
-                                >
-                                  {page}
-                                </button>
-                              );
-                            } else if (
-                              page === currentPage - 2 ||
-                              page === currentPage + 2
-                            ) {
-                              return (
-                                <span key={page} className={`px-2 py-2 ${
-                                  isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                }`}>
-                                  ...
-                                </span>
-                              );
-                            }
-                            return null;
-                          })}
-                        </div>
-
-                        <button
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === pagination.last_page}
-                          className={`p-2.5 rounded-xl transition-all ${
-                            currentPage === pagination.last_page
-                              ? 'opacity-50 cursor-not-allowed'
-                              : isDarkMode
-                                ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                          }`}
-                        >
-                          <ChevronLeft className="w-5 h-5" />
-                        </button>
+                  {/* Price */}
+                  <div className="p-3 rounded-xl border border-[#114C5A]/10 bg-[#114C5A]/5">
+                    <div className="flex items-center gap-2">
+                      <DollarSign size={16} className="text-[#114C5A]" />
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-600 font-medium">{t('dashboard.myPurchases.price') || 'السعر'}</p>
+                        <p className="text-lg font-bold text-[#114C5A]">
+                          {order.price.toLocaleString()} {order.currency || 'ر.س'}
+                        </p>
                       </div>
                     </div>
                   </div>
-                )}
+
+                  {/* Order Date */}
+                  <div className="p-3 rounded-xl border border-[#114C5A]/10 bg-[#114C5A]/5">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-[#114C5A]" />
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-600 font-medium">{t('dashboard.myPurchases.orderDate') || 'تاريخ الطلب'}</p>
+                        <p className="text-sm font-semibold text-gray-900">{formatDate(order.created_at)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Preference */}
+                  <div className="p-3 rounded-xl border border-[#114C5A]/10 bg-[#114C5A]/5">
+                    <div className="flex items-center gap-2">
+                      {order.contact_preference === 'phone' ? (
+                        <Phone size={16} className="text-green-500" />
+                      ) : (
+                        <Mail size={16} className="text-purple-500" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-600 font-medium">{t('dashboard.myPurchases.contactPreference') || 'تفضيل التواصل'}</p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {order.contact_preference === 'phone' 
+                            ? (t('dashboard.myPurchases.phone') || 'هاتف')
+                            : (t('dashboard.myPurchases.email') || 'بريد إلكتروني')
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Processed At */}
+                  {order.processed_at && (
+                    <div className="p-3 rounded-xl border border-green-200 bg-green-50">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle size={16} className="text-green-500" />
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-600 font-medium">{t('dashboard.myPurchases.processedAt') || 'تاريخ المعالجة'}</p>
+                          <p className="text-sm font-semibold text-gray-900">{formatDate(order.processed_at)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {order.notes && (
+                    <div className="p-3 rounded-xl border border-[#FFB200]/20 bg-[#FFB200]/5">
+                      <div className="flex items-start gap-2">
+                        <FileText size={16} className="text-[#FFB200] mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-[#FFB200] font-semibold mb-1">{t('dashboard.myPurchases.notes') || 'ملاحظات'}</p>
+                          <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">{order.notes}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 pt-3 border-t border-[#114C5A]/10 bg-gray-50">
+                  <button
+                    onClick={() => navigate(`/admin/ready-apps/${order.app.id}`)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#114C5A] text-white rounded-xl font-semibold transition-all shadow-sm hover:bg-[#114C5A]/90 hover:shadow-md"
+                  >
+                    <ArrowRight size={16} />
+                    {t('dashboard.myPurchases.viewApp') || 'عرض التطبيق'}
+                  </button>
+                </div>
               </div>
-            ) : (
-              <EmptyState
-                icon={ShoppingBag}
-                title={t('dashboard.myPurchases.noOrders') || 'لا توجد طلبات'}
-                message={t('dashboard.myPurchases.noOrdersMessage') || 'لم يتم العثور على طلبات شراء'}
-              />
-            )}
-          </>
-        )}
-      </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-8">
+          <EmptyState
+            icon={ShoppingBag}
+            title={t('dashboard.myPurchases.noOrders') || 'لا توجد طلبات'}
+            message={t('dashboard.myPurchases.noOrdersMessage') || 'لم يتم العثور على طلبات شراء'}
+          />
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pagination && pagination.last_page > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+              currentPage === 1
+                ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+            }`}
+          >
+            <ChevronRight size={18} />
+            <span className="font-semibold">{t('dashboard.bookings.previous')}</span>
+          </button>
+          
+          <div className="flex items-center gap-2">
+            {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
+              let pageNum;
+              if (pagination.last_page <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= pagination.last_page - 2) {
+                pageNum = pagination.last_page - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
+                    currentPage === pageNum
+                      ? 'bg-[#114C5A] text-white shadow-md'
+                      : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === pagination.last_page}
+            className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+              currentPage === pagination.last_page
+                ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+            }`}
+          >
+            <span className="font-semibold">{t('dashboard.bookings.next')}</span>
+            <ChevronLeft size={18} />
+          </button>
+        </div>
+      )}
+
+      {/* Pagination Info */}
+      {pagination && (
+        <div className="text-center text-sm text-gray-600">
+          {t('dashboard.myPurchases.showing') || 'عرض'} {pagination.from}-{pagination.to} {t('dashboard.myPurchases.of') || 'من'} {pagination.total} {t('dashboard.myPurchases.results') || 'نتيجة'}
+        </div>
+      )}
     </div>
   );
 };
 
 export default MyPurchases;
-

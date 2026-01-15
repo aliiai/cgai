@@ -72,13 +72,13 @@ const LanguageSelector = ({
             className="fixed inset-0 z-40"
             onClick={() => setIsLanguageMenuOpen(false)}
           ></div>
-          <div className={`absolute left-0 top-full mt-2 w-48 rounded-xl shadow-2xl border py-2 z-50 overflow-hidden animate-in ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
-            }`} dir="rtl">
+          <div className={`absolute ${i18n.language === 'ar' ? 'left-0' : 'right-0'} top-full mt-2 w-48 rounded-xl shadow-2xl border py-2 z-50 overflow-hidden animate-in ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
+            }`} dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
             {languages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-right transition-colors ${i18n.language === lang.code
+                className={`w-full flex items-center gap-3 px-4 py-2.5 ${i18n.language === 'ar' ? 'text-right' : 'text-left'} transition-colors ${i18n.language === lang.code
                     ? 'bg-primary/10'
                     : 'hover:bg-primary/10'
                   }`}

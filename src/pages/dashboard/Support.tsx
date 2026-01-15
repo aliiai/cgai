@@ -1,22 +1,25 @@
-import { Headphones, MessageSquare, Plus, Clock, CheckCircle, Loader2, AlertCircle, Paperclip } from 'lucide-react';
+import { Headphones, MessageSquare, Plus, Clock, CheckCircle, AlertCircle, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
 import { getTickets, createTicket } from '../../storeApi/storeApi';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 import type { Ticket } from '../../types/types';
 import Swal from 'sweetalert2';
+import LoadingState from '../../components/dashboard/LoadingState';
 
 const Support = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { isDarkMode } = useThemeStore();
+  const isRTL = i18n.language === 'ar';
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'open' | 'closed' | 'pending'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [from, setFrom] = useState(0);
+  const [to, setTo] = useState(0);
 
   // جلب التذاكر
   const fetchTickets = async (page: number = 1) => {
@@ -37,6 +40,9 @@ const Support = () => {
         setTickets(result.data.data || []);
         setCurrentPage(result.data.current_page || 1);
         setTotalPages(result.data.last_page || 1);
+        setTotal(result.data.total || 0);
+        setFrom(result.data.from || 0);
+        setTo(result.data.to || 0);
       }
     } catch (error) {
       console.error('Error fetching tickets:', error);
@@ -68,7 +74,7 @@ const Support = () => {
           confirmButtonText: t('dashboard.support.viewTicket'),
           cancelButtonText: t('dashboard.support.stayHere'),
           showCancelButton: true,
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#114C5A',
           cancelButtonColor: '#6b7280',
           customClass: { popup: 'font-ElMessiri' },
           allowOutsideClick: true,
@@ -76,10 +82,8 @@ const Support = () => {
         });
         
         if (swalResult.isConfirmed) {
-          // التوجيه إلى صفحة التذكرة
           navigate(`/admin/tickets/${ticketId}`);
         } else {
-          // إعادة جلب التذاكر
           fetchTickets(1);
         }
       } else {
@@ -88,7 +92,7 @@ const Support = () => {
           title: t('dashboard.support.error'),
           text: result.message || t('dashboard.support.ticketFailed'),
           confirmButtonText: t('dashboard.ticketDetails.ok'),
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#114C5A',
           customClass: { popup: 'font-ElMessiri' },
           allowOutsideClick: true,
           allowEscapeKey: true,
@@ -101,7 +105,7 @@ const Support = () => {
         title: t('dashboard.support.error'),
         text: t('dashboard.support.ticketError'),
         confirmButtonText: t('dashboard.ticketDetails.ok'),
-        confirmButtonColor: '#00adb5',
+        confirmButtonColor: '#114C5A',
         customClass: { popup: 'font-ElMessiri' },
         allowOutsideClick: true,
         allowEscapeKey: true,
@@ -121,7 +125,7 @@ const Support = () => {
               type="text" 
               style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; outline: none; transition: all 0.3s;"
               placeholder="${t('dashboard.support.subjectPlaceholder')}"
-              onfocus="this.style.borderColor='#00adb5'; this.style.boxShadow='0 0 0 3px rgba(0, 173, 181, 0.1)'"
+              onfocus="this.style.borderColor='#114C5A'; this.style.boxShadow='0 0 0 3px rgba(17, 76, 90, 0.1)'"
               onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
             />
           </div>
@@ -130,7 +134,7 @@ const Support = () => {
             <select 
               id="ticket-priority" 
               style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; outline: none; transition: all 0.3s;"
-              onfocus="this.style.borderColor='#00adb5'; this.style.boxShadow='0 0 0 3px rgba(0, 173, 181, 0.1)'"
+              onfocus="this.style.borderColor='#114C5A'; this.style.boxShadow='0 0 0 3px rgba(17, 76, 90, 0.1)'"
               onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
             >
               <option value="low">${t('dashboard.support.low')}</option>
@@ -146,7 +150,7 @@ const Support = () => {
               rows="6" 
               style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; outline: none; resize: none; transition: all 0.3s; font-family: inherit;"
               placeholder="${t('dashboard.support.descriptionPlaceholder')}"
-              onfocus="this.style.borderColor='#00adb5'; this.style.boxShadow='0 0 0 3px rgba(0, 173, 181, 0.1)'"
+              onfocus="this.style.borderColor='#114C5A'; this.style.boxShadow='0 0 0 3px rgba(17, 76, 90, 0.1)'"
               onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
             ></textarea>
           </div>
@@ -157,7 +161,7 @@ const Support = () => {
               type="file" 
               multiple
               style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; outline: none; transition: all 0.3s;"
-              onfocus="this.style.borderColor='#00adb5'; this.style.boxShadow='0 0 0 3px rgba(0, 173, 181, 0.1)'"
+              onfocus="this.style.borderColor='#114C5A'; this.style.boxShadow='0 0 0 3px rgba(17, 76, 90, 0.1)'"
               onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
             />
           </div>
@@ -167,7 +171,7 @@ const Support = () => {
       showCancelButton: true,
       confirmButtonText: t('dashboard.support.sendTicket'),
       cancelButtonText: t('dashboard.support.cancel'),
-      confirmButtonColor: '#00adb5',
+      confirmButtonColor: '#114C5A',
       cancelButtonColor: '#6b7280',
       customClass: {
         popup: 'font-ElMessiri',
@@ -206,22 +210,22 @@ const Support = () => {
   const getStatusBadge = (status: string) => {
     const styles: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
       open: {
-        bg: 'bg-gradient-to-r from-blue-50 to-blue-100/50',
+        bg: 'bg-blue-50',
         text: 'text-blue-700 border-blue-200',
         icon: <AlertCircle size={14} className="stroke-2" />,
       },
       pending: {
-        bg: 'bg-gradient-to-r from-amber-50 to-amber-100/50',
-        text: 'text-amber-700 border-amber-200',
+        bg: 'bg-[#FFB200]/10',
+        text: 'text-[#FFB200] border-[#FFB200]/30',
         icon: <Clock size={14} className="stroke-2" />,
       },
       closed: {
-        bg: 'bg-gradient-to-r from-green-50 to-green-100/50',
+        bg: 'bg-green-50',
         text: 'text-green-700 border-green-200',
         icon: <CheckCircle size={14} className="stroke-2" />,
       },
       resolved: {
-        bg: 'bg-gradient-to-r from-emerald-50 to-emerald-100/50',
+        bg: 'bg-emerald-50',
         text: 'text-emerald-700 border-emerald-200',
         icon: <CheckCircle size={14} className="stroke-2" />,
       },
@@ -239,9 +243,9 @@ const Support = () => {
 
     return (
       <span className={`
-        flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border-2
+        flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border
         ${style.bg} ${style.text}
-        shadow-md transition-all duration-300 hover:scale-105
+        transition-all duration-200
       `}>
         {style.icon}
         {label}
@@ -252,7 +256,7 @@ const Support = () => {
   const getPriorityBadge = (priority: string) => {
     const styles: Record<string, string> = {
       low: 'bg-gray-100 text-gray-700 border-gray-200',
-      medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      medium: 'bg-[#FFB200]/10 text-[#FFB200] border-[#FFB200]/30',
       high: 'bg-orange-100 text-orange-700 border-orange-200',
       urgent: 'bg-red-100 text-red-700 border-red-200',
     };
@@ -265,7 +269,7 @@ const Support = () => {
     };
 
     return (
-      <span className={`px-2 py-1 rounded-lg text-xs font-semibold border ${styles[priority] || styles.medium}`}>
+      <span className={`px-2.5 py-1 rounded-xl text-xs font-semibold border ${styles[priority] || styles.medium}`}>
         {labels[priority] || priority}
       </span>
     );
@@ -275,8 +279,16 @@ const Support = () => {
     ? tickets
     : tickets.filter(ticket => ticket.status === filter);
 
+  // Statistics
+  const stats = {
+    all: tickets.length,
+    open: tickets.filter(t => t.status === 'open').length,
+    pending: tickets.filter(t => t.status === 'pending').length,
+    closed: tickets.filter(t => t.status === 'closed' || t.status === 'resolved').length,
+  };
+
   return (
-    <div className="space-y-8 animate-in fade-in zoom-in duration-500">
+    <div className="space-y-6">
       <DashboardPageHeader
         title={t('dashboard.support.title')}
         subtitle={t('dashboard.support.subtitle')}
@@ -284,146 +296,113 @@ const Support = () => {
         onAction={showNewTicketPopup}
       />
 
-      {/* Filters */}
-      <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { value: 'all', label: t('dashboard.support.all'), icon: Headphones },
-          { value: 'open', label: t('dashboard.support.open'), icon: AlertCircle },
-          { value: 'pending', label: t('dashboard.support.pending'), icon: Clock },
-          { value: 'closed', label: t('dashboard.support.closed'), icon: CheckCircle },
-        ].map(({ value, label, icon: Icon }) => {
+          { value: 'all', label: t('dashboard.support.all'), icon: Headphones, count: stats.all },
+          { value: 'open', label: t('dashboard.support.open'), icon: AlertCircle, count: stats.open },
+          { value: 'pending', label: t('dashboard.support.pending'), icon: Clock, count: stats.pending },
+          { value: 'closed', label: t('dashboard.support.closed'), icon: CheckCircle, count: stats.closed },
+        ].map(({ value, label, icon: Icon, count }) => {
           const isActive = filter === value;
           return (
-            <button
+            <div
               key={value}
               onClick={() => setFilter(value as 'all' | 'open' | 'closed' | 'pending')}
-              className={`
-                px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 whitespace-nowrap
-                flex items-center gap-2 relative overflow-hidden
-                ${isActive
-                  ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-xl shadow-primary/30 scale-105 ring-2 ring-primary/20'
-                  : isDarkMode
-                    ? 'bg-slate-700 text-gray-300 hover:bg-slate-600 border-2 border-slate-600 hover:border-primary/30 hover:shadow-lg hover:scale-102'
-                    : 'bg-white text-gray-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-gray-900 border-2 border-gray-200 hover:border-primary/30 hover:shadow-lg hover:scale-102'
-                }
-              `}
+              className={`bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group ${
+                isActive
+                  ? 'border-[#114C5A] bg-[#114C5A]/5'
+                  : 'border-[#114C5A]/10 hover:border-[#114C5A]/30'
+              }`}
             >
-              {isActive && (
-                <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent animate-pulse" />
-              )}
-              <Icon size={16} className={isActive ? 'text-white' : 'text-primary'} />
-              <span>{label}</span>
-            </button>
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                  isActive
+                    ? 'bg-[#114C5A] text-white'
+                    : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
+                }`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-xs text-gray-600 mb-2 leading-tight">{label}</p>
+              <p className={`text-2xl font-bold ${isActive ? 'text-[#114C5A]' : 'text-gray-700'}`}>{count}</p>
+            </div>
           );
         })}
       </div>
 
       {/* Tickets List */}
-      {isLoading ? (
-        <div className="flex flex-col justify-center items-center py-32">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 flex items-center justify-center mb-6 animate-pulse">
-              <Loader2 className="w-10 h-10 text-primary animate-spin" />
-            </div>
-            <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" />
+      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm overflow-hidden">
+        {isLoading ? (
+          <div className="p-12">
+            <LoadingState />
           </div>
-          <p className={`font-bold text-lg animate-pulse ${
-            isDarkMode ? 'text-slate-300' : 'text-gray-600'
-          }`}>{t('dashboard.support.loading')}</p>
-          <p className={`text-sm mt-2 ${
-            isDarkMode ? 'text-slate-400' : 'text-gray-400'
-          }`}>{t('dashboard.support.pleaseWait')}</p>
-        </div>
-      ) : filteredTickets.length === 0 ? (
-        <div className="col-span-full py-24 flex flex-col items-center justify-center text-center">
-          <div className="relative mb-8">
-            <div className="w-32 h-32 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center shadow-2xl border-4 border-primary/20">
-              <Headphones size={56} className="text-primary/60" strokeWidth={1.5} />
+        ) : filteredTickets.length === 0 ? (
+          <div className="p-12">
+            <div className="text-center py-8">
+              <div className="w-20 h-20 bg-[#114C5A]/10 rounded-xl flex items-center justify-center mx-auto mb-4 border border-[#114C5A]/20">
+                <Headphones className="w-10 h-10 text-[#114C5A]" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('dashboard.support.noTickets')}</h3>
+              <p className="text-gray-600 text-base mb-6">{t('dashboard.support.noTicketsMessage')}</p>
+              <button
+                onClick={showNewTicketPopup}
+                className="px-6 py-3 bg-[#114C5A] text-white rounded-xl font-semibold shadow-md hover:bg-[#114C5A]/90 hover:shadow-lg transition-all duration-200 flex items-center gap-2 mx-auto"
+              >
+                <Plus size={18} />
+                {t('dashboard.support.createNewTicket')}
+              </button>
             </div>
-            <div className="absolute inset-0 rounded-full bg-primary/5 animate-ping" />
-            <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary/20 rounded-full blur-xl animate-pulse" />
           </div>
-          <h3 className={`text-2xl font-black mb-3 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>{t('dashboard.support.noTickets')}</h3>
-          <p className={`max-w-md mx-auto text-lg leading-relaxed mb-6 ${
-            isDarkMode ? 'text-slate-300' : 'text-gray-600'
-          }`}>
-            {t('dashboard.support.noTicketsMessage')}
-          </p>
-          <button
-            onClick={showNewTicketPopup}
-            className="px-8 py-4 bg-gradient-to-r from-primary to-primary-dark text-white rounded-2xl font-bold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
-          >
-            <span className="flex items-center gap-2">
-              <Plus size={18} />
-              {t('dashboard.support.createNewTicket')}
-            </span>
-          </button>
-        </div>
-      ) : (
-        <>
-          {/* Tickets Table */}
-          <div className={`rounded-2xl shadow-lg border-2 overflow-hidden ${
-            isDarkMode 
-              ? 'bg-slate-800 border-slate-700' 
-              : 'bg-white border-gray-200/60'
-          }`}>
+        ) : (
+          <>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-primary/10 to-primary/5 border-b-2 border-primary/20">
+                <thead className="bg-[#114C5A]/5 border-b border-[#114C5A]/10">
                   <tr>
-                    <th className={`px-6 py-4 text-right text-sm font-bold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{t('dashboard.support.tableHeaders.number')}</th>
-                    <th className={`px-6 py-4 text-right text-sm font-bold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{t('dashboard.support.tableHeaders.subject')}</th>
-                    <th className={`px-6 py-4 text-center text-sm font-bold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{t('dashboard.support.tableHeaders.status')}</th>
-                    <th className={`px-6 py-4 text-center text-sm font-bold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{t('dashboard.support.tableHeaders.priority')}</th>
-                    <th className={`px-6 py-4 text-right text-sm font-bold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{t('dashboard.support.tableHeaders.date')}</th>
-                    <th className={`px-6 py-4 text-center text-sm font-bold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{t('dashboard.support.tableHeaders.attachments')}</th>
-                    <th className={`px-6 py-4 text-center text-sm font-bold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{t('dashboard.support.tableHeaders.actions')}</th>
+                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold text-gray-900`}>
+                      {t('dashboard.support.tableHeaders.number')}
+                    </th>
+                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold text-gray-900`}>
+                      {t('dashboard.support.tableHeaders.subject')}
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                      {t('dashboard.support.tableHeaders.status')}
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                      {t('dashboard.support.tableHeaders.priority')}
+                    </th>
+                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold text-gray-900`}>
+                      {t('dashboard.support.tableHeaders.date')}
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                      {t('dashboard.support.tableHeaders.attachments')}
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                      {t('dashboard.support.tableHeaders.actions')}
+                    </th>
                   </tr>
                 </thead>
-                <tbody className={`divide-y ${
-                  isDarkMode ? 'divide-slate-700' : 'divide-gray-200'
-                }`}>
-                  {filteredTickets.map((ticket, index) => (
+                <tbody className="divide-y divide-gray-100">
+                  {filteredTickets.map((ticket) => (
                     <tr
                       key={ticket.id}
                       onClick={() => navigate(`/admin/tickets/${ticket.id}`)}
-                      className="hover:bg-primary/5 transition-colors cursor-pointer"
+                      className="hover:bg-[#114C5A]/5 transition-colors cursor-pointer"
                     >
-                      <td className={`px-6 py-4 text-sm font-bold ${
-                        isDarkMode ? 'text-slate-300' : 'text-gray-600'
-                      }`}>
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-600">
                         #{ticket.id}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg flex items-center justify-center text-primary border border-primary/20 flex-shrink-0">
+                          <div className="w-10 h-10 bg-[#114C5A]/10 rounded-lg flex items-center justify-center text-[#114C5A] border border-[#114C5A]/20 flex-shrink-0">
                             <MessageSquare size={18} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className={`text-sm font-bold mb-1 line-clamp-1 ${
-                              isDarkMode ? 'text-white' : 'text-gray-900'
-                            }`}>
+                            <h3 className="text-sm font-semibold mb-1 line-clamp-1 text-gray-900">
                               {ticket.subject}
                             </h3>
-                            <p className={`text-xs line-clamp-2 ${
-                              isDarkMode ? 'text-slate-300' : 'text-gray-600'
-                            }`}>
+                            <p className="text-xs line-clamp-2 text-gray-600">
                               {ticket.description}
                             </p>
                           </div>
@@ -435,13 +414,11 @@ const Support = () => {
                       <td className="px-6 py-4 text-center">
                         {getPriorityBadge(ticket.priority)}
                       </td>
-                      <td className={`px-6 py-4 text-sm ${
-                        isDarkMode ? 'text-slate-300' : 'text-gray-600'
-                      }`}>
+                      <td className="px-6 py-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1.5">
                           <Clock size={14} className="text-gray-400" />
                           <span dir="ltr" className="text-xs">
-                            {new Date(ticket.created_at).toLocaleDateString('ar-SA', {
+                            {new Date(ticket.created_at).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US', {
                               year: 'numeric',
                               month: 'short',
                               day: 'numeric',
@@ -451,7 +428,7 @@ const Support = () => {
                       </td>
                       <td className="px-6 py-4 text-center">
                         {ticket.attachments && ticket.attachments.length > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-lg text-xs font-semibold">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#114C5A]/10 text-[#114C5A] rounded-lg text-xs font-semibold border border-[#114C5A]/20">
                             <Paperclip size={12} />
                             {ticket.attachments.length}
                           </span>
@@ -465,7 +442,7 @@ const Support = () => {
                             e.stopPropagation();
                             navigate(`/admin/tickets/${ticket.id}`);
                           }}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-semibold transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#114C5A]/10 hover:bg-[#114C5A]/20 text-[#114C5A] rounded-xl font-semibold transition-colors border border-[#114C5A]/20"
                         >
                           <MessageSquare size={16} />
                           <span>{t('dashboard.support.view')}</span>
@@ -476,61 +453,74 @@ const Support = () => {
                 </tbody>
               </table>
             </div>
-          </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-6">
-              <button
-                onClick={() => fetchTickets(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {t('dashboard.support.previous')}
-              </button>
-              
-              <div className="flex items-center gap-2">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-[#114C5A]/10 p-4">
+                <div className="text-xs sm:text-sm font-semibold text-center sm:text-right text-gray-600">
+                  {t('dashboard.support.showing', { from, to, total }) || `عرض ${from}-${to} من ${total}`}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => fetchTickets(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                      currentPage === 1
+                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                    }`}
+                  >
+                    <ChevronRight size={18} />
+                    <span className="font-semibold">{t('dashboard.support.previous')}</span>
+                  </button>
                   
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => fetchTickets(pageNum)}
-                      className={`
-                        px-4 py-2 rounded-lg font-semibold transition-all
-                        ${currentPage === pageNum
-                          ? 'bg-primary text-white shadow-lg'
-                          : 'border-2 border-gray-200 text-gray-600 hover:bg-gray-50'
-                        }
-                      `}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => fetchTickets(pageNum)}
+                          className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
+                            currentPage === pageNum
+                              ? 'bg-[#114C5A] text-white shadow-md'
+                              : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              <button
-                onClick={() => fetchTickets(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {t('dashboard.support.next')}
-              </button>
-            </div>
-          )}
-        </>
-      )}
+                  <button
+                    onClick={() => fetchTickets(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                      currentPage === totalPages
+                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                    }`}
+                  >
+                    <span className="font-semibold">{t('dashboard.support.next')}</span>
+                    <ChevronLeft size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

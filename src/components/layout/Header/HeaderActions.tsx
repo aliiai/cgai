@@ -34,8 +34,8 @@ const HeaderActions = ({
             <button
                 onClick={toggleDarkMode}
                 className={`p-2 rounded-lg transition-colors ${isDarkMode
-                    ? 'hover:bg-slate-800 text-amber-500'
-                    : 'hover:bg-gray-100 text-gray-700'
+                        ? 'hover:bg-slate-800 text-amber-500'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }`}
                 title={isDarkMode ? 'الوضع الفاتح' : 'الوضع الداكن'}
             >

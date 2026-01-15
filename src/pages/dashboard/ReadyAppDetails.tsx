@@ -14,7 +14,6 @@ import {
   X,
   Maximize2
 } from 'lucide-react';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 import LoadingState from '../../components/dashboard/LoadingState';
 import { getReadyAppDetails, purchaseReadyApp, type ReadyApp } from '../../storeApi/api/ready-apps.api';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
@@ -25,7 +24,6 @@ const ReadyAppDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   const [app, setApp] = useState<ReadyApp | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -204,13 +202,13 @@ const ReadyAppDetails = () => {
   const handlePurchase = async () => {
     if (!appId) return;
 
-    const primaryColor = '#3b82f6';
-    const bgColor = isDarkMode ? '#0f172a' : '#ffffff';
-    const cardBg = isDarkMode ? '#1e293b' : '#f8fafc';
-    const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
-    const borderColor = isDarkMode ? '#334155' : '#e2e8f0';
-    const inputBg = isDarkMode ? '#1e293b' : '#ffffff';
-    const labelColor = isDarkMode ? '#cbd5e1' : '#475569';
+    const primaryColor = '#114C5A';
+    const bgColor = '#ffffff';
+    const cardBg = '#f8fafc';
+    const textColor = '#1e293b';
+    const borderColor = '#e2e8f0';
+    const inputBg = '#ffffff';
+    const labelColor = '#475569';
 
     const { value: formValues } = await Swal.fire({
       title: `<div style="display: flex; align-items: center; gap: 12px; justify-content: ${i18n.language === 'ar' ? 'flex-end' : 'flex-start'};">
@@ -271,7 +269,7 @@ const ReadyAppDetails = () => {
             padding-${i18n.language === 'ar' ? 'left' : 'right'}: 40px;
           }
           .form-input::placeholder {
-            color: ${isDarkMode ? '#64748b' : '#94a3b8'};
+            color: #94a3b8;
             opacity: 0.7;
           }
         </style>
@@ -318,13 +316,13 @@ const ReadyAppDetails = () => {
       </span>`,
       cancelButtonText: i18n.language === 'ar' ? 'إلغاء' : 'Cancel',
       confirmButtonColor: primaryColor,
-      cancelButtonColor: isDarkMode ? '#475569' : '#94a3b8',
+      cancelButtonColor: '#94a3b8',
       background: bgColor,
       color: textColor,
       backdrop: true,
       allowOutsideClick: false,
       customClass: {
-        popup: `rounded-3xl shadow-2xl ${isDarkMode ? 'border border-slate-700' : 'border border-gray-200'}`,
+        popup: 'rounded-3xl shadow-2xl border border-gray-200',
         title: 'mb-0',
         htmlContainer: 'mt-4',
         confirmButton: 'px-6 py-3 rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transition-all',
@@ -362,18 +360,18 @@ const ReadyAppDetails = () => {
       didOpen: () => {
         Swal.showLoading();
       },
-      background: isDarkMode ? '#1e293b' : '#ffffff',
-      color: isDarkMode ? '#e2e8f0' : '#1e293b',
+      background: '#ffffff',
+      color: '#1e293b',
     });
 
     try {
       const result = await purchaseReadyApp(appId, formValues);
 
       if (result.success) {
-        const bgColor = isDarkMode ? '#0f172a' : '#ffffff';
-        const textColor = isDarkMode ? '#e2e8f0' : '#1e293b';
-        const cardBg = isDarkMode ? '#1e293b' : '#f8fafc';
-        const labelColor = isDarkMode ? '#cbd5e1' : '#475569';
+        const bgColor = '#ffffff';
+        const textColor = '#1e293b';
+        const cardBg = '#f8fafc';
+        const labelColor = '#475569';
         
         await Swal.fire({
           icon: 'success',
@@ -386,8 +384,8 @@ const ReadyAppDetails = () => {
               <p style="color: ${textColor}; margin-bottom: 20px; font-size: 16px; line-height: 1.6;">
                 ${result.message || (i18n.language === 'ar' ? 'تم إنشاء طلب الشراء بنجاح، سنتواصل معك قريباً' : 'Purchase order created successfully, we will contact you soon')}
               </p>
-              <div style="background: ${cardBg}; padding: 20px; border-radius: 16px; margin-top: 16px; border: 1px solid ${isDarkMode ? '#334155' : '#e2e8f0'};">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid ${isDarkMode ? '#334155' : '#e2e8f0'};">
+              <div style="background: ${cardBg}; padding: 20px; border-radius: 16px; margin-top: 16px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
                   <span style="color: ${labelColor}; font-size: 14px; font-weight: 500;">
                     ${i18n.language === 'ar' ? 'رقم الطلب' : 'Order ID'}
                   </span>
@@ -407,13 +405,13 @@ const ReadyAppDetails = () => {
             </div>
           `,
           confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
-          confirmButtonColor: '#3b82f6',
+          confirmButtonColor: '#114C5A',
           background: bgColor,
           color: textColor,
           width: '550px',
           padding: '2.5rem',
           customClass: {
-            popup: `rounded-3xl shadow-2xl ${isDarkMode ? 'border border-slate-700' : 'border border-gray-200'}`,
+            popup: 'rounded-3xl shadow-2xl border border-gray-200',
             confirmButton: 'px-8 py-3 rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transition-all',
           },
           buttonsStyling: false,
@@ -429,8 +427,8 @@ const ReadyAppDetails = () => {
         text: error.message || (i18n.language === 'ar' ? 'فشل إنشاء طلب الشراء. يرجى المحاولة مرة أخرى.' : 'Failed to create purchase order. Please try again.'),
         confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
         confirmButtonColor: '#ef4444',
-        background: isDarkMode ? '#1e293b' : '#ffffff',
-        color: isDarkMode ? '#e2e8f0' : '#1e293b',
+        background: '#ffffff',
+        color: '#1e293b',
       });
     }
   };
@@ -482,21 +480,15 @@ const ReadyAppDetails = () => {
 
   if (!app) {
     return (
-      <div className={`flex items-center justify-center py-20 ${
-        isDarkMode ? 'bg-slate-900' : 'bg-gray-50'
-      }`}>
+      <div className="flex items-center justify-center py-20 bg-gray-50">
         <div className="text-center">
-          <Package className={`w-16 h-16 mx-auto mb-4 ${
-            isDarkMode ? 'text-slate-600' : 'text-gray-400'
-          }`} />
-          <h2 className={`text-2xl font-bold mb-2 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
+          <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+          <h2 className="text-2xl font-bold mb-2 text-gray-900">
             {t('dashboard.readyApps.appNotFound') || 'التطبيق غير موجود'}
           </h2>
           <button
             onClick={() => navigate('/admin/ready-apps')}
-            className="mt-4 px-6 py-2 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition"
+            className="mt-4 px-6 py-2 bg-[#114C5A] text-white rounded-xl font-semibold hover:bg-[#114C5A]/90 transition"
           >
             {t('dashboard.readyApps.backToList') || 'العودة للقائمة'}
           </button>
@@ -509,9 +501,7 @@ const ReadyAppDetails = () => {
   const mainImageUrl = getImageUrl(app.main_image || images[0]);
 
   return (
-    <div className={`${
-      isDarkMode ? 'bg-slate-900' : 'bg-gray-50'
-    }`}>
+    <div className="bg-gray-50">
       {/* Hero Section with Background */}
       <div className="relative">
         {/* Background Image/Overlay */}
@@ -612,7 +602,7 @@ const ReadyAppDetails = () => {
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={handlePurchase}
-                className="px-8 py-4 bg-primary text-white rounded-xl font-bold text-lg hover:bg-primary-dark transition shadow-xl hover:shadow-2xl hover:scale-105 flex items-center gap-2"
+                className="px-8 py-4 bg-[#114C5A] text-white rounded-xl font-bold text-lg hover:bg-[#114C5A]/90 transition shadow-xl hover:shadow-2xl hover:scale-105 flex items-center gap-2"
               >
                 <ShoppingCart className="w-5 h-5" />
                 {t('dashboard.readyApps.buyNow') || 'شراء الآن'}
@@ -633,30 +623,22 @@ const ReadyAppDetails = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
 
         {/* Content Card */}
-        <div className={`rounded-3xl shadow-2xl overflow-hidden ${
-          isDarkMode ? 'bg-slate-800' : 'bg-white'
-        }`}>
+        <div className="rounded-xl shadow-lg overflow-hidden bg-white border border-[#114C5A]/10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6 md:p-8 lg:p-12">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Media Gallery Section */}
-              <div className={`rounded-2xl overflow-hidden border ${
-                isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
-              }`}>
+              <div className="rounded-xl overflow-hidden border border-[#114C5A]/10 bg-white">
               {/* Media Type Tabs */}
               {(images.length > 0 || app.video_url) && (
-                <div className={`flex gap-2 p-4 border-b ${
-                  isDarkMode ? 'border-slate-700' : 'border-gray-200'
-                }`}>
+                <div className="flex gap-2 p-4 border-b border-[#114C5A]/10">
                   {images.length > 0 && (
                     <button
                       onClick={() => setMediaType('images')}
                       className={`px-4 py-2 rounded-lg font-semibold transition ${
                         mediaType === 'images'
-                          ? 'bg-primary text-white'
-                          : isDarkMode
-                            ? 'text-slate-300 hover:bg-slate-700'
-                            : 'text-gray-600 hover:bg-gray-100'
+                          ? 'bg-[#114C5A] text-white'
+                          : 'text-gray-600 hover:bg-gray-100'
                       }`}
                     >
                       {t('dashboard.readyApps.images') || 'الصور'} ({images.length})
@@ -667,10 +649,8 @@ const ReadyAppDetails = () => {
                       onClick={() => setMediaType('video')}
                       className={`px-4 py-2 rounded-lg font-semibold transition ${
                         mediaType === 'video'
-                          ? 'bg-primary text-white'
-                          : isDarkMode
-                            ? 'text-slate-300 hover:bg-slate-700'
-                            : 'text-gray-600 hover:bg-gray-100'
+                          ? 'bg-[#114C5A] text-white'
+                          : 'text-gray-600 hover:bg-gray-100'
                       }`}
                     >
                       {t('dashboard.readyApps.video') || 'فيديو توضيحي'}
@@ -693,8 +673,8 @@ const ReadyAppDetails = () => {
                         onError={() => handleImageError(selectedImageIndex)}
                       />
                     ) : (
-                      <div className="w-full h-[500px] flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                        <Package className="w-32 h-32 text-primary/30" />
+                      <div className="w-full h-[500px] flex items-center justify-center bg-gradient-to-br from-[#114C5A]/10 to-[#114C5A]/5">
+                        <Package className="w-32 h-32 text-[#114C5A]/30" />
                       </div>
                     )}
                     
@@ -741,9 +721,7 @@ const ReadyAppDetails = () => {
 
                   {/* Thumbnails */}
                   {images.length > 1 && (
-                    <div className={`p-4 border-t ${
-                      isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-gray-50'
-                    }`}>
+                    <div className="p-4 border-t border-gray-200 bg-gray-50">
                       <div className="flex gap-2 overflow-x-auto pb-2">
                         {images.map((image: string, index: number) => (
                           <button
@@ -751,10 +729,8 @@ const ReadyAppDetails = () => {
                             onClick={() => setSelectedImageIndex(index)}
                             className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition ${
                               selectedImageIndex === index
-                                ? 'border-primary ring-2 ring-primary/50'
-                                : isDarkMode
-                                  ? 'border-slate-600 hover:border-slate-500'
-                                  : 'border-gray-300 hover:border-gray-400'
+                                ? 'border-[#114C5A] ring-2 ring-[#114C5A]/50'
+                                : 'border-gray-300 hover:border-gray-400'
                             }`}
                           >
                             {!imageErrors.has(index) ? (
@@ -776,12 +752,10 @@ const ReadyAppDetails = () => {
                   )}
                 </div>
               ) : mediaType === 'images' ? (
-                <div className="h-[500px] flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                <div className="h-[500px] flex items-center justify-center bg-gradient-to-br from-[#114C5A]/10 to-[#114C5A]/5">
                   <div className="text-center">
-                    <Package className="w-32 h-32 text-primary/30 mx-auto mb-4" />
-                    <p className={`text-lg ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                    <Package className="w-32 h-32 text-[#114C5A]/30 mx-auto mb-4" />
+                    <p className="text-lg text-gray-500">
                       {t('dashboard.readyApps.noImages') || 'لا توجد صور متاحة'}
                     </p>
                   </div>
@@ -812,12 +786,10 @@ const ReadyAppDetails = () => {
                   </a>
                 </div>
               ) : mediaType === 'video' ? (
-                <div className="h-[500px] flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                <div className="h-[500px] flex items-center justify-center bg-gradient-to-br from-[#114C5A]/10 to-[#114C5A]/5">
                   <div className="text-center">
-                    <Play className="w-32 h-32 text-primary/30 mx-auto mb-4" />
-                    <p className={`text-lg ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                    <Play className="w-32 h-32 text-[#114C5A]/30 mx-auto mb-4" />
+                    <p className="text-lg text-gray-500">
                       {t('dashboard.readyApps.noVideo') || 'لا يوجد فيديو متاح'}
                     </p>
                   </div>
@@ -827,19 +799,15 @@ const ReadyAppDetails = () => {
 
             {/* Screenshots Section */}
             {screenshots.length > 0 && (
-              <div className={`rounded-2xl p-6 border ${
-                isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
-              }`}>
-                <h2 className={`text-2xl font-bold mb-4 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+              <div className="rounded-xl p-6 border border-[#114C5A]/10 bg-white">
+                <h2 className="text-2xl font-bold mb-4 text-gray-900">
                   {t('dashboard.readyApps.screenshots') || 'لقطات الشاشة'}
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {screenshots.map((screenshot: string, index: number) => (
                     <div
                       key={index}
-                      className="relative group cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition"
+                      className="relative group cursor-pointer rounded-lg overflow-hidden border-2 border-transparent hover:border-[#114C5A] transition"
                       onClick={() => {
                         setMediaType('images');
                         const imageIndex = images.findIndex((img: string) => img === screenshot);
@@ -863,17 +831,11 @@ const ReadyAppDetails = () => {
             )}
 
             {/* Description Section */}
-            <div className={`rounded-2xl p-6 border ${
-              isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
-            }`}>
-              <h2 className={`text-2xl font-bold mb-4 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
+            <div className="rounded-xl p-6 border border-[#114C5A]/10 bg-white">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900">
                 {t('dashboard.readyApps.fullDescription') || 'الوصف الكامل'}
               </h2>
-              <p className={`leading-relaxed whitespace-pre-line ${
-                isDarkMode ? 'text-slate-300' : 'text-gray-600'
-              }`}>
+              <p className="leading-relaxed whitespace-pre-line text-gray-600">
                 {localizedApp?.full_description || localizedApp?.description || localizedApp?.short_description || 
                  (t('dashboard.readyApps.noDescription') || 'لا يوجد وصف متاح')}
               </p>
@@ -881,12 +843,8 @@ const ReadyAppDetails = () => {
 
             {/* Features Section */}
             {app.features && app.features.length > 0 && (
-              <div className={`rounded-2xl p-6 border ${
-                isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
-              }`}>
-                <h2 className={`text-2xl font-bold mb-6 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+              <div className="rounded-xl p-6 border border-[#114C5A]/10 bg-white">
+                <h2 className="text-2xl font-bold mb-6 text-gray-900">
                   {t('dashboard.readyApps.features') || 'المميزات الرئيسية'}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -897,9 +855,7 @@ const ReadyAppDetails = () => {
                     return (
                       <div key={feature.id || index} className="flex items-start gap-3">
                         <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className={`${
-                          isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                        }`}>
+                        <span className="text-gray-700">
                           {featureTitle}
                         </span>
                       </div>
@@ -910,12 +866,8 @@ const ReadyAppDetails = () => {
             )}
 
             {/* Reviews Section */}
-            <div className={`rounded-2xl p-6 border ${
-              isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'
-            }`}>
-              <h2 className={`text-2xl font-bold mb-4 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
+            <div className="rounded-xl p-6 border border-[#114C5A]/10 bg-white">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900">
                 {t('dashboard.readyApps.ratings') || 'التقييمات'}
               </h2>
               {ratingValue > 0 ? (
@@ -928,23 +880,19 @@ const ReadyAppDetails = () => {
                             key={i}
                             className={`w-6 h-6 ${
                               i < Math.floor(ratingValue)
-                                ? 'text-yellow-400 fill-current'
+                                ? 'text-[#FFB200] fill-current'
                                 : i < ratingValue
-                                  ? 'text-yellow-400 fill-current opacity-50'
+                                  ? 'text-[#FFB200] fill-current opacity-50'
                                   : 'text-gray-300'
                             }`}
                           />
                         ))}
                       </div>
-                      <span className={`text-xl font-bold ${
-                        isDarkMode ? 'text-white' : 'text-gray-900'
-                      }`}>
+                      <span className="text-xl font-bold text-gray-900">
                         {ratingValue.toFixed(1)}
                       </span>
                     </div>
-                    <span className={`${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                    <span className="text-gray-500">
                       ({reviewsCount} {t('dashboard.readyApps.reviews') || 'تقييم'})
                     </span>
                   </div>
@@ -952,22 +900,18 @@ const ReadyAppDetails = () => {
                     <div className="space-y-2 pt-4 border-t border-gray-200/50">
                       {Object.entries(app.rating.breakdown).reverse().map(([stars, count]: [string, any]) => (
                         <div key={stars} className="flex items-center gap-3">
-                          <span className={`text-sm font-semibold w-12 ${
-                            isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                          }`}>
+                          <span className="text-sm font-semibold w-12 text-gray-700">
                             {stars} {t('dashboard.readyApps.stars') || 'نجمة'}
                           </span>
                           <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-yellow-400 rounded-full"
+                              className="h-full bg-[#FFB200] rounded-full"
                               style={{
                                 width: `${reviewsCount > 0 ? (count / reviewsCount) * 100 : 0}%`
                               }}
                             />
                           </div>
-                          <span className={`text-sm w-12 text-right ${
-                            isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                          }`}>
+                          <span className="text-sm w-12 text-right text-gray-500">
                             {count}
                           </span>
                         </div>
@@ -977,12 +921,8 @@ const ReadyAppDetails = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Star className={`w-16 h-16 mx-auto mb-4 ${
-                    isDarkMode ? 'text-slate-600' : 'text-gray-300'
-                  }`} />
-                  <p className={`text-lg ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                  }`}>
+                  <Star className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg text-gray-500">
                     {t('dashboard.readyApps.noRatings') || 'لا توجد تقييمات بعد'}
                   </p>
                 </div>
@@ -993,21 +933,15 @@ const ReadyAppDetails = () => {
             {/* Sidebar - Purchase Section */}
             <div className="space-y-6">
               {/* Purchase Card */}
-              <div className={`rounded-2xl p-6 border sticky top-8 shadow-lg ${
-                isDarkMode ? 'bg-slate-800/90 backdrop-blur-sm border-slate-700' : 'bg-white/90 backdrop-blur-sm border-gray-200'
-              }`}>
+              <div className="rounded-xl p-6 border border-[#114C5A]/10 sticky top-8 shadow-lg bg-white">
               {/* Price */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className={`text-3xl font-black ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
+                  <span className="text-3xl font-black text-gray-900">
                     {price.toLocaleString()} {app.currency || 'ر.س'}
                   </span>
                   {originalPrice && originalPrice > price && (
-                    <span className={`text-lg line-through ${
-                      isDarkMode ? 'text-slate-500' : 'text-gray-400'
-                    }`}>
+                    <span className="text-lg line-through text-gray-400">
                       {originalPrice.toLocaleString()} {app.currency || 'ر.س'}
                     </span>
                   )}
@@ -1023,7 +957,7 @@ const ReadyAppDetails = () => {
                 <div className="space-y-3">
                   <button
                     onClick={handlePurchase}
-                    className="w-full flex items-center justify-center gap-2 bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary-dark transition shadow-lg shadow-primary/30 hover:shadow-primary/40 hover:scale-105"
+                    className="w-full flex items-center justify-center gap-2 bg-[#114C5A] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#114C5A]/90 transition shadow-lg hover:shadow-xl hover:scale-105"
                   >
                     <ShoppingCart className="w-5 h-5" />
                     {t('dashboard.readyApps.buyNow') || 'شراء الآن'}
@@ -1034,11 +968,7 @@ const ReadyAppDetails = () => {
                 <div className="mt-6 pt-6 border-t border-gray-200/50">
                   <button
                     onClick={handleShare}
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition hover:scale-105 ${
-                      isDarkMode
-                        ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition hover:scale-105 bg-gray-100 text-gray-700 hover:bg-gray-200"
                   >
                     <Share2 className="w-5 h-5" />
                     {t('dashboard.readyApps.share') || 'مشاركة'}
@@ -1046,9 +976,7 @@ const ReadyAppDetails = () => {
                 </div>
 
               {/* Info */}
-              <div className={`mt-6 pt-6 border-t border-gray-200/50 space-y-3 ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              } text-sm`}>
+              <div className="mt-6 pt-6 border-t border-gray-200/50 space-y-3 text-gray-500 text-sm">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>{t('dashboard.readyApps.qualityGuarantee') || 'ضمان الجودة'}</span>
@@ -1066,78 +994,52 @@ const ReadyAppDetails = () => {
 
               {/* Category Badge */}
               {categoryName && (
-                <div className={`rounded-2xl p-4 border shadow-md ${
-                  isDarkMode ? 'bg-slate-800/90 backdrop-blur-sm border-slate-700' : 'bg-white/90 backdrop-blur-sm border-gray-200'
-                }`}>
-                  <span className={`text-sm font-semibold ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                  }`}>
+                <div className="rounded-xl p-4 border border-[#114C5A]/10 shadow-md bg-white">
+                  <span className="text-sm font-semibold text-gray-500">
                     {t('dashboard.readyApps.category') || 'الفئة'}:
                   </span>
-                  <span className={`block mt-1 text-lg font-bold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
+                  <span className="block mt-1 text-lg font-bold text-gray-900">
                     {categoryName}
                   </span>
                 </div>
               )}
 
               {/* Statistics */}
-              <div className={`rounded-2xl p-4 border shadow-md ${
-                isDarkMode ? 'bg-slate-800/90 backdrop-blur-sm border-slate-700' : 'bg-white/90 backdrop-blur-sm border-gray-200'
-              }`}>
-              <h3 className={`text-lg font-bold mb-3 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
+              <div className="rounded-xl p-4 border border-[#114C5A]/10 shadow-md bg-white">
+              <h3 className="text-lg font-bold mb-3 text-gray-900">
                 {t('dashboard.readyApps.statistics') || 'الإحصائيات'}
               </h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className={`text-sm ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                  }`}>
+                  <span className="text-sm text-gray-500">
                     {t('dashboard.readyApps.views') || 'المشاهدات'}:
                   </span>
-                  <span className={`font-semibold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
+                  <span className="font-semibold text-gray-900">
                     {app.statistics?.views || app.views_count || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={`text-sm ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                  }`}>
+                  <span className="text-sm text-gray-500">
                     {t('dashboard.readyApps.purchases') || 'المشتريات'}:
                   </span>
-                  <span className={`font-semibold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
+                  <span className="font-semibold text-gray-900">
                     {app.statistics?.purchases || app.purchases_count || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className={`text-sm ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                  }`}>
+                  <span className="text-sm text-gray-500">
                     {t('dashboard.readyApps.favorites') || 'المفضلة'}:
                   </span>
-                  <span className={`font-semibold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
+                  <span className="font-semibold text-gray-900">
                     {app.statistics?.favorites || app.favorites_count || 0}
                   </span>
                 </div>
                 {app.reviews_count !== undefined && (
                   <div className="flex justify-between">
-                    <span className={`text-sm ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                    <span className="text-sm text-gray-500">
                       {t('dashboard.readyApps.reviews') || 'التقييمات'}:
                     </span>
-                    <span className={`font-semibold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
+                    <span className="font-semibold text-gray-900">
                       {app.reviews_count || 0}
                     </span>
                   </div>
@@ -1146,53 +1048,39 @@ const ReadyAppDetails = () => {
             </div>
 
               {/* Additional Info */}
-              <div className={`rounded-2xl p-4 border shadow-md ${
-                isDarkMode ? 'bg-slate-800/90 backdrop-blur-sm border-slate-700' : 'bg-white/90 backdrop-blur-sm border-gray-200'
-              }`}>
-              <h3 className={`text-lg font-bold mb-3 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
+              <div className="rounded-xl p-4 border border-[#114C5A]/10 shadow-md bg-white">
+              <h3 className="text-lg font-bold mb-3 text-gray-900">
                 {t('dashboard.readyApps.additionalInfo') || 'معلومات إضافية'}
               </h3>
               <div className="space-y-2">
                 {app.created_at && (
                   <div className="flex justify-between">
-                    <span className={`text-sm ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                    <span className="text-sm text-gray-500">
                       {t('dashboard.readyApps.createdAt') || 'تاريخ الإضافة'}:
                     </span>
-                    <span className={`text-sm font-semibold ${
-                      isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                    }`}>
+                    <span className="text-sm font-semibold text-gray-700">
                       {formatDate(app.created_at)}
                     </span>
                   </div>
                 )}
                 {app.updated_at && app.updated_at !== app.created_at && (
                   <div className="flex justify-between">
-                    <span className={`text-sm ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                    <span className="text-sm text-gray-500">
                       {t('dashboard.readyApps.updatedAt') || 'آخر تحديث'}:
                     </span>
-                    <span className={`text-sm font-semibold ${
-                      isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                    }`}>
+                    <span className="text-sm font-semibold text-gray-700">
                       {formatDate(app.updated_at)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className={`text-sm ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                  }`}>
+                  <span className="text-sm text-gray-500">
                     {t('dashboard.readyApps.status') || 'الحالة'}:
                   </span>
                   <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
                     app.is_active
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
                   }`}>
                     {app.is_active 
                       ? (t('dashboard.readyApps.active') || 'نشط')
@@ -1274,7 +1162,7 @@ const ReadyAppDetails = () => {
                         onClick={() => setSelectedImageIndex(index)}
                         className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
                           selectedImageIndex === index
-                            ? 'border-primary ring-2 ring-primary/50'
+                            ? 'border-[#114C5A] ring-2 ring-[#114C5A]/50'
                             : 'border-white/30 hover:border-white/50'
                         }`}
                       >

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Phone, Shield, ArrowRight, ArrowLeft, UserPlus } from "lucide-react";
+import { Phone, Shield, ArrowRight, ArrowLeft, UserPlus, Home } from "lucide-react";
 import Swal from "sweetalert2";
 import { sendVerificationCode, verifyLoginCode, useAuthStore } from "../../storeApi/storeApi";
 
@@ -40,7 +40,7 @@ const Login = () => {
         title: 'تنبيه',
         text: 'الرجاء إدخال رقم الهاتف',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#00adb5',
+        confirmButtonColor: '#FDB103',
         customClass: {
           popup: 'font-ElMessiri',
         },
@@ -50,13 +50,30 @@ const Login = () => {
       return;
     }
     
-    if (phone.length < 9) {
+    // التحقق من أن الرقم يبدأ بـ 0 وله 10 أرقام بالضبط
+    if (!phone.startsWith('0')) {
       await Swal.fire({
         icon: 'error',
         title: 'خطأ',
-        text: 'رقم الهاتف غير صحيح. يجب أن يكون 9 أرقام على الأقل',
+        text: 'رقم الهاتف يجب أن يبدأ بـ 0',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#00adb5',
+        confirmButtonColor: '#FDB103',
+        customClass: {
+          popup: 'font-ElMessiri',
+        },
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+      });
+      return;
+    }
+    
+    if (phone.length !== 10) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'خطأ',
+        text: 'رقم الهاتف يجب أن يكون 10 أرقام (مثال: 0501111116)',
+        confirmButtonText: 'حسناً',
+        confirmButtonColor: '#FDB103',
         customClass: {
           popup: 'font-ElMessiri',
         },
@@ -85,7 +102,7 @@ const Login = () => {
           title: 'تم الإرسال!',
           text: result.message || 'تم إرسال كود التحقق إلى هاتفك',
           confirmButtonText: 'حسناً',
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#FDB103',
           timer: 2000,
           timerProgressBar: true,
           customClass: {
@@ -101,7 +118,7 @@ const Login = () => {
           title: 'خطأ',
           text: result.message || 'حدث خطأ أثناء إرسال كود التحقق',
           confirmButtonText: 'حسناً',
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#FDB103',
           customClass: {
             popup: 'font-ElMessiri',
           },
@@ -116,7 +133,7 @@ const Login = () => {
         title: 'خطأ',
         text: 'حدث خطأ في الاتصال بالخادم',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#00adb5',
+        confirmButtonColor: '#FDB103',
         customClass: {
           popup: 'font-ElMessiri',
         },
@@ -137,7 +154,7 @@ const Login = () => {
         title: 'تنبيه',
         text: 'الرجاء إدخال كود التحقق المكون من 6 أرقام',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#00adb5',
+        confirmButtonColor: '#FDB103',
         customClass: {
           popup: 'font-ElMessiri',
         },
@@ -174,7 +191,7 @@ const Login = () => {
             title: 'خطأ',
             text: 'لم يتم استلام التوكن بشكل صحيح. يرجى المحاولة مرة أخرى',
             confirmButtonText: 'حسناً',
-            confirmButtonColor: '#00adb5',
+            confirmButtonColor: '#FDB103',
             customClass: {
               popup: 'font-ElMessiri',
             },
@@ -220,7 +237,7 @@ const Login = () => {
             title: 'خطأ',
             text: 'لم يتم استلام بيانات المستخدم بشكل صحيح',
             confirmButtonText: 'حسناً',
-            confirmButtonColor: '#00adb5',
+            confirmButtonColor: '#FDB103',
             customClass: {
               popup: 'font-ElMessiri',
             },
@@ -235,7 +252,7 @@ const Login = () => {
           title: 'تم بنجاح!',
           text: result.message || 'تم تسجيل الدخول بنجاح ✅',
           confirmButtonText: 'حسناً',
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#FDB103',
           customClass: {
             popup: 'font-ElMessiri',
           },
@@ -252,7 +269,7 @@ const Login = () => {
           title: 'خطأ',
           text: result.message || 'حدث خطأ أثناء تسجيل الدخول',
           confirmButtonText: 'حسناً',
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#FDB103',
           customClass: {
             popup: 'font-ElMessiri',
           },
@@ -267,7 +284,7 @@ const Login = () => {
         title: 'خطأ',
         text: 'حدث خطأ في الاتصال بالخادم',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#00adb5',
+        confirmButtonColor: '#FDB103',
         customClass: {
           popup: 'font-ElMessiri',
         },
@@ -344,6 +361,17 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-primary/5 px-4 py-8">
       <div className="w-full max-w-md">
+        {/* Return to Home Button */}
+        <div className="mb-4">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-primary transition-colors text-sm font-medium"
+          >
+            <Home className="w-4 h-4" />
+            <span>العودة إلى الصفحة الرئيسية</span>
+          </Link>
+        </div>
+
         {/* Logo/Header Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full mb-4">
@@ -391,13 +419,25 @@ const Login = () => {
                   <Phone className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="tel"
-                    placeholder="05xxxxxxxx"
+                    placeholder="0501111116"
                     value={phone}
                     onChange={(e) => {
                       // قبول الأرقام فقط
-                      const value = e.target.value.replace(/\D/g, '');
+                      let value = e.target.value.replace(/\D/g, '');
+                      
+                      // التأكد من أن الرقم يبدأ بـ 0
+                      if (value.length > 0 && !value.startsWith('0')) {
+                        value = '0' + value.replace(/^0+/, '');
+                      }
+                      
+                      // الحد الأقصى 10 أرقام
+                      if (value.length > 10) {
+                        value = value.substring(0, 10);
+                      }
+                      
                       setPhone(value);
                     }}
+                    maxLength={10}
                     className="w-full pr-12 pl-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-right"
                     dir="ltr"
                     inputMode="numeric"

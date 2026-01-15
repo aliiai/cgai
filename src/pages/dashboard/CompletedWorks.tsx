@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 import LoadingState from '../../components/dashboard/LoadingState';
 import EmptyState from '../../components/dashboard/EmptyState';
 import RatingPopup from '../../components/dashboard/RatingPopup';
-import { CheckCircle, FileCheck, Search, Filter, Calendar, Clock, DollarSign, User, Star, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
+import { CheckCircle, FileCheck, Search, Calendar, Clock, DollarSign, User, Star, ChevronLeft, ChevronRight, MessageSquare, Tag, Loader2, ArrowRight } from 'lucide-react';
 import { getPastBookings } from '../../storeApi/storeApi';
 import type { CustomerBooking } from '../../types/types';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +13,6 @@ import { useLocalizedName, useLocalizedDescription } from '../../hooks/useLocali
 const CompletedWorks = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isDarkMode } = useThemeStore();
   const [bookings, setBookings] = useState<CustomerBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,6 +96,17 @@ const CompletedWorks = () => {
   };
 
   const formatDate = (date: any) => {
+    // Handle object format from API
+    if (typeof date === 'object' && date.formatted) {
+      const dateObj = new Date(date.formatted);
+      if (isNaN(dateObj.getTime())) return '';
+      return dateObj.toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    
     const dateString = typeof date === 'string' 
       ? date 
       : date?.formatted || date?.date?.formatted || '';
@@ -112,6 +121,7 @@ const CompletedWorks = () => {
   };
 
   const formatTime = (timeString: string) => {
+    if (!timeString) return '';
     return timeString.slice(0, 5); // HH:mm
   };
 
@@ -137,160 +147,165 @@ const CompletedWorks = () => {
     return <>{serviceDesc}</>;
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <DashboardPageHeader title={t('dashboard.completedWorks.title')} />
+        <div className="flex flex-col justify-center items-center py-32">
+          <Loader2 className="w-10 h-10 text-[#114C5A] animate-spin mb-4" />
+          <p className="text-gray-600 font-semibold text-lg">{t('dashboard.bookings.loading')}</p>
+          <p className="text-gray-500 text-sm mt-2">{t('dashboard.bookings.pleaseWait')}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6">
       <DashboardPageHeader title={t('dashboard.completedWorks.title')} />
       
-      <div className={`rounded-[32px] p-8 border shadow-sm ${
-        isDarkMode 
-          ? 'bg-slate-800 border-slate-700' 
-          : 'bg-white border-slate-100'
-      }`}>
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center">
-              <CheckCircle className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className={`text-2xl font-black ${
-                isDarkMode ? 'text-white' : 'text-slate-900'
-              }`}>{t('dashboard.completedWorks.title')}</h2>
-              <p className={`text-sm font-bold uppercase tracking-widest mt-0.5 ${
-                isDarkMode ? 'text-slate-400' : 'text-slate-400'
-              }`}>
-                {total > 0 ? t('dashboard.completedWorks.total', { count: total }) : t('dashboard.completedWorks.subtitle')}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:flex-none">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder={t('dashboard.completedWorks.search')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full md:w-64 pr-10 pl-4 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${
-                  isDarkMode 
-                    ? 'bg-slate-700 border-slate-600 text-white placeholder:text-slate-400' 
-                    : 'bg-slate-50 border-slate-100'
-                }`}
-              />
-            </div>
-          </div>
+      {/* Search Bar */}
+      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-4">
+        <div className="relative">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder={t('dashboard.completedWorks.search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pr-10 pl-4 py-3 border border-[#114C5A]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] bg-gray-50"
+          />
         </div>
+      </div>
 
-        {isLoading ? (
-          <LoadingState />
-        ) : bookings.length === 0 ? (
+      {bookings.length === 0 ? (
+        <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-8">
           <EmptyState 
             message={searchTerm ? t('dashboard.completedWorks.noResults') : t('dashboard.completedWorks.noWorks')}
             description={searchTerm ? t('dashboard.completedWorks.tryDifferent') : t('dashboard.completedWorks.willShow')}
           />
-        ) : (
-          <>
-            <div className="space-y-4">
-              {bookings.map((booking) => (
+        </div>
+      ) : (
+        <>
+          {/* Bookings Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {bookings.map((booking) => {
+              // Get booking date from time_slots or booking_date
+              const bookingDate = booking.time_slots?.[0]?.date || booking.booking_date;
+              const startTime = booking.time_slots?.[0]?.start_time || booking.start_time;
+              const endTime = booking.time_slots?.[0]?.end_time || booking.end_time;
+
+              return (
                 <div
                   key={booking.id}
-                  className={`group border rounded-3xl p-6 transition-all duration-300 ${
-                    isDarkMode 
-                      ? 'border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-900/20' 
-                      : 'border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30'
-                  }`}
+                  className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm hover:shadow-md hover:border-[#114C5A]/20 transition-all duration-300 group overflow-hidden flex flex-col"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/30">
-                        <CheckCircle className="w-8 h-8" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h4 className={`font-black text-xl group-hover:text-emerald-600 transition-colors ${
-                            isDarkMode ? 'text-white' : 'text-slate-800'
-                          }`}>
-                            <ServiceName booking={booking} />
-                          </h4>
-                          <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-black uppercase tracking-wider">
-                            {t('dashboard.completedWorks.completed')}
-                          </span>
+                  {/* Header with gradient */}
+                  <div className="bg-gradient-to-br from-[#114C5A] to-[#114C5A]/90 p-4 text-white">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 border border-white/20 rounded-lg flex items-center justify-center font-bold text-xs bg-white/10">
+                          #{booking.id}
                         </div>
-                        <p className={`text-sm mb-3 line-clamp-2 ${
-                          isDarkMode ? 'text-slate-300' : 'text-slate-600'
-                        }`}>
-                          <ServiceDescription booking={booking} />
+                        <span className="px-2 py-1 bg-green-500/20 text-green-100 rounded-lg text-xs font-semibold border border-green-400/30">
+                          {t('dashboard.completedWorks.completed')}
+                        </span>
+                      </div>
+                      <CheckCircle size={20} className="text-white/80" />
+                    </div>
+                    <h3 className="text-lg font-bold mb-1 line-clamp-2">
+                      <ServiceName booking={booking} />
+                    </h3>
+                    {(booking.service?.sub_category?.name || booking.consultation?.category?.name) && (
+                      <p className="text-xs text-white/80 flex items-center gap-1.5 mt-1">
+                        <Tag size={12} />
+                        {booking.service?.sub_category?.name || booking.consultation?.category?.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 space-y-3 flex-grow">
+                    {/* Date & Time */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2.5 rounded-lg border border-[#114C5A]/10 bg-[#114C5A]/5">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Calendar size={12} className="text-[#114C5A]" />
+                          <p className="text-xs text-gray-600 font-medium">{t('dashboard.bookings.date')}</p>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900">{formatDate(bookingDate)}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg border border-[#114C5A]/10 bg-[#114C5A]/5">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Clock size={12} className="text-[#114C5A]" />
+                          <p className="text-xs text-gray-600 font-medium">{t('dashboard.bookings.time')}</p>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900" dir="ltr">
+                          {formatTime(startTime)} - {formatTime(endTime)}
                         </p>
-                        <div className="flex flex-wrap items-center gap-4 text-sm">
-                          <div className={`flex items-center gap-2 ${
-                            isDarkMode ? 'text-slate-400' : 'text-slate-500'
-                          }`}>
-                            <Calendar className="w-4 h-4 text-blue-500" />
-                            <span className="font-bold">{formatDate(booking.booking_date)}</span>
+                      </div>
+                    </div>
+
+                    {/* Employee */}
+                    {booking.employee && (
+                      <div className="p-2.5 rounded-lg border border-[#114C5A]/10 bg-[#114C5A]/5">
+                        <div className="flex items-center gap-2">
+                          <User size={14} className="text-[#114C5A]" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-600 font-medium mb-0.5">{t('dashboard.bookings.serviceProvider')}</p>
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {booking.employee.name || booking.employee.user?.name || t('dashboard.bookings.cgaiTeam')}
+                            </p>
                           </div>
-                          <div className={`flex items-center gap-2 ${
-                            isDarkMode ? 'text-slate-400' : 'text-slate-500'
-                          }`}>
-                            <Clock className="w-4 h-4 text-amber-500" />
-                            <span className="font-bold" dir="ltr">
-                              {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
-                            </span>
-                          </div>
-                          {booking.employee && (
-                            <div className={`flex items-center gap-2 ${
-                            isDarkMode ? 'text-slate-400' : 'text-slate-500'
-                          }`}>
-                              <User className="w-4 h-4 text-primary" />
-                              <span className="font-bold">{booking.employee.name}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-2 text-emerald-600 ml-auto">
-                            <DollarSign className="w-4 h-4" />
-                            <span className="font-black text-lg">{booking.total_price} {t('dashboard.stats.currency')}</span>
-                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Price */}
+                    <div className="p-2.5 rounded-lg border border-[#114C5A]/10 bg-[#114C5A]/5">
+                      <div className="flex items-center gap-2">
+                        <DollarSign size={14} className="text-[#114C5A]" />
+                        <div>
+                          <p className="text-xs text-gray-600 font-medium">{t('dashboard.bookings.totalCost')}</p>
+                          <p className="text-base font-bold text-[#114C5A]">
+                            {Math.abs(parseFloat(booking.total_price)).toFixed(2)} <span className="text-xs text-gray-600">{t('dashboard.stats.currency')}</span>
+                          </p>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* معلومات إضافية */}
-                  <div className={`mt-4 pt-4 border-t flex items-center justify-between ${
-                    isDarkMode ? 'border-slate-700' : 'border-slate-100'
-                  }`}>
-                    <div className={`flex items-center gap-4 text-xs ${
-                      isDarkMode ? 'text-slate-400' : 'text-slate-400'
-                    }`}>
-                      <span className="font-bold">{t('dashboard.completedWorks.bookingNumber', { id: booking.id })}</span>
-                      {booking.has_rating !== undefined && (
-                        <div className="flex items-center gap-1.5">
+                    {/* Rating Status */}
+                    {booking.has_rating !== undefined && (
+                      <div className="p-2.5 rounded-lg border border-gray-200 bg-gray-50">
+                        <div className="flex items-center gap-2">
                           {booking.has_rating ? (
                             <>
-                              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                              <span className="font-bold text-amber-600">{t('dashboard.completedWorks.rated')}</span>
+                              <Star size={14} className="fill-amber-400 text-amber-400" />
+                              <span className="text-xs font-semibold text-amber-600">{t('dashboard.completedWorks.rated')}</span>
                             </>
                           ) : (
                             <>
-                              <MessageSquare className="w-4 h-4 text-slate-400" />
-                              <span className="font-bold">{t('dashboard.completedWorks.notRated')}</span>
+                              <MessageSquare size={14} className="text-gray-400" />
+                              <span className="text-xs font-semibold text-gray-600">{t('dashboard.completedWorks.notRated')}</span>
                             </>
                           )}
                         </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {booking.updated_at && (
-                        <span className="text-xs text-slate-400 font-bold">
-                          {t('dashboard.completedWorks.completedAt', { date: formatDate(booking.updated_at) })}
-                        </span>
-                      )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="p-4 pt-3 border-t border-[#114C5A]/10 bg-gray-50">
+                    <div className="flex items-center justify-between gap-2">
                       {!booking.has_rating && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedBookingForRating(booking);
                           }}
-                          className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg active:scale-95"
+                          className="flex items-center gap-2 px-3 py-2 bg-[#FFB200] hover:bg-[#FFB200]/90 text-white rounded-lg font-semibold text-xs transition-all shadow-sm hover:shadow-md flex-1 justify-center"
                         >
-                          <Star className="w-4 h-4" />
+                          <Star size={14} />
                           {t('dashboard.completedWorks.addRating')}
                         </button>
                       )}
@@ -299,89 +314,86 @@ const CompletedWorks = () => {
                           e.stopPropagation();
                           navigate(`/admin/bookings/${booking.id}`);
                         }}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ${
-                          isDarkMode 
-                            ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' 
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                        }`}
+                        className="flex items-center gap-2 px-3 py-2 bg-[#114C5A] hover:bg-[#114C5A]/90 text-white rounded-lg font-semibold text-xs transition-all shadow-sm hover:shadow-md flex-1 justify-center"
                       >
+                        <ArrowRight size={14} />
                         {t('dashboard.completedWorks.viewDetails')}
                       </button>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
+          </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className={`flex items-center justify-between mt-8 pt-6 border-t ${
-                isDarkMode ? 'border-slate-700' : 'border-slate-100'
-              }`}>
-                <div className={`text-sm font-bold ${
-                  isDarkMode ? 'text-slate-400' : 'text-slate-500'
-                }`}>
-                  {t('dashboard.completedWorks.showing', { from, to, total })}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`p-2 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
-                      isDarkMode 
-                        ? 'border-slate-600 hover:bg-slate-700 text-slate-300' 
-                        : 'border-slate-200 hover:bg-slate-50 text-slate-600'
-                    }`}
-                  >
-                    <ChevronRight className="w-5 h-5 text-slate-600" />
-                  </button>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                  currentPage === 1
+                    ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                    : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                }`}
+              >
+                <ChevronRight size={18} />
+                <span className="font-semibold">{t('dashboard.bookings.previous')}</span>
+              </button>
+              
+              <div className="flex items-center gap-2">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
                   
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${
-                          currentPage === pageNum
-                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                            : isDarkMode
-                              ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                              : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                  
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`p-2 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
-                      isDarkMode 
-                        ? 'border-slate-600 hover:bg-slate-700 text-slate-300' 
-                        : 'border-slate-200 hover:bg-slate-50 text-slate-600'
-                    }`}
-                  >
-                    <ChevronLeft className="w-5 h-5 text-slate-600" />
-                  </button>
-                </div>
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
+                        currentPage === pageNum
+                          ? 'bg-[#114C5A] text-white shadow-md'
+                          : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
               </div>
-            )}
-          </>
-        )}
-      </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                  currentPage === totalPages
+                    ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                    : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                }`}
+              >
+                <span className="font-semibold">{t('dashboard.bookings.next')}</span>
+                <ChevronLeft size={18} />
+              </button>
+            </div>
+          )}
+
+          {/* Pagination Info */}
+          {total > 0 && (
+            <div className="text-center text-sm text-gray-600">
+              {t('dashboard.completedWorks.showing', { from, to, total })}
+            </div>
+          )}
+        </>
+      )}
 
       {/* Rating Popup */}
       {selectedBookingForRating && (

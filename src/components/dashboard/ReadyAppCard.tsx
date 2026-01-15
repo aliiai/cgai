@@ -5,11 +5,10 @@ import {
   ShoppingCart, 
   Star, 
   CheckCircle, 
-  ArrowLeft,
+  ArrowRight,
   Package,
   Sparkles
 } from 'lucide-react';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 import { useLocalized } from '../../hooks/useLocalized';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
 import type { ReadyApp } from '../../storeApi/api/ready-apps.api';
@@ -19,7 +18,6 @@ interface ReadyAppCardProps {
 }
 
 const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
-  const { isDarkMode } = useThemeStore();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
@@ -72,89 +70,77 @@ const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
 
   return (
     <div
-      className={`group relative backdrop-blur-xl rounded-3xl overflow-hidden border shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer ${
-        isDarkMode 
-          ? 'bg-slate-800/60 border-slate-700/40 hover:border-primary/40' 
-          : 'bg-white/60 border-white/40 hover:border-primary/40'
-      }`}
+      className="group bg-white rounded-xl border border-[#114C5A]/10 shadow-sm hover:shadow-md hover:border-[#114C5A]/20 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
       onClick={handleViewDetails}
     >
-      {/* Badges */}
-      <div className="absolute top-4 right-4 z-10 flex gap-2">
-        {app.is_new && (
-          <span className="px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg">
-            {t('dashboard.readyApps.new') || 'جديد'}
-          </span>
-        )}
-        {app.is_popular && (
-          <span className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full shadow-lg">
-            {t('dashboard.readyApps.popular') || 'الأكثر مبيعاً'}
-          </span>
-        )}
-      </div>
+      {/* Header with gradient */}
+      <div className="bg-gradient-to-br from-[#114C5A] to-[#114C5A]/90 p-4 text-white relative overflow-hidden">
+        {/* Badges */}
+        <div className="absolute top-3 right-3 z-10 flex gap-2">
+          {app.is_new && (
+            <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-lg shadow-md">
+              {t('dashboard.readyApps.new') || 'جديد'}
+            </span>
+          )}
+          {app.is_popular && (
+            <span className="px-2.5 py-1 bg-[#FFB200] text-white text-xs font-bold rounded-lg shadow-md">
+              {t('dashboard.readyApps.popular') || 'الأكثر مبيعاً'}
+            </span>
+          )}
+        </div>
 
-      {/* Image Section */}
-      <div className="relative h-48 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
-        {imageUrl && !imageError ? (
-          <img 
-            src={imageUrl} 
-            alt={localizedApp.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Package className="w-20 h-20 text-primary/30" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-      </div>
+        {/* Image Section */}
+        <div className="relative h-40 bg-white/10 rounded-xl overflow-hidden mt-2">
+          {imageUrl && !imageError ? (
+            <img 
+              src={imageUrl} 
+              alt={localizedApp.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Package className="w-16 h-16 text-white/30" />
+            </div>
+          )}
+        </div>
 
-      {/* Content Section */}
-      <div className="p-6">
         {/* Category */}
         {categoryName && (
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className={`text-xs font-bold uppercase tracking-wider ${
-              isDarkMode ? 'text-primary/80' : 'text-primary'
-            }`}>
+          <div className="flex items-center gap-2 mt-3">
+            <Sparkles className="w-4 h-4 text-white/80" />
+            <span className="text-xs font-semibold text-white/80 uppercase tracking-wider">
               {categoryName}
             </span>
           </div>
         )}
 
         {/* Title */}
-        <h3 className={`text-xl font-bold mb-2 group-hover:text-primary transition-colors ${
-          isDarkMode ? 'text-white' : 'text-gray-800'
-        }`}>
+        <h3 className="text-lg font-bold mt-2 line-clamp-2">
           {localizedApp.name}
         </h3>
+      </div>
 
+      {/* Content Section */}
+      <div className="p-4 space-y-3 flex-grow">
         {/* Description */}
-        <p className={`text-sm mb-4 line-clamp-2 ${
-          isDarkMode ? 'text-slate-300' : 'text-gray-600'
-        }`}>
+        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
           {localizedApp.short_description || localizedApp.description}
         </p>
 
         {/* Features Preview */}
         {features.length > 0 && (
-          <div className="mb-4 space-y-1">
+          <div className="space-y-1.5">
             {features.map((feature, index) => (
               <div key={index} className="flex items-center gap-2">
-                <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
-                <span className={`text-xs ${
-                  isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                }`}>
+                <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                <span className="text-xs text-gray-600">
                   {feature}
                 </span>
               </div>
             ))}
             {app.features && app.features.length > 2 && (
-              <span className={`text-xs ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>
+              <span className="text-xs text-gray-500">
                 +{app.features.length - 2} {t('dashboard.readyApps.moreFeatures') || 'ميزة أخرى'}
               </span>
             )}
@@ -163,46 +149,42 @@ const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
 
         {/* Rating */}
         {app.rating && (
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 pt-2 border-t border-[#114C5A]/10">
             <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-4 h-4 ${
+                  className={`w-3.5 h-3.5 ${
                     i < Math.floor(app.rating!) 
-                      ? 'text-yellow-400 fill-current' 
+                      ? 'text-[#FFB200] fill-current' 
                       : 'text-gray-300'
                   }`}
                 />
               ))}
             </div>
-            <span className={`text-xs font-semibold ${
-              isDarkMode ? 'text-slate-400' : 'text-gray-500'
-            }`}>
+            <span className="text-xs font-semibold text-gray-600">
               {app.rating} ({app.reviews_count || 0})
             </span>
           </div>
         )}
+      </div>
 
-        {/* Price and Action */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200/50">
+      {/* Footer */}
+      <div className="p-4 pt-3 border-t border-[#114C5A]/10 bg-gray-50">
+        <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <span className={`text-2xl font-black ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>
+            <span className="text-xl font-bold text-[#114C5A]">
               {app.price.toLocaleString()} {app.currency || 'ر.س'}
             </span>
             {app.original_price && app.original_price > app.price && (
-              <span className={`text-sm line-through ${
-                isDarkMode ? 'text-slate-500' : 'text-gray-400'
-              }`}>
+              <span className="text-sm line-through text-gray-400">
                 {app.original_price.toLocaleString()} {app.currency || 'ر.س'}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2 text-primary font-semibold group-hover:gap-3 transition-all">
+          <div className="flex items-center gap-2 text-[#114C5A] font-semibold group-hover:gap-3 transition-all">
             <ShoppingCart className="w-5 h-5" />
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
           </div>
         </div>
       </div>

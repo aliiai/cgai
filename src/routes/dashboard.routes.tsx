@@ -18,7 +18,6 @@ const componentMap: Record<string, React.LazyExoticComponent<React.ComponentType
   BookingDetails: lazy(() => import('../pages/dashboard/BookingDetails')),
   CompletedWorks: lazy(() => import('../pages/dashboard/CompletedWorks')),
   PreviousWorks: lazy(() => import('../pages/dashboard/PreviousWorks')),
-  Works: lazy(() => import('../pages/dashboard/Works')),
   Payments: lazy(() => import('../pages/dashboard/Payments')),
   Reports: lazy(() => import('../pages/dashboard/Reports')),
   Reviews: lazy(() => import('../pages/dashboard/Reviews')),
@@ -33,6 +32,8 @@ const componentMap: Record<string, React.LazyExoticComponent<React.ComponentType
   ReadyApps: lazy(() => import('../pages/dashboard/ReadyApps')),
   ReadyAppDetails: lazy(() => import('../pages/dashboard/ReadyAppDetails')),
   MyPurchases: lazy(() => import('../pages/dashboard/MyPurchases')),
+  AIServices: lazy(() => import('../pages/dashboard/AIServices')),
+  AIServiceDetails: lazy(() => import('../pages/dashboard/AIServiceDetails')),
 };
 
 // Dashboard Routes Data - مرتبة حسب الأولوية
@@ -74,14 +75,6 @@ export const dashboardRoutes: AdminRoute[] = [
   
   // 3. إدارة الأعمال
   {
-    id: 'admin-works',
-    name: 'إدارة أعمالي',
-    path: '/admin/works',
-    component: 'Works',
-    icon: 'Briefcase',
-    requiresAuth: true,
-  },
-  {
     id: 'admin-completed-works',
     name: 'الأعمال المكتملة',
     path: '/admin/completed-works',
@@ -105,6 +98,21 @@ export const dashboardRoutes: AdminRoute[] = [
     path: '/admin/ready-apps',
     component: 'ReadyApps',
     icon: 'Package',
+    requiresAuth: true,
+  },
+  {
+    id: 'admin-ai-services',
+    name: 'أدوات الذكاء الاصطناعي',
+    path: '/admin/ai-services',
+    component: 'AIServices',
+    icon: 'Sparkles',
+    requiresAuth: true,
+  },
+  {
+    id: 'admin-ai-service-details',
+    name: 'تفاصيل خدمة الذكاء الاصطناعي',
+    path: '/admin/ai-services/:id',
+    component: 'AIServiceDetails',
     requiresAuth: true,
   },
   {

@@ -24,55 +24,12 @@ const DashboardHeader = ({
   
   // Use translated title if not provided
   const displayTitle = title || t('common.dashboard');
-  const [userData, setUserData] = useState<any>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [pointsPerRiyal, setPointsPerRiyal] = useState<number>(10);
   const [isLoadingWallet, setIsLoadingWallet] = useState<boolean>(false);
-
-  // الحصول على بيانات المستخدم - يعتمد على user من الـ store مباشرة
-  useEffect(() => {
-    const updateUserData = () => {
-      if (user) {
-        setUserData(user);
-        // console.log('Header: User updated from store:', user);
-      } else {
-        // محاولة الحصول من localStorage كـ fallback
-        try {
-          const authStorage = localStorage.getItem('auth-storage');
-          if (authStorage) {
-            const authData = JSON.parse(authStorage);
-            const storedUser = authData?.state?.user;
-            if (storedUser) {
-              setUserData(storedUser);
-              return;
-            }
-          }
-
-          const userDataStr = localStorage.getItem('user-data');
-          if (userDataStr) {
-            setUserData(JSON.parse(userDataStr));
-          }
-        } catch (error) {
-          console.error('Error loading user data:', error);
-        }
-      }
-    };
-    
-    updateUserData();
-    
-    // الاستماع لتغييرات الـ store مباشرة
-    const unsubscribe = useAuthStore.subscribe((state) => {
-      if (state.user) {
-        setUserData(state.user);
-        console.log('Header: User updated via subscription:', state.user);
-      }
-    });
-    
-    return () => unsubscribe();
-  }, [user]);
 
   // الاستماع لتغييرات user من الـ store مباشرة (Zustand سيتولى re-render)
   // لا حاجة لـ interval أو storage events لأن Zustand يتولى ذلك
@@ -229,10 +186,11 @@ const DashboardHeader = ({
     return name.trim().charAt(0).toUpperCase();
   };
 
-  // الحصول على بيانات المستخدم
-  const userName = userData?.name || t('common.user');
-  const userEmail = userData?.email || userData?.phone || '';
-  const userInitials = getInitials(userData?.name);
+  // الحصول على بيانات المستخدم مباشرة من الـ store
+  // Zustand سيتولى re-render تلقائياً عند تغيير user
+  const userName = user?.name || t('common.user');
+  const userEmail = user?.email || user?.phone || '';
+  const userInitials = getInitials(user?.name);
 
   const languages = [
     { code: 'ar', name: t('languages.ar'), flag: '🇸🇦' },
@@ -302,7 +260,7 @@ const DashboardHeader = ({
           title: t('logout.success'),
           text: response.message || t('logout.successMessage'),
           confirmButtonText: t('logout.ok'),
-          confirmButtonColor: '#00adb5',
+          confirmButtonColor: '#114C5A',
           customClass: {
             popup: 'font-ElMessiri',
           },
@@ -327,10 +285,10 @@ const DashboardHeader = ({
 
   return (
     <header 
-      className={`h-14 sm:h-16 border-b flex items-center ${isRTL ? 'justify-between' : 'justify-between'} px-3 sm:px-4 md:px-6 shadow-sm transition-colors duration-200 ${
+      className={`h-16 sm:h-18 border-b flex items-center ${isRTL ? 'justify-between' : 'justify-between'} px-4 sm:px-6 md:px-8 shadow-sm transition-all duration-300 ${
         isDarkMode 
-          ? 'bg-slate-900 border-slate-700 shadow-slate-900/50' 
-          : 'bg-white border-gray-200'
+          ? 'bg-[#114C5A] border-[#114C5A]/30' 
+          : 'bg-[#FBFBFB] border-[#114C5A]/10'
       }`} 
       dir={isRTL ? 'rtl' : 'ltr'}
     >
@@ -338,10 +296,10 @@ const DashboardHeader = ({
       {onMenuClick && (
         <button
           onClick={onMenuClick}
-          className={`lg:hidden p-1.5 sm:p-2 rounded-lg transition-colors mr-2 sm:mr-3 ${
+          className={`lg:hidden p-2 sm:p-2.5 rounded-lg transition-all duration-200 mr-3 sm:mr-4 ${
             isDarkMode 
-              ? 'hover:bg-slate-800 text-gray-300' 
-              : 'hover:bg-gray-100 text-gray-700'
+              ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+              : 'hover:bg-[#FBFBFB] text-[#333333]'
           }`}
           aria-label="Toggle menu"
         >
@@ -350,37 +308,37 @@ const DashboardHeader = ({
       )}
 
       {/* Title */}
-      <h1 className={`text-base sm:text-lg md:text-xl font-semibold truncate flex-1 min-w-0 ${isDarkMode ? 'text-white' : 'text-gray-900'} ${isRTL ? 'text-right' : 'text-left'} ${onMenuClick ? '' : 'mr-2 sm:mr-3'}`}>{displayTitle}</h1>
+      <h1 className={`text-lg sm:text-xl md:text-2xl font-bold truncate flex-1 min-w-0 ${isDarkMode ? 'text-[#FBFBFB]' : 'text-[#333333]'} ${isRTL ? 'text-right' : 'text-left'} ${onMenuClick ? '' : 'mr-3 sm:mr-4'}`}>{displayTitle}</h1>
 
       {/* Actions */}
-      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
         {/* Points/Wallet Display */}
-        <div className={`hidden sm:flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors ${
+        <div className={`hidden sm:flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all duration-200 shadow-sm ${
           isDarkMode 
-            ? 'bg-primary/10 border border-primary/20 text-primary' 
-            : 'bg-primary/5 border border-primary/10 text-primary'
+            ? 'bg-[#FFB200]/20 border border-[#FFB200]/30 text-[#FFB200]' 
+            : 'bg-[#FFB200]/10 border border-[#FFB200]/20 text-[#FFB200]'
         }`}>
-          <Coins size={16} className="sm:w-5 sm:h-5" />
-          <span className="text-xs sm:text-sm font-bold">
+          <Coins size={18} className="sm:w-5 sm:h-5" />
+          <span className="text-sm sm:text-base font-bold">
             {isLoadingWallet ? '...' : walletBalance.toLocaleString()}
           </span>
-          <span className="text-[10px] sm:text-xs opacity-75">نقطة</span>
+          <span className="text-xs sm:text-sm opacity-80 font-medium">نقطة</span>
         </div>
 
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}
-          className={`relative p-1.5 sm:p-2 rounded-lg transition-colors ${
+          className={`relative p-2 sm:p-2.5 rounded-lg transition-all duration-200 ${
             isDarkMode 
-              ? 'hover:bg-slate-800 text-gray-300' 
-              : 'hover:bg-gray-100 text-gray-700'
+              ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+              : 'hover:bg-[#FBFBFB] text-[#333333]'
           }`}
           title={isDarkMode ? 'تفعيل الوضع الفاتح' : 'تفعيل الوضع الداكن'}
         >
           {isDarkMode ? (
-            <Sun size={18} className="sm:w-5 sm:h-5 text-amber-500" />
+            <Sun size={20} className="sm:w-5 sm:h-5 text-[#FFB200]" />
           ) : (
-            <Moon size={18} className="sm:w-5 sm:h-5" />
+            <Moon size={20} className="sm:w-5 sm:h-5" />
           )}
         </button>
 
@@ -392,15 +350,15 @@ const DashboardHeader = ({
               setIsNotificationOpen(false);
               setIsProfileOpen(false);
             }}
-            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 ${
               isDarkMode 
-                ? 'hover:bg-slate-800 text-gray-300' 
-                : 'hover:bg-gray-100 text-gray-700'
+                ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                : 'hover:bg-[#FBFBFB] text-[#333333]'
             }`}
           >
-            <Globe size={18} className="sm:w-5 sm:h-5" />
-            <span className="text-xs sm:text-sm font-medium hidden md:inline">{currentLanguage}</span>
-            <ChevronDown size={14} className={`sm:w-4 sm:h-4 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
+            <Globe size={20} className="sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base font-semibold hidden md:inline">{currentLanguage}</span>
+            <ChevronDown size={16} className={`sm:w-4 sm:h-4 transition-transform duration-200 ${isLanguageOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Language Dropdown */}
@@ -410,29 +368,29 @@ const DashboardHeader = ({
                 className="fixed inset-0 z-10"
                 onClick={() => setIsLanguageOpen(false)}
               ></div>
-              <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-44 sm:w-48 rounded-lg shadow-xl py-2 z-20 ${
+              <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 sm:w-52 rounded-xl shadow-2xl py-2 z-20 border ${
                 isDarkMode 
-                  ? 'bg-slate-800 border-slate-700' 
-                  : 'bg-white border-gray-200'
-              } border`}>
+                  ? 'bg-[#114C5A] border-[#114C5A]/30' 
+                  : 'bg-[#FBFBFB] border-[#114C5A]/10'
+              }`}>
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => handleLanguageChange(lang)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 ${isRTL ? 'text-right' : 'text-left'} transition-colors ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 ${isRTL ? 'text-right' : 'text-left'} transition-all duration-200 ${
                       isDarkMode 
-                        ? 'hover:bg-slate-700 text-gray-300' 
-                        : 'hover:bg-gray-50 text-gray-700'
+                        ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                        : 'hover:bg-[#FBFBFB] text-[#333333]'
                     } ${
                       i18n.language === lang.code 
-                        ? isDarkMode ? 'bg-primary/10' : 'bg-primary/5' 
+                        ? isDarkMode ? 'bg-[#FFB200]/20 text-[#FFB200]' : 'bg-[#FFB200]/10 text-[#FFB200]' 
                         : ''
                     }`}
                   >
                     <span className="text-2xl">{lang.flag}</span>
-                    <span className={`text-sm font-medium flex-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{lang.name}</span>
+                    <span className={`text-sm font-semibold flex-1 ${isDarkMode ? 'text-[#FBFBFB]' : 'text-[#333333]'}`}>{lang.name}</span>
                     {i18n.language === lang.code && (
-                      <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      <div className="w-2 h-2 bg-[#FFB200] rounded-full"></div>
                     )}
                   </button>
                 ))}
@@ -449,15 +407,15 @@ const DashboardHeader = ({
               setIsProfileOpen(false);
               setIsLanguageOpen(false);
             }}
-            className={`relative p-1.5 sm:p-2 rounded-lg transition-colors ${
+            className={`relative p-2 sm:p-2.5 rounded-lg transition-all duration-200 ${
               isDarkMode 
-                ? 'hover:bg-slate-800 text-gray-300' 
-                : 'hover:bg-gray-100 text-gray-700'
+                ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                : 'hover:bg-[#FBFBFB] text-[#333333]'
             }`}
           >
-            <Bell size={18} className="sm:w-5 sm:h-5" />
+            <Bell size={20} className="sm:w-5 sm:h-5" />
             {notificationCount > 0 && (
-              <span className="absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 text-[10px] sm:text-xs bg-red-500 text-white rounded-full flex items-center justify-center font-semibold">
+              <span className="absolute top-0 right-0 w-5 h-5 sm:w-6 sm:h-6 text-[10px] sm:text-xs bg-[#FFB200] text-[#333333] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white">
                 {notificationCount > 9 ? '9+' : notificationCount}
               </span>
             )}
@@ -470,17 +428,17 @@ const DashboardHeader = ({
                 className="fixed inset-0 z-10"
                 onClick={() => setIsNotificationOpen(false)}
               ></div>
-              <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-[calc(100vw-2rem)] sm:w-80 md:w-96 rounded-lg shadow-xl z-20 max-h-[calc(100vh-8rem)] sm:max-h-[600px] flex flex-col border ${
+              <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-[calc(100vw-2rem)] sm:w-80 md:w-96 rounded-xl shadow-2xl z-20 max-h-[calc(100vh-8rem)] sm:max-h-[600px] flex flex-col border ${
                 isDarkMode 
-                  ? 'bg-slate-800 border-slate-700' 
-                  : 'bg-white border-gray-200'
+                  ? 'bg-[#114C5A] border-[#114C5A]/30' 
+                  : 'bg-[#FBFBFB] border-[#114C5A]/10'
               }`}>
-                <div className={`p-3 sm:p-4 border-b flex items-center justify-between gap-2 ${
-                  isDarkMode ? 'border-slate-700' : 'border-gray-200'
+                <div className={`p-4 sm:p-5 border-b flex items-center justify-between gap-3 ${
+                  isDarkMode ? 'border-[#114C5A]/30' : 'border-[#114C5A]/10'
                 }`}>
-                  <h3 className={`text-sm sm:text-base font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{t('header.notifications')}</h3>
+                  <h3 className={`text-base sm:text-lg font-bold ${isDarkMode ? 'text-[#FBFBFB]' : 'text-[#333333]'}`}>{t('header.notifications')}</h3>
                   {unreadCount > 0 && (
-                    <span className="text-[10px] sm:text-xs bg-primary text-white px-2 py-1 rounded-full font-semibold whitespace-nowrap">
+                    <span className="text-xs sm:text-sm bg-[#FFB200] text-[#333333] px-3 py-1.5 rounded-full font-bold whitespace-nowrap shadow-sm">
                       {unreadCount} غير مقروء
                     </span>
                   )}
@@ -505,37 +463,37 @@ const DashboardHeader = ({
                           e.stopPropagation();
                           handleMarkAsRead(notification, true);
                         }}
-                        className={`p-3 sm:p-4 border-b transition-colors cursor-pointer ${
+                        className={`p-4 sm:p-5 border-b transition-all duration-200 cursor-pointer ${
                           isDarkMode 
-                            ? `border-slate-700 hover:bg-slate-700 ${!notification.read ? 'bg-primary/10' : ''}`
-                            : `border-gray-100 hover:bg-gray-50 ${!notification.read ? 'bg-primary/5' : ''}`
+                            ? `border-[#114C5A]/30 hover:bg-[#114C5A]/50 ${!notification.read ? 'bg-[#FFB200]/20' : ''}`
+                            : `border-[#114C5A]/10 hover:bg-[#FBFBFB] ${!notification.read ? 'bg-[#FFB200]/10' : ''}`
                         }`}
                       >
-                        <div className="flex items-start gap-2 sm:gap-3">
-                          <div className={`mt-0.5 sm:mt-1 p-1.5 sm:p-2 rounded-lg flex-shrink-0 ${
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className={`mt-0.5 sm:mt-1 p-2 sm:p-2.5 rounded-lg flex-shrink-0 ${
                             !notification.read 
-                              ? 'bg-primary/10 text-primary' 
-                              : isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-400'
+                              ? 'bg-[#FFB200]/20 text-[#FFB200]' 
+                              : isDarkMode ? 'bg-[#114C5A]/50 text-[#FBFBFB]/60' : 'bg-[#FBFBFB] text-[#333333]/60'
                           }`}>
-                            <Calendar size={14} className="sm:w-4 sm:h-4" />
+                            <Calendar size={16} className="sm:w-4 sm:h-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <p className={`text-xs sm:text-sm font-semibold truncate ${
+                              <p className={`text-sm sm:text-base font-bold truncate ${
                                 !notification.read 
-                                  ? isDarkMode ? 'text-white' : 'text-gray-900'
-                                  : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                  ? isDarkMode ? 'text-[#FBFBFB]' : 'text-[#333333]'
+                                  : isDarkMode ? 'text-[#FBFBFB]/70' : 'text-[#333333]/70'
                               }`}>
                                 {notification.title}
                               </p>
                               {!notification.read && (
-                                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full mt-1.5 flex-shrink-0"></span>
+                                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-[#FFB200] rounded-full mt-1.5 flex-shrink-0 shadow-sm"></span>
                               )}
                             </div>
-                            <p className={`text-[10px] sm:text-xs mt-1 line-clamp-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <p className={`text-xs sm:text-sm mt-1.5 line-clamp-2 ${isDarkMode ? 'text-[#FBFBFB]/70' : 'text-[#333333]/70'}`}>
                               {notification.message}
                             </p>
-                            <p className={`text-[10px] sm:text-xs mt-1.5 sm:mt-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                            <p className={`text-[10px] sm:text-xs mt-2 sm:mt-2.5 ${isDarkMode ? 'text-[#FBFBFB]/60' : 'text-[#333333]/60'}`}>
                               {formatDate(notification.created_at)}
                             </p>
                           </div>
@@ -545,14 +503,14 @@ const DashboardHeader = ({
                   )}
                 </div>
                 {notifications.length > 0 && (
-                  <div className={`p-2 sm:p-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                  <div className={`p-3 sm:p-4 border-t ${isDarkMode ? 'border-[#114C5A]/30' : 'border-[#114C5A]/10'}`}>
                     <button 
                       onClick={() => {
                         navigate('/admin/notifications');
                         setIsNotificationOpen(false);
                       }}
-                      className={`w-full text-xs sm:text-sm text-primary hover:text-primary-dark font-medium text-center ${
-                        isDarkMode ? 'hover:text-primary' : ''
+                      className={`w-full text-sm sm:text-base text-[#FFB200] hover:text-[#FFB200] font-bold text-center transition-colors duration-200 ${
+                        isDarkMode ? 'hover:text-[#FFB200]' : ''
                       }`}
                     >
                       {t('common.viewAll')}
@@ -572,24 +530,24 @@ const DashboardHeader = ({
               setIsNotificationOpen(false);
               setIsLanguageOpen(false);
             }}
-            className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-all duration-200 ${
               isDarkMode 
-                ? 'hover:bg-slate-800' 
-                : 'hover:bg-gray-100'
+                ? 'hover:bg-[#114C5A]/50' 
+                : 'hover:bg-[#FBFBFB]'
             }`}
           >
             <div className="relative">
               {/* Avatar with initials */}
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-primary bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-semibold text-xs sm:text-sm shadow-md">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#114C5A] bg-gradient-to-br from-[#114C5A] to-[#114C5A] flex items-center justify-center text-[#FBFBFB] font-bold text-sm sm:text-base shadow-md">
                 {userInitials}
               </div>
-              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-[#FFB200] rounded-full border-2 border-white shadow-sm"></div>
             </div>
             <div className={`hidden lg:block ${isRTL ? 'text-right' : 'text-left'}`}>
-              <p className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{userName}</p>
-              <p className={`text-xs truncate max-w-[120px] xl:max-w-[150px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{userEmail}</p>
+              <p className={`text-sm sm:text-base font-bold ${isDarkMode ? 'text-[#FBFBFB]' : 'text-[#333333]'}`}>{userName}</p>
+              <p className={`text-xs sm:text-sm truncate max-w-[120px] xl:max-w-[150px] ${isDarkMode ? 'text-[#FBFBFB]/70' : 'text-[#333333]/70'}`}>{userEmail}</p>
             </div>
-            <ChevronDown size={14} className={`sm:w-4 sm:h-4 transition-transform ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} ${isProfileOpen ? 'rotate-180' : ''} hidden sm:block`} />
+            <ChevronDown size={16} className={`sm:w-4 sm:h-4 transition-transform duration-200 ${isDarkMode ? 'text-[#FBFBFB]/60' : 'text-[#333333]/60'} ${isProfileOpen ? 'rotate-180' : ''} hidden sm:block`} />
           </button>
 
           {/* Profile Dropdown */}
@@ -599,62 +557,62 @@ const DashboardHeader = ({
                 className="fixed inset-0 "
                 onClick={() => setIsProfileOpen(false)}
               ></div>
-              <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-[calc(100vw-2rem)] sm:w-72 rounded-lg shadow-xl border py-2 z-20 ${
+              <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-[calc(100vw-2rem)] sm:w-72 rounded-xl shadow-2xl border py-2 z-20 ${
                 isDarkMode 
-                  ? 'bg-slate-800 border-slate-700' 
-                  : 'bg-white border-gray-200'
+                  ? 'bg-[#114C5A] border-[#114C5A]/30' 
+                  : 'bg-[#FBFBFB] border-[#114C5A]/10'
               }`}>
                 {/* User Info */}
-                <div className={`px-3 sm:px-4 py-3 sm:py-4 border-b bg-gradient-to-br ${
+                <div className={`px-4 sm:px-5 py-4 sm:py-5 border-b bg-gradient-to-br ${
                   isDarkMode 
-                    ? 'border-slate-700 from-primary/10 to-primary/20' 
-                    : 'border-gray-200 from-primary/5 to-primary/10'
+                    ? 'border-[#114C5A]/30 from-[#FFB200]/20 to-[#FFB200]/30' 
+                    : 'border-[#114C5A]/10 from-[#FFB200]/10 to-[#FFB200]/15'
                 }`}>
-                  <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     {/* Avatar with initials */}
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 sm:border-[3px] border-primary bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-lg flex-shrink-0">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 sm:border-[3px] border-[#114C5A] bg-gradient-to-br from-[#114C5A] to-[#114C5A] flex items-center justify-center text-[#FBFBFB] font-bold text-lg sm:text-xl shadow-lg flex-shrink-0">
                       {userInitials}
                     </div>
                     <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      <p className={`font-semibold text-sm sm:text-base truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{userName}</p>
-                      <p className={`text-[10px] sm:text-xs mt-1 truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{userEmail}</p>
-                      {userData?.phone && (
-                        <p className={`text-[10px] sm:text-xs mt-1 truncate ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>{userData.phone}</p>
+                      <p className={`font-bold text-base sm:text-lg truncate ${isDarkMode ? 'text-[#FBFBFB]' : 'text-[#333333]'}`}>{userName}</p>
+                      <p className={`text-xs sm:text-sm mt-1 truncate ${isDarkMode ? 'text-[#FBFBFB]/70' : 'text-[#333333]/70'}`}>{userEmail}</p>
+                      {user?.phone && (
+                        <p className={`text-xs sm:text-sm mt-1 truncate ${isDarkMode ? 'text-[#FBFBFB]/60' : 'text-[#333333]/60'}`}>{user.phone}</p>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Menu Items */}
-                <div className="py-1 sm:py-2">
+                <div className="py-2">
                   <button 
                     onClick={() => {
                       setIsProfileOpen(false);
                       navigate('/admin/settings');
                     }}
-                    className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 ${isRTL ? 'text-right' : 'text-left'} transition-colors ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 ${isRTL ? 'text-right' : 'text-left'} transition-all duration-200 ${
                       isDarkMode 
-                        ? 'hover:bg-slate-700 text-gray-300' 
-                        : 'hover:bg-gray-50 text-gray-700'
+                        ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                        : 'hover:bg-[#FBFBFB] text-[#333333]'
                     }`}
                   >
-                    <Settings size={16} className={`sm:w-[18px] sm:h-[18px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                    <span className="text-xs sm:text-sm font-medium">{t('common.settings')}</span>
+                    <Settings size={18} className={`sm:w-5 sm:h-5 ${isDarkMode ? 'text-[#FBFBFB]/60' : 'text-[#333333]/60'}`} />
+                    <span className="text-sm sm:text-base font-semibold">{t('common.settings')}</span>
                   </button>
                 </div>
 
                 {/* Logout */}
-                <div className={`border-t pt-1 sm:pt-2 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                <div className={`border-t pt-2 ${isDarkMode ? 'border-[#114C5A]/30' : 'border-[#114C5A]/10'}`}>
                   <button
                     onClick={handleLogout}
-                    className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 ${isRTL ? 'text-right' : 'text-left'} transition-colors ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 ${isRTL ? 'text-right' : 'text-left'} transition-all duration-200 ${
                       isDarkMode 
-                        ? 'hover:bg-red-900/20 text-red-400' 
+                        ? 'hover:bg-red-900/30 text-red-400' 
                         : 'hover:bg-red-50 text-red-600'
                     }`}
                   >
-                    <LogOut size={16} className="sm:w-[18px] sm:h-[18px]" />
-                    <span className="text-xs sm:text-sm font-medium">{t('common.logout')}</span>
+                    <LogOut size={18} className="sm:w-5 sm:h-5" />
+                    <span className="text-sm sm:text-base font-semibold">{t('common.logout')}</span>
                   </button>
                 </div>
               </div>

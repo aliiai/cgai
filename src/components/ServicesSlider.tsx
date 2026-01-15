@@ -3,6 +3,7 @@ import Slider from 'react-slick';
 import type { Settings } from 'react-slick';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ServiceCard from './ServiceCard';
+import { useThemeStore } from '../storeApi/store/theme.store';
 
 interface Service {
   id: number;
@@ -16,22 +17,15 @@ interface ServicesSliderProps {
 }
 
 const ServicesSlider = ({ services }: ServicesSliderProps) => {
+  const { isDarkMode } = useThemeStore();
   const sliderRef = useRef<Slider>(null);
 
-  if (!services || services.length === 0) {
-    return null;
-  }
-
-  // تكرار الخدمات عدد كبير من المرات لضمان infinite loop سلس
   const duplicatedServices = useMemo(() => {
-    // تكرار الخدمات 20 مرة لضمان حركة سلسة
     const repetitions = 60;
     const repeated = [];
-    
     for (let i = 0; i < repetitions; i++) {
       repeated.push(...services);
     }
-    
     return repeated;
   }, [services]);
 
@@ -40,7 +34,7 @@ const ServicesSlider = ({ services }: ServicesSliderProps) => {
     speed: 600,
     slidesToShow: 3,
     slidesToScroll: 1,
-    autoplay: true,
+    // autoplay: true,
     autoplaySpeed: 3000,
     cssEase: 'ease-in-out',
     arrows: true,
@@ -55,7 +49,7 @@ const ServicesSlider = ({ services }: ServicesSliderProps) => {
     useCSS: true,
     useTransform: true,
     waitForAnimate: false,
-    initialSlide: 30, // البدء من منتصف الـ slides لتجنب الوصول للحواف بسرعة
+    initialSlide: 30,
     responsive: [
       {
         breakpoint: 1024,
@@ -93,19 +87,24 @@ const ServicesSlider = ({ services }: ServicesSliderProps) => {
     }
   };
 
+  if (!services || services.length === 0) {
+    return null;
+  }
+
   return (
     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 mt-8 sm:mt-12 md:mt-16">
-      <div className="relative px-16">
+      <div className="relative px-16 w-full">
         <button
           onClick={handlePrev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-50 bg-white hover:bg-gray-100 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300"
+          className={`absolute left-0 top-1/2 -translate-y-1/2 z-50 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-primary' : 'bg-white hover:bg-gray-100 text-blue-600'
+            }`}
           aria-label="Previous slide"
           type="button"
         >
-          <ChevronLeft className="w-6 h-6 text-blue-600" />
+          <ChevronLeft className="w-6 h-6" />
         </button>
 
-        <Slider ref={sliderRef} {...servicesSettings} className="services-slider">
+        <Slider ref={sliderRef} {...servicesSettings} className="services-slider containerCardService">
           {duplicatedServices.map((service, index) => (
             <ServiceCard
               key={`service-${index}`}
@@ -114,17 +113,19 @@ const ServicesSlider = ({ services }: ServicesSliderProps) => {
               description={service.description}
               image={service.image}
               index={index}
+
             />
           ))}
         </Slider>
 
         <button
           onClick={handleNext}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-50 bg-white hover:bg-gray-100 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300"
+          className={`absolute right-0 top-1/2 -translate-y-1/2 z-50 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-primary' : 'bg-white hover:bg-gray-100 text-blue-600'
+            }`}
           aria-label="Next slide"
           type="button"
         >
-          <ChevronRight className="w-6 h-6 text-blue-600" />
+          <ChevronRight className="w-6 h-6" />
         </button>
       </div>
     </div>

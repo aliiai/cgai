@@ -204,7 +204,10 @@ export const getLocalizedName = <T extends { name?: string | null; name_en?: str
   options: LocalizationOptions = {}
 ): string => {
   if (!item) return options.defaultValue || '';
-  return localizeField(item.name, item.name_en, options);
+  // Support both name/name_en and name_en only (for subscriptions)
+  const arValue = 'name' in item ? item.name : null;
+  const enValue = 'name_en' in item ? item.name_en : null;
+  return localizeField(arValue, enValue, options);
 };
 
 /**
@@ -224,7 +227,10 @@ export const getLocalizedDescription = <T extends { description?: string | null;
   options: LocalizationOptions = {}
 ): string => {
   if (!item) return options.defaultValue || '';
-  return localizeField(item.description, item.description_en, options);
+  // Support both description/description_en and description_en only (for subscriptions)
+  const arValue = 'description' in item ? item.description : null;
+  const enValue = 'description_en' in item ? item.description_en : null;
+  return localizeField(arValue, enValue, options);
 };
 
 /**

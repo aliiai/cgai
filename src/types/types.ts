@@ -746,13 +746,17 @@ export interface SubscriptionFeature {
 
 export interface Subscription {
   id: number;
-  name: string;
+  name?: string | null; // Optional for backward compatibility
   name_en?: string | null;
-  description: string | null;
+  description?: string | null;
   description_en?: string | null;
-  features: SubscriptionFeature[];
+  features: string[] | SubscriptionFeature[]; // Support both string array and object array
+  features_en?: string[] | null;
   price: string; // Decimal as string
-  duration_type: 'monthly' | '3months' | '6months' | 'yearly';
+  duration_type: 'monthly' | '3months' | '6months' | 'yearly' | 'month' | 'year';
+  max_debtors?: number;
+  max_messages?: number;
+  ai_enabled?: boolean;
   is_active: boolean;
   created_at: string; // ISO 8601
   updated_at: string; // ISO 8601

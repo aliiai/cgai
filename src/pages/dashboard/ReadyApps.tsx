@@ -1,16 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Filter, Grid, List, Package, ChevronLeft, ChevronRight, X, Sparkles, TrendingUp, Eye, ShoppingBag } from 'lucide-react';
+import { Search, Filter, Grid, List, Package, ChevronLeft, ChevronRight, X, Sparkles, TrendingUp } from 'lucide-react';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
 import ReadyAppCard from '../../components/dashboard/ReadyAppCard';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 import LoadingState from '../../components/dashboard/LoadingState';
 import EmptyState from '../../components/dashboard/EmptyState';
 import { getReadyApps, type ReadyApp } from '../../storeApi/api/ready-apps.api';
 
 const ReadyApps = () => {
   const { t, i18n } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   const [apps, setApps] = useState<ReadyApp[]>([]);
   const [categories, setCategories] = useState<Array<{ id: number; name: string; name_en?: string; slug: string }>>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -110,351 +108,253 @@ const ReadyApps = () => {
   const newApps = apps.filter(app => app.is_new).length;
 
   return (
-    <div className={`pb-8 ${
-      isDarkMode ? 'bg-slate-900' : 'bg-gray-50'
-    }`}>
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <DashboardPageHeader
-          title={t('dashboard.readyApps.title') || 'التطبيقات والأنظمة الجاهزة'}
-          subtitle={t('dashboard.readyApps.subtitle') || 'اختر من مجموعة واسعة من التطبيقات والأنظمة الجاهزة المطورة مسبقاً'}
-        />
+    <div className="space-y-6">
+      {/* Header */}
+      <DashboardPageHeader
+        title={t('dashboard.readyApps.title') || 'التطبيقات والأنظمة الجاهزة'}
+        subtitle={t('dashboard.readyApps.subtitle') || 'اختر من مجموعة واسعة من التطبيقات والأنظمة الجاهزة المطورة مسبقاً'}
+      />
 
-        {/* Statistics Cards */}
-        {!isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className={`rounded-2xl p-6 border shadow-lg ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' 
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${
-                  isDarkMode ? 'bg-primary/20' : 'bg-primary/10'
-                }`}>
-                  <Package className={`w-6 h-6 ${isDarkMode ? 'text-primary' : 'text-primary'}`} />
-                </div>
-              </div>
-              <div className={`text-3xl font-black mb-1 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {totalApps}
-              </div>
-              <div className={`text-sm font-semibold ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>
-                {t('dashboard.readyApps.totalApps') || 'إجمالي التطبيقات'}
+      {/* Statistics Cards - Similar to Dashboard */}
+      {!isLoading && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="bg-white border border-[#114C5A]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all duration-200 group">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A] group-hover:bg-[#114C5A]/20 transition-colors">
+                <Package className="w-5 h-5" />
               </div>
             </div>
-
-            <div className={`rounded-2xl p-6 border shadow-lg ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' 
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${
-                  isDarkMode ? 'bg-orange-500/20' : 'bg-orange-500/10'
-                }`}>
-                  <TrendingUp className={`w-6 h-6 ${isDarkMode ? 'text-orange-400' : 'text-orange-500'}`} />
-                </div>
-              </div>
-              <div className={`text-3xl font-black mb-1 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {popularApps}
-              </div>
-              <div className={`text-sm font-semibold ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>
-                {t('dashboard.readyApps.popular') || 'شائع'}
-              </div>
-            </div>
-
-            <div className={`rounded-2xl p-6 border shadow-lg ${
-              isDarkMode 
-                ? 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600' 
-                : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${
-                  isDarkMode ? 'bg-green-500/20' : 'bg-green-500/10'
-                }`}>
-                  <Sparkles className={`w-6 h-6 ${isDarkMode ? 'text-green-400' : 'text-green-500'}`} />
-                </div>
-              </div>
-              <div className={`text-3xl font-black mb-1 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {newApps}
-              </div>
-              <div className={`text-sm font-semibold ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>
-                {t('dashboard.readyApps.new') || 'جديد'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Filters and Search */}
-        <div className={`mb-8 p-6 rounded-2xl border shadow-lg ${
-          isDarkMode 
-            ? 'bg-slate-800/80 backdrop-blur-sm border-slate-700' 
-            : 'bg-white/80 backdrop-blur-sm border-gray-200'
-        }`}>
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative group">
-              <Search className={`absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors ${
-                isDarkMode ? 'text-slate-400 group-focus-within:text-primary' : 'text-gray-400 group-focus-within:text-primary'
-              }`} />
-              <input
-                type="text"
-                placeholder={t('dashboard.readyApps.searchPlaceholder') || 'ابحث عن تطبيق...'}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pr-12 pl-4 py-3.5 rounded-xl border-2 transition-all ${
-                  isDarkMode
-                    ? 'bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-primary focus:bg-slate-700'
-                    : 'bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:bg-white'
-                } focus:outline-none focus:ring-2 focus:ring-primary/20`}
-                dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 transition ${
-                    isDarkMode ? 'hover:bg-slate-600' : ''
-                  }`}
-                >
-                  <X className="w-4 h-4 text-gray-400" />
-                </button>
-              )}
-            </div>
-
-            {/* Category Filter */}
-            <div className="relative group">
-              <Filter className={`absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none z-10 ${
-                isDarkMode ? 'text-slate-400 group-focus-within:text-primary' : 'text-gray-400 group-focus-within:text-primary'
-              }`} />
-              <select
-                value={selectedCategory}
-                onChange={(e) => {
-                  setSelectedCategory(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className={`appearance-none pr-12 pl-4 py-3.5 rounded-xl border-2 min-w-[200px] transition-all ${
-                  isDarkMode
-                    ? 'bg-slate-700/50 border-slate-600 text-white focus:border-primary focus:bg-slate-700'
-                    : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-primary focus:bg-white'
-                } focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer`}
-                dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
-              >
-                {categoryOptions.map(category => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* View Mode Toggle */}
-            <div className={`flex gap-2 p-1.5 rounded-xl border-2 ${
-              isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50 border-gray-200'
-            }`}>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2.5 rounded-lg transition-all ${
-                  viewMode === 'grid'
-                    ? 'bg-primary text-white shadow-lg scale-105'
-                    : isDarkMode
-                      ? 'text-slate-300 hover:bg-slate-600'
-                      : 'text-gray-600 hover:bg-gray-200'
-                }`}
-                title={t('dashboard.readyApps.gridView') || 'عرض الشبكة'}
-              >
-                <Grid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2.5 rounded-lg transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-primary text-white shadow-lg scale-105'
-                    : isDarkMode
-                      ? 'text-slate-300 hover:bg-slate-600'
-                      : 'text-gray-600 hover:bg-gray-200'
-                }`}
-                title={t('dashboard.readyApps.listView') || 'عرض القائمة'}
-              >
-                <List className="w-5 h-5" />
-              </button>
-            </div>
+            <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.readyApps.totalApps') || 'إجمالي التطبيقات'}</p>
+            <p className="text-2xl font-bold text-[#114C5A]">{totalApps}</p>
           </div>
 
-          {/* Active Filters */}
-          {(searchTerm || selectedCategory !== 'all') && (
-            <div className="mt-4 pt-4 border-t border-gray-200/50 flex flex-wrap gap-2">
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition ${
-                    isDarkMode
-                      ? 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'
-                      : 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'
-                  }`}
-                >
-                  {t('dashboard.readyApps.search') || 'بحث'}: {searchTerm}
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-              {selectedCategory !== 'all' && (
-                <button
-                  onClick={() => setSelectedCategory('all')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition ${
-                    isDarkMode
-                      ? 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'
-                      : 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'
-                  }`}
-                >
-                  {t('dashboard.readyApps.category') || 'الفئة'}: {categoryOptions.find(c => c.value === selectedCategory)?.label}
-                  <X className="w-3 h-3" />
-                </button>
-              )}
+          <div className="bg-white border border-[#FFB200]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#FFB200]/40 transition-all duration-200 group">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-[#FFB200]/10 rounded-xl flex items-center justify-center text-[#FFB200] group-hover:bg-[#FFB200]/20 transition-colors">
+                <TrendingUp className="w-5 h-5" />
+              </div>
             </div>
-          )}
+            <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.readyApps.popular') || 'شائع'}</p>
+            <p className="text-2xl font-bold text-[#FFB200]">{popularApps}</p>
+          </div>
+
+          <div className="bg-white border border-green-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-green-400 transition-all duration-200 group">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-500 group-hover:bg-green-100 transition-colors">
+                <Sparkles className="w-5 h-5" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.readyApps.new') || 'جديد'}</p>
+            <p className="text-2xl font-bold text-green-500">{newApps}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Filters and Search */}
+      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Search */}
+          <div className="flex-1 relative group">
+            <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#114C5A] transition-colors" />
+            <input
+              type="text"
+              placeholder={t('dashboard.readyApps.searchPlaceholder') || 'ابحث عن تطبيق...'}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pr-12 pl-4 py-3 rounded-xl border border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] transition-all"
+              dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 transition"
+              >
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
+            )}
+          </div>
+
+          {/* Category Filter */}
+          <div className="relative group">
+            <Filter className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#114C5A] transition-colors pointer-events-none z-10" />
+            <select
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="appearance-none pr-12 pl-4 py-3 rounded-xl border border-[#114C5A]/10 bg-gray-50 text-gray-900 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] transition-all cursor-pointer"
+              dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
+            >
+              {categoryOptions.map(category => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex gap-2 p-1.5 rounded-xl border border-[#114C5A]/10 bg-gray-50">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2.5 rounded-lg transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-[#114C5A] text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-200'
+              }`}
+              title={t('dashboard.readyApps.gridView') || 'عرض الشبكة'}
+            >
+              <Grid className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2.5 rounded-lg transition-all ${
+                viewMode === 'list'
+                  ? 'bg-[#114C5A] text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-200'
+              }`}
+              title={t('dashboard.readyApps.listView') || 'عرض القائمة'}
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Loading State */}
-        {isLoading ? (
-          <LoadingState />
-        ) : (
-          <>
-            {/* Apps Grid/List */}
-            {apps.length > 0 ? (
-              <>
-                {/* Results Count */}
-                <div className={`mb-6 flex items-center justify-between ${
-                  isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <Package className="w-5 h-5" />
-                    <span className="font-semibold">
-                      {pagination 
-                        ? `${pagination.from}-${pagination.to} ${t('dashboard.readyApps.of') || 'من'} ${pagination.total} ${t('dashboard.readyApps.apps') || 'تطبيق'}`
-                        : `${apps.length} ${t('dashboard.readyApps.apps') || 'تطبيق'}`
-                      }
-                    </span>
-                  </div>
+        {/* Active Filters */}
+        {(searchTerm || selectedCategory !== 'all') && (
+          <div className="mt-4 pt-4 border-t border-[#114C5A]/10 flex flex-wrap gap-2">
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition bg-[#114C5A]/10 text-[#114C5A] border border-[#114C5A]/20 hover:bg-[#114C5A]/20"
+              >
+                {t('dashboard.readyApps.search') || 'بحث'}: {searchTerm}
+                <X className="w-3 h-3" />
+              </button>
+            )}
+            {selectedCategory !== 'all' && (
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition bg-[#114C5A]/10 text-[#114C5A] border border-[#114C5A]/20 hover:bg-[#114C5A]/20"
+              >
+                {t('dashboard.readyApps.category') || 'الفئة'}: {categoryOptions.find(c => c.value === selectedCategory)?.label}
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Loading State */}
+      {isLoading ? (
+        <LoadingState />
+      ) : (
+        <>
+          {/* Apps Grid/List */}
+          {apps.length > 0 ? (
+            <>
+              {/* Results Count */}
+              <div className="mb-6 flex items-center justify-between text-gray-700">
+                <div className="flex items-center gap-2">
+                  <Package className="w-5 h-5 text-[#114C5A]" />
+                  <span className="font-semibold">
+                    {pagination 
+                      ? `${pagination.from}-${pagination.to} ${t('dashboard.readyApps.of') || 'من'} ${pagination.total} ${t('dashboard.readyApps.apps') || 'تطبيق'}`
+                      : `${apps.length} ${t('dashboard.readyApps.apps') || 'تطبيق'}`
+                    }
+                  </span>
                 </div>
+              </div>
 
-                <div className={
-                  viewMode === 'grid'
-                    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-                    : 'space-y-4'
-                }>
-                  {apps.map(app => (
-                    <ReadyAppCard key={app.id} app={app} />
-                  ))}
-                </div>
+              <div className={
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                  : 'space-y-4'
+              }>
+                {apps.map(app => (
+                  <ReadyAppCard key={app.id} app={app} />
+                ))}
+              </div>
 
-                {/* Pagination */}
-                {pagination && pagination.last_page > 1 && (
-                  <div className={`mt-8 p-6 rounded-2xl border ${
-                    isDarkMode 
-                      ? 'bg-slate-800/80 backdrop-blur-sm border-slate-700' 
-                      : 'bg-white/80 backdrop-blur-sm border-gray-200'
-                  }`}>
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className={`text-sm font-semibold ${
-                        isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                      }`}>
-                        {t('dashboard.readyApps.showing') || 'عرض'} {pagination.from}-{pagination.to} {t('dashboard.readyApps.of') || 'من'} {pagination.total} {t('dashboard.readyApps.results') || 'نتيجة'}
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className={`p-2.5 rounded-xl transition-all ${
-                            currentPage === 1
-                              ? 'opacity-50 cursor-not-allowed'
-                              : isDarkMode
-                                ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                          }`}
-                        >
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
-
-                        <div className="flex gap-1">
-                          {[...Array(pagination.last_page)].map((_, index) => {
-                            const page = index + 1;
-                            // Show first page, last page, current page, and pages around current
-                            if (
-                              page === 1 ||
-                              page === pagination.last_page ||
-                              (page >= currentPage - 1 && page <= currentPage + 1)
-                            ) {
-                              return (
-                                <button
-                                  key={page}
-                                  onClick={() => handlePageChange(page)}
-                                  className={`px-4 py-2 rounded-xl font-bold transition-all min-w-[44px] ${
-                                    currentPage === page
-                                      ? 'bg-primary text-white shadow-lg scale-105'
-                                      : isDarkMode
-                                        ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                                  }`}
-                                >
-                                  {page}
-                                </button>
-                              );
-                            } else if (
-                              page === currentPage - 2 ||
-                              page === currentPage + 2
-                            ) {
-                              return (
-                                <span key={page} className={`px-2 py-2 ${
-                                  isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                                }`}>
-                                  ...
-                                </span>
-                              );
-                            }
-                            return null;
-                          })}
-                        </div>
-
-                        <button
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === pagination.last_page}
-                          className={`p-2.5 rounded-xl transition-all ${
-                            currentPage === pagination.last_page
-                              ? 'opacity-50 cursor-not-allowed'
-                              : isDarkMode
-                                ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                          }`}
-                        >
-                          <ChevronLeft className="w-5 h-5" />
-                        </button>
-                      </div>
+              {/* Pagination */}
+              {pagination && pagination.last_page > 1 && (
+                <div className="mt-8">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                        currentPage === 1
+                          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                      }`}
+                    >
+                      <ChevronRight size={18} />
+                      <span className="font-semibold">{t('dashboard.bookings.previous')}</span>
+                    </button>
+                    
+                    <div className="flex items-center gap-2">
+                      {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
+                        let pageNum;
+                        if (pagination.last_page <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= pagination.last_page - 2) {
+                          pageNum = pagination.last_page - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
+                              currentPage === pageNum
+                                ? 'bg-[#114C5A] text-white shadow-md'
+                                : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
                     </div>
+
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === pagination.last_page}
+                      className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                        currentPage === pagination.last_page
+                          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                      }`}
+                    >
+                      <span className="font-semibold">{t('dashboard.bookings.next')}</span>
+                      <ChevronLeft size={18} />
+                    </button>
                   </div>
-                )}
-              </>
-            ) : (
+
+                  {/* Pagination Info */}
+                  <div className="text-center text-sm text-gray-600 mt-4">
+                    {t('dashboard.readyApps.showing') || 'عرض'} {pagination.from}-{pagination.to} {t('dashboard.readyApps.of') || 'من'} {pagination.total} {t('dashboard.readyApps.results') || 'نتيجة'}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-8">
               <EmptyState
                 icon={Package}
                 title={t('dashboard.readyApps.noApps') || 'لا توجد تطبيقات'}
                 message={t('dashboard.readyApps.noAppsMessage') || 'لم يتم العثور على تطبيقات تطابق معايير البحث'}
               />
-            )}
-          </>
-        )}
-      </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

@@ -46,3 +46,6 @@ export * from './wallet.api';
 // Ready Apps APIs
 export * from './ready-apps.api';
 
+// AI Services APIs
+export * from './ai-services.api';
+

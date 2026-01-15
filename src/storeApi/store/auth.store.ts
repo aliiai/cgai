@@ -14,7 +14,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   setUser: (user: User | null) => void;
-  updateUser: (updates: Partial<User>) => void;
+  updateUser: (updates: Partial<User> | User) => void;
   setToken: (token: string | null) => void;
   setLoading: (isLoading: boolean) => void;
   login: (user: User, token: string) => void;
@@ -32,13 +32,21 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user) =>
         set(() => ({
-          user,
+          // إنشاء object جديد لضمان أن Zustand يكتشف التغيير
+          user: user ? { ...user } : null,
           isAuthenticated: !!user,
         })),
 
       updateUser: (updates) =>
         set((state) => {
-          if (!state.user) return state;
+          if (!state.user) {
+            // إذا لم يكن هناك user، نستخدم updates كـ user جديد
+            return {
+              user: updates as User,
+              isAuthenticated: !!updates,
+            };
+          }
+          // دمج التحديثات مع البيانات الحالية
           const updatedUser = { ...state.user, ...updates };
           return {
             user: updatedUser,
@@ -66,100 +74,36 @@ export const useAuthStore = create<AuthState>()(
 
         console.log('Login called with token:', token, 'User:', user);
 
-        // تحديث الحالة أولاً
+        // تحديث الحالة - Zustand persist سيتولى الحفظ تلقائياً
         set(() => ({
           user,
           token,
           isAuthenticated: true,
         }));
-
-        // حفظ البيانات في localStorage بشكل صريح بعد تحديث الحالة
-        setTimeout(() => {
-          try {
-            const authData = {
-              user,
-              token,
-              isAuthenticated: true,
-              isLoading: false,
-              timestamp: new Date().toISOString(),
-            };
-
-            // حفظ في localStorage بنفس البنية التي يستخدمها Zustand persist
-            localStorage.setItem('auth-storage', JSON.stringify({
-              state: authData,
-              version: 0,
-            }));
-
-            // حفظ إضافي في مفاتيح منفصلة للتأكد
-            localStorage.setItem('user-data', JSON.stringify(user));
-            localStorage.setItem('auth-token', token);
-            localStorage.setItem('is-authenticated', 'true');
-            localStorage.setItem('login-timestamp', new Date().toISOString());
-
-            console.log('Data saved to localStorage:', { user, token });
-
-            // التحقق من الحفظ
-            const savedToken = localStorage.getItem('auth-token');
-            if (!savedToken || savedToken === 'null') {
-              console.error('Token was not saved correctly! Saved value:', savedToken);
-            } else {
-              console.log('Token verified in localStorage:', savedToken);
-            }
-          } catch (error) {
-            console.error('Error saving to localStorage:', error);
-          }
-        }, 100);
       },
 
       logout: () => {
-        // تنظيف localStorage بشكل كامل
-        try {
-          localStorage.removeItem('auth-storage');
-          localStorage.removeItem('user-data');
-          localStorage.removeItem('auth-token');
-          localStorage.removeItem('is-authenticated');
-          localStorage.removeItem('login-timestamp');
-        } catch (error) {
-          console.error('Error clearing localStorage:', error);
-        }
-        
         set(() => ({
           user: null,
           token: null,
           isAuthenticated: false,
         }));
+        // Zustand persist سيتولى تنظيف localStorage تلقائياً
       },
 
       clearAuth: () => {
-        // تنظيف localStorage بشكل كامل
-        try {
-          localStorage.removeItem('auth-storage');
-          localStorage.removeItem('user-data');
-          localStorage.removeItem('auth-token');
-          localStorage.removeItem('is-authenticated');
-          localStorage.removeItem('login-timestamp');
-        } catch (error) {
-          console.error('Error clearing localStorage:', error);
-        }
-        
         set(() => ({
           user: null,
           token: null,
           isAuthenticated: false,
           isLoading: false,
         }));
+        // Zustand persist سيتولى تنظيف localStorage تلقائياً
       },
     }),
     {
       name: 'auth-storage',
-      // التأكد من أن persist يحفظ التغييرات فوراً
-      partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
-        isLoading: state.isLoading,
-      }),
+      // Zustand persist سيتولى الحفظ تلقائياً عند أي تغيير في الحالة
     }
   )
 );
-

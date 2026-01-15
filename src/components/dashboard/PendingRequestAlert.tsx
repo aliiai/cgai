@@ -17,30 +17,30 @@ const PendingRequestAlert = ({ pendingRequest, formatDate }: PendingRequestAlert
   return (
     <div className={`border-r-4 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 animate-scaleIn ${
       isDarkMode 
-        ? 'bg-amber-900/20 border-amber-500' 
-        : 'bg-amber-50 border-amber-400'
+        ? 'bg-[#FFB200]/10 border-[#FFB200]' 
+        : 'bg-[#FFB200]/10 border-[#FFB200]'
     }`}>
       <div className="flex items-center gap-6">
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center animate-pulse ${
           isDarkMode 
-            ? 'bg-amber-800/30 text-amber-400' 
-            : 'bg-amber-100 text-amber-600'
+            ? 'bg-[#FFB200]/20 text-[#FFB200]' 
+            : 'bg-[#FFB200]/20 text-[#FFB200]'
         }`}>
           <Clock className="w-8 h-8" />
         </div>
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h3 className={`text-xl font-black ${
-              isDarkMode ? 'text-amber-300' : 'text-amber-900'
+              isDarkMode ? 'text-[#333333]' : 'text-[#333333]'
             }`}>{t('dashboard.pendingRequest.title')}</h3>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+            <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border-2 ${
               isDarkMode 
-                ? 'bg-amber-800/40 text-amber-300' 
-                : 'bg-amber-200 text-amber-800'
+                ? 'bg-[#FFB200]/20 text-[#FFB200] border-[#FFB200]/40' 
+                : 'bg-[#FFB200]/20 text-[#FFB200] border-[#FFB200]/40'
             }`}>{t('dashboard.pendingRequest.status')}</span>
           </div>
-          <p className={`max-w-xl ${
-            isDarkMode ? 'text-amber-200' : 'text-amber-700'
+          <p className={`max-w-xl font-bold ${
+            isDarkMode ? 'text-[#333333]/80' : 'text-[#333333]/80'
           }`}>
             {t('dashboard.pendingRequest.message', {
               name: pendingRequest.subscription?.name || t('dashboard.subscription.subscriptionName'),
@@ -51,7 +51,7 @@ const PendingRequestAlert = ({ pendingRequest, formatDate }: PendingRequestAlert
       </div>
       <button
         onClick={() => navigate('/admin/subscriptions')}
-        className="px-8 py-3 bg-amber-500 text-white rounded-2xl font-black text-sm shadow-lg shadow-amber-500/20 hover:scale-105 transition-all"
+        className="px-8 py-3 bg-[#FFB200] text-[#114C5A] rounded-3xl font-black text-sm shadow-lg shadow-[#FFB200]/20 hover:scale-105 transition-all border-2 border-[#FFB200]"
       >
         {t('dashboard.pendingRequest.details')}
       </button>
@@ -60,4 +60,3 @@ const PendingRequestAlert = ({ pendingRequest, formatDate }: PendingRequestAlert
 };
 
 export default PendingRequestAlert;
-

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AuthButton {
   label: string;
@@ -24,6 +25,9 @@ const AuthButtons = ({
   buttons = defaultButtons,
   className = '' 
 }: AuthButtonsProps) => {
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+  
   return (
     <div className={`flex items-center gap-4 ${className}`}>
       {buttons.map((button, index) => {
@@ -40,7 +44,11 @@ const AuthButtons = ({
               {button.label}
             </span>
             {button.icon === 'arrow' && (
-              <ArrowLeft className="w-5 h-5 relative z-10 transition-colors duration-100 group-hover:text-white group-hover:translate-x-[-4px] transition-transform" />
+              isRTL ? (
+                <ArrowLeft className="w-5 h-5 relative z-10 transition-colors duration-100 group-hover:text-white group-hover:translate-x-[-4px] transition-transform" />
+              ) : (
+                <ArrowRight className="w-5 h-5 relative z-10 transition-colors duration-100 group-hover:text-white group-hover:translate-x-1 transition-transform" />
+              )
             )}
             <span 
               className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-100 ease-in-out" 
@@ -51,14 +59,23 @@ const AuthButtons = ({
           </button>
         );
 
+        // Prevent navigation for request-service and contact links
+        const shouldPreventNavigation = href === '#' || href === '/request-service' || href === '/contact' || href === '/contact-us';
+        
         // إذا كان link موجود أو external أو target محدد، استخدم <a>
         if (button.link || isExternal || target === '_blank' || target === '_self') {
           return (
             <a 
               key={index} 
-              href={href} 
+              href={shouldPreventNavigation ? '#' : href} 
               target={target}
               rel={target === '_blank' ? 'noopener noreferrer' : undefined}
+              onClick={(e) => {
+                if (shouldPreventNavigation) {
+                  e.preventDefault();
+                  // Do nothing - prevent navigation
+                }
+              }}
             >
               {buttonContent}
             </a>

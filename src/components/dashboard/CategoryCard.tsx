@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import type { ServiceCategory } from '../../types/types';
 import CategoryIcon from './CategoryIcon';
 import { useLocalized } from '../../hooks/useLocalized';
-import { useThemeStore } from '../../storeApi/store/theme.store';
 
 interface CategoryCardProps {
   category: ServiceCategory;
@@ -12,40 +11,29 @@ interface CategoryCardProps {
 
 const CategoryCard = ({ category, onClick }: CategoryCardProps) => {
   const { t } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   const localizedCategory = useLocalized(category, ['name', 'description']);
 
   return (
 <div
   onClick={() => onClick(category)}
-  className={`group relative backdrop-blur-xl rounded-3xl p-7 border shadow-lg hover:shadow-xl transition cursor-pointer ${
-    isDarkMode 
-      ? 'bg-slate-800/60 border-slate-700/40 hover:border-primary/40' 
-      : 'bg-white/60 border-white/40 hover:border-primary/40'
-  }`}
+      className="group bg-white border border-[#114C5A]/20 rounded-xl p-6 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all cursor-pointer"
 >
   <CategoryIcon item={category} />
 
-  <h3 className={`text-xl font-bold mt-5 mb-3 ${
-    isDarkMode ? 'text-white' : 'text-gray-800'
-  }`}>
+      <h3 className="text-lg font-semibold text-[#114C5A] mt-4 mb-2">
     {localizedCategory.name}
   </h3>
 
-  <p className={`text-sm mb-6 ${
-    isDarkMode ? 'text-slate-300' : 'text-gray-600'
-  }`}>
+      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
     {localizedCategory.description || ''}
   </p>
 
-  <div className="flex items-center justify-between text-primary font-semibold">
+      <div className="flex items-center justify-between text-[#114C5A] font-medium text-sm pt-3 border-t border-[#114C5A]/10">
     <span>{t('dashboard.services.details')}</span>
-    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition" />
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
   </div>
 </div>
-
   );
 };
 
 export default CategoryCard;
-

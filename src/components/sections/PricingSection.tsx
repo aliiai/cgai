@@ -1,55 +1,61 @@
 import PricingCard from '../PricingCard';
+import { useThemeStore } from '../../storeApi/store/theme.store';
+import { useTranslation } from 'react-i18next';
 
 const PricingSection = () => {
+  const { isDarkMode } = useThemeStore();
+  const { t } = useTranslation();
+  
   const plans = [
     {
       id: 1,
-      name: 'الباقة الأساسية',
+      name: t('pricing.basic.name') || 'الباقة الأساسية',
       price: '1,500',
       currency: 'SAR',
       features: [
-        'حلول ذكاء اصطناعي (نماذج جاهزة)',
-        'تطوير برمجيات أساسي',
-        'تصميم وتجربة مستخدم أساسية',
-        'بيانات وتحليلات محدودة',
-        'دعم أساسي'
+        t('pricing.basic.features.0') || 'حلول ذكاء اصطناعي (نماذج جاهزة)',
+        t('pricing.basic.features.1') || 'تطوير برمجيات أساسي',
+        t('pricing.basic.features.2') || 'تصميم وتجربة مستخدم أساسية',
+        t('pricing.basic.features.3') || 'بيانات وتحليلات محدودة',
+        t('pricing.basic.features.4') || 'دعم أساسي'
       ],
       isPopular: false
     },
     {
       id: 2,
-      name: 'الباقة الاحترافية',
+      name: t('pricing.professional.name') || 'الباقة الاحترافية',
       price: '4,500',
       currency: 'SAR',
       features: [
-        'حلول ذكاء اصطناعي مخصصة',
-        'تطوير برمجيات متقدم',
-        'تصميم وتجربة مستخدم احترافية',
-        'بيانات وتحليلات متقدمة',
-        'حجز خبراء بالساعة',
-        'أولوية في الدعم'
+        t('pricing.professional.features.0') || 'حلول ذكاء اصطناعي مخصصة',
+        t('pricing.professional.features.1') || 'تطوير برمجيات متقدم',
+        t('pricing.professional.features.2') || 'تصميم وتجربة مستخدم احترافية',
+        t('pricing.professional.features.3') || 'بيانات وتحليلات متقدمة',
+        t('pricing.professional.features.4') || 'حجز خبراء بالساعة',
+        t('pricing.professional.features.5') || 'أولوية في الدعم'
       ],
       isPopular: true
     },
     {
       id: 3,
-      name: 'باقة الأعمال',
+      name: t('pricing.business.name') || 'باقة الأعمال',
       price: '9,000',
       currency: 'SAR',
       features: [
-        'حلول ذكاء اصطناعي متقدمة',
-        'أنظمة برمجية جاهزة أو مخصصة',
-        'تصميم وتجربة مستخدم مخصص',
-        'تحليلات وبيانات شاملة',
-        'حجز خبراء',
-        'دعم تقني مستمر'
+        t('pricing.business.features.0') || 'حلول ذكاء اصطناعي متقدمة',
+        t('pricing.business.features.1') || 'أنظمة برمجية جاهزة أو مخصصة',
+        t('pricing.business.features.2') || 'تصميم وتجربة مستخدم مخصص',
+        t('pricing.business.features.3') || 'تحليلات وبيانات شاملة',
+        t('pricing.business.features.4') || 'حجز خبراء',
+        t('pricing.business.features.5') || 'دعم تقني مستمر'
       ],
       isPopular: false
     },
   ];
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-[#114C5A] relative overflow-hidden">
+    <section className={`py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-slate-950' : 'bg-[#114C5A]'
+      }`}>
       {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-auto bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-32"></div>
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] -ml-48 -mb-32"></div>

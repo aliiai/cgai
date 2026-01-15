@@ -1,27 +1,97 @@
-import { Search, Grid3x3, ChevronDown, BookCopy, Navigation, ExternalLink, Bookmark } from 'lucide-react';
-import { useState } from 'react';
-import chatgpt from '../assets/images/chatgpt-logo.png';
-import claude from '../assets/images/cloud-logo.png';
-import grok from '../assets/images/grok-logo.png';
+import { Search, Grid3x3, ChevronDown, ExternalLink, Bookmark, Loader2 } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import chatgptLogo from '../assets/images/chatgpt-logo.png';
+import claudeLogo from '../assets/images/cloud-logo.png';
+import grokLogo from '../assets/images/grok-logo.png';
+import { getAIServices, type AIService, type AIServicesCategory } from '../storeApi/api/home.api';
+import { useThemeStore } from '../storeApi/store/theme.store';
+import { STORAGE_BASE_URL } from '../storeApi/config/constants';
+import { localizeField } from '../utils/localization';
+
 const Technologies = () => {
+  const { isDarkMode } = useThemeStore();
+  const { i18n, t } = useTranslation();
+  const isRTL = i18n.language === 'ar';
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTechnology, setSelectedTechnology] = useState<string | null>(null);
   const [isPaid, setIsPaid] = useState(false);
   const [isFree, setIsFree] = useState(false);
-  const [selectedSection, setSelectedSection] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedPopularSection, setSelectedPopularSection] = useState<string | null>(null);
 
+  // API Data State
+  const [services, setServices] = useState<AIService[]>([]);
+  const [categories, setCategories] = useState<AIServicesCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch AI Services
+  const fetchServices = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const locale = i18n.language === 'ar' ? 'ar' : 'en';
+      const params = {
+        page: 1,
+        per_page: 12,
+        is_free: isFree ? true : (isPaid ? false : undefined),
+        locale
+      };
+      const response = await getAIServices(params);
+      if (response.success && response.data) {
+        setServices(response.data.services);
+        setCategories(response.data.categories);
+      } else {
+        setError(response.message || t('technologies.error.loadingError'));
+      }
+    } catch (err) {
+      setError(t('technologies.error.connectionError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [isFree, isPaid, i18n.language, t]);
+
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
+
+  // إعادة جلب البيانات عند تغيير اللغة
+  useEffect(() => {
+    const handleLanguageChanged = async (lng: string) => {
+      console.log('Language changed to:', lng, '- Refetching technologies data...');
+      await fetchServices();
+    };
+
+    i18n.on('languageChanged', handleLanguageChanged);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChanged);
+    };
+  }, [i18n, fetchServices]);
+
+  // Filter services based on search and other local filters
+  const filteredServices = useMemo(() => {
+    return services.filter(service => {
+      const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.short_description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory ? service.category.id.toString() === selectedCategory : true;
+      const matchesTechnology = selectedTechnology ? service.name.toLowerCase().includes(selectedTechnology.toLowerCase()) : true;
+
+      return matchesSearch && matchesCategory && matchesTechnology;
+    });
+  }, [services, searchTerm, selectedCategory, selectedTechnology]);
+
   return (
-    <div className="technologies-page bg-white min-h-screen">
+    <div className={`technologies-page min-h-screen transition-colors duration-300 ${isDarkMode ? 'bg-slate-900' : 'bg-white'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
         {/* Main Title */}
-        <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 text-center">
-          الدليل الشامل للذكاء الاصطناعي
+        <h1 className={`text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 text-center transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          {t('technologies.title')}
         </h1>
 
         {/* Subtitle */}
-        <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-8 text-center">
-          دليلك الشامل في تجميع وتصنيف أدوات الذكاء الاصطناعي
+        <p className={`text-base md:text-lg lg:text-xl mb-8 text-center transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+          {t('technologies.subtitle')}
         </p>
 
         {/* Gradient Line */}
@@ -40,415 +110,204 @@ const Technologies = () => {
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#FDB103]" />
             <input
               type="text"
-              placeholder="ابحث عن أداة AI..."
+              placeholder={t('technologies.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-12 pl-4 py-4 rounded-full border border-[#FFB200] bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FDB103]/20 transition-all text-base md:text-lg"
-              dir="rtl"
+              className={`w-full pr-12 pl-4 py-4 rounded-full border transition-all text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#FDB103]/20 ${isDarkMode
+                ? 'bg-slate-800 border-slate-700 text-white placeholder:text-gray-500'
+                : 'bg-white border-[#FFB200] text-gray-900 placeholder:text-gray-400'
+                }`}
+              dir={isRTL ? 'rtl' : 'ltr'}
             />
           </div>
         </div>
       </div>
 
-
       {/* Filters Section */}
-      <div className="max-w-7xl mx-auto pb-12 ">
-        <div className="flex flex-col lg:flex-row !gap-16 lg:gap-6 items-start justify-between lg:items-start">
-          {/* Left Section: Most Used Technologies */}
-          <div className="flex-shrink-0">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Grid3x3 className="w-4 h-4 text-gray-700" />
-              <h3 className="text-xl font-semibold text-gray-800">الأقسام الاكثر شيوعا</h3>
+      <div className="max-w-7xl mx-auto pb-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-6 items-start justify-between">
+
+          {/* Popular Categories */}
+          <div className="flex-shrink-0 w-full lg:w-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <Grid3x3 className={`w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`} />
+              <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{t('technologies.popularCategories')}</h3>
             </div>
-            <div className="flex flex-row-reverse gap-1">
-              <button
-                onClick={() => setSelectedPopularSection(selectedPopularSection === 'images' ? null : 'images')}
-                className={`p-2 rounded-full border transition-all flex items-center gap-1 whitespace-nowrap text-sm ${selectedPopularSection === 'images'
-                  ? 'border-[#114C5A] text-gray-900'
-                  : 'border-[#A8D5E2] text-gray-700'
-                  }`}
-              >
-                <span className="text-sm">الصور والفيديو</span>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-600 flex-shrink-0" />
-              </button>
-              <button
-                onClick={() => setSelectedPopularSection(selectedPopularSection === 'design' ? null : 'design')}
-                className={`p-2 rounded-full border transition-all flex items-center gap-1 whitespace-nowrap text-sm ${selectedPopularSection === 'design'
-                  ? 'border-[#114C5A] text-gray-900'
-                  : 'border-[#A8D5E2] text-gray-700'
-                  }`}
-              >
-                <span className="text-sm">التصميم والإبداع</span>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-600 flex-shrink-0" />
-              </button>
-              <button
-                onClick={() => setSelectedPopularSection(selectedPopularSection === 'chat' ? null : 'chat')}
-                className={`p-2 rounded-full border transition-all flex items-center gap-1 whitespace-nowrap text-sm ${selectedPopularSection === 'chat'
-                  ? 'border-[#114C5A] text-gray-900'
-                  : 'border-[#A8D5E2] text-gray-700'
-                  }`}
-              >
-                <span className="text-sm">الدردشة والمساعدين</span>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-600 flex-shrink-0" />
-              </button>
+            <div className="flex flex-wrap gap-2">
+              {[t('technologies.categories.images'), t('technologies.categories.design'), t('technologies.categories.chat')].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedPopularSection(selectedPopularSection === cat ? null : cat)}
+                  className={`px-4 py-2 rounded-full border transition-all flex items-center gap-1 text-sm ${selectedPopularSection === cat
+                    ? 'bg-[#114C5A] text-white border-[#114C5A]'
+                    : isDarkMode
+                      ? 'border-slate-700 text-gray-300 hover:border-[#114C5A]'
+                      : 'border-[#A8D5E2] text-gray-700 hover:border-[#114C5A]'
+                    }`}
+                >
+                  <span>{cat}</span>
+                  <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Middle Section: General Filters */}
-          <div className="flex-1 flex items-center justify-center gap-4 lg:gap-6">
-            {/* Paid Checkbox */}
+          {/* Center Filters */}
+          <div className="flex flex-1 items-center justify-center gap-4 lg:gap-6 w-full">
+            {/* Paid Filter */}
             <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
-              <span className="text-sm text-gray-700">مدفوع</span>
               <input
                 type="checkbox"
                 checked={isPaid}
-                onChange={(e) => setIsPaid(e.target.checked)}
-                className="w-6 h-6 rounded border border-[#FFE5B4] accent-[#FFB200] focus:ring-1 focus:ring-[#FFB200]/20 focus:ring-offset-0 cursor-pointer"
-                style={{ accentColor: '#FFB200' }}
+                onChange={(e) => {
+                  setIsPaid(e.target.checked);
+                  if (e.target.checked) setIsFree(false);
+                }}
+                className="w-6 h-6 rounded border border-[#FFE5B4] accent-[#FFB200] cursor-pointer"
               />
+              <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('technologies.paid')}</span>
             </label>
 
-            {/* Section Dropdown */}
+            {/* Category Dropdown */}
             <div className="relative flex-1 max-w-xs">
               <select
-                value={selectedSection}
-                onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full px-4 py-4 pr-50 pl-5 rounded-full border border-[#FFE5B4] bg-white text-gray-400 appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#FFB200]/20
-                 focus:border-[#FFB200] text-sm"
-                dir="rtl"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className={`w-full px-4 py-3 pr-10 pl-4 rounded-full border appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#FFB200]/20 text-sm transition-colors ${isDarkMode
+                  ? 'bg-slate-800 border-slate-700 text-gray-300'
+                  : 'bg-white border-[#FFE5B4] text-gray-600'
+                  }`}
+                dir={isRTL ? 'rtl' : 'ltr'}
               >
-                <option value="" disabled>اختر القسم</option>
-                <option value="section1">قسم 1</option>
-                <option value="section2">قسم 2</option>
-                <option value="section3">قسم 3</option>
+                <option value="">{t('technologies.allCategories')}</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id.toString()}>{cat.name}</option>
+                ))}
               </select>
-              <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
             </div>
 
-            {/* Free Checkbox */}
+            {/* Free Filter */}
             <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
-              <span className="text-sm text-gray-700">مجاني</span>
+              <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('technologies.free')}</span>
               <input
                 type="checkbox"
                 checked={isFree}
-                onChange={(e) => setIsFree(e.target.checked)}
-                className="w-6 h-6 rounded border border-[#FFE5B4] accent-[#FFB200] focus:ring-1 focus:ring-[#FFB200]/20 focus:ring-offset-0 cursor-pointer"
-                style={{ accentColor: '#FFB200' }}
+                onChange={(e) => {
+                  setIsFree(e.target.checked);
+                  if (e.target.checked) setIsPaid(false);
+                }}
+                className="w-6 h-6 rounded border border-[#FFE5B4] accent-[#FFB200] cursor-pointer"
               />
             </label>
           </div>
 
-          {/* Right Section: Most Popular Sections */}
-
-          <div className="flex-shrink-0">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Grid3x3 className="w-4 h-4 text-gray-700" />
-              <h3 className="text-base font-semibold text-gray-800">التقنيات الأكثر استخداما</h3>
+          {/* Popular Tech */}
+          <div className="flex-shrink-0 w-full lg:w-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <Grid3x3 className={`w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`} />
+              <h3 className={`text-base font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{t('technologies.popularTechnologies')}</h3>
             </div>
-            <div className="flex flex-row-reverse gap-2">
-              <button
-                onClick={() => setSelectedTechnology(selectedTechnology === 'grok' ? null : 'grok')}
-                className={`px-3 py-1 rounded-full border transition-all flex items-center gap-2 whitespace-nowrap ${selectedTechnology === 'grok'
-                  ? 'border-[#FFB200] text-gray-900'
-                  : 'border-[#FFE5B4] text-gray-700'
-                  }`}
-              >
-                <img src={grok} alt="Grok" className="w-6 h-6 object-contain flex-shrink-0" />
-                <span className="">Grok</span>
-              </button>
-              <button
-                onClick={() => setSelectedTechnology(selectedTechnology === 'chatgpt' ? null : 'chatgpt')}
-                className={`px-3 py-1 rounded-full border transition-all flex items-center gap-2 whitespace-nowrap ${selectedTechnology === 'chatgpt'
-                  ? 'border-[#FFB200] text-gray-900'
-                  : 'border-[#FFE5B4] text-gray-700'
-                  }`}
-              >
-                <img src={chatgpt} alt="ChatGPT" className="w-6 h-6 object-contain flex-shrink-0" />
-                <span className="text-sm">Chatgpt</span>
-              </button>
-              <button
-                onClick={() => setSelectedTechnology(selectedTechnology === 'claude' ? null : 'claude')}
-                className={`px-3 py-1 rounded-full border transition-all flex items-center gap-2 whitespace-nowrap ${selectedTechnology === 'claude'
-                  ? 'border-[#FFB200] text-gray-900'
-                  : 'border-[#FFE5B4] text-gray-700'
-                  }`}
-              >
-                <img src={claude} alt="Claude" className="w-6 h-6 object-contain flex-shrink-0" />
-                <span className="text-sm">claude ai</span>
-              </button>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { name: 'Grok', id: 'grok', logo: grokLogo },
+                { name: 'ChatGPT', id: 'chatgpt', logo: chatgptLogo },
+                { name: 'Claude', id: 'claude', logo: claudeLogo }
+              ].map((tech) => (
+                <button
+                  key={tech.id}
+                  onClick={() => setSelectedTechnology(selectedTechnology === tech.id ? null : tech.id)}
+                  className={`px-3 py-1.5 rounded-full border transition-all flex items-center gap-2 ${selectedTechnology === tech.id
+                    ? 'border-[#FFB200] bg-[#FFB200]/10 text-gray-900'
+                    : isDarkMode
+                      ? 'border-slate-700 text-gray-300'
+                      : 'border-[#FFE5B4] text-gray-700'
+                    }`}
+                >
+                  <img src={tech.logo} alt={tech.name} className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-medium">{tech.name}</span>
+                </button>
+              ))}
             </div>
           </div>
-
         </div>
       </div>
 
-
-
-
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8 ">
-        <div className="relative rounded-[2.5rem] pb-6 border border-[#1B4D58] bg-white hover:shadow-lg overflow-hidden transition-shadow">
-          {/* Header Icons */}
-          <div className="absolute top-6 left-6 flex gap-3 z-10">
-            <button className="w-10 h-10 rounded-2xl bg-[#ffedd5] flex items-center justify-center hover:bg-[#fed7aa] transition-colors">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.935 1.99146C11.9136 0.635133 13.9028 -0.0430253 14.9728 1.02693C16.0427 2.09689 15.3646 4.08618 14.0083 8.06476L13.0847 10.7741C12.0431 13.8296 11.5222 15.3573 10.6637 15.4838C10.4329 15.5178 10.194 15.4973 9.96558 15.424C9.11625 15.1513 8.66725 13.5405 7.76925 10.3189C7.57008 9.60434 7.4705 9.24701 7.24366 8.97409C7.17783 8.89492 7.10483 8.82193 7.02566 8.75609C6.75275 8.52926 6.39541 8.42967 5.68087 8.23051C2.45926 7.33251 0.848447 6.88351 0.575747 6.03415C0.50243 5.80579 0.481972 5.56687 0.515964 5.33605C0.642397 4.47752 2.17016 3.95671 5.22566 2.91507L7.935 1.99146Z" stroke="#141B34" />
-              </svg>
-
-            </button>
-            <button className="w-10 h-10 rounded-2xl bg-[#bae6fd] flex items-center justify-center hover:bg-[#a5dbf9] transition-colors">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.5 14.984V10.5896C2.5 7.56182 2.5 6.04792 3.41529 5.1073C4.33058 4.16669 5.80372 4.16669 8.75 4.16669C11.6962 4.16669 13.1694 4.16669 14.0847 5.1073C15 6.04792 15 7.56182 15 10.5896V14.984C15 16.9056 15 17.8664 14.3962 18.2103C13.227 18.8762 11.0337 16.6544 9.99217 15.9854C9.38808 15.5974 9.08608 15.4034 8.75 15.4034C8.41392 15.4034 8.11188 15.5974 7.50782 15.9854C6.46625 16.6544 4.27302 18.8762 3.10378 18.2103C2.5 17.8664 2.5 16.9056 2.5 14.984Z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7.5 1.66669H9.16667C13.095 1.66669 15.0592 1.66669 16.2796 2.88708C17.5 4.10746 17.5 6.07165 17.5 10V15" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+      {/* Services Grid */}
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <Loader2 className="w-12 h-12 text-[#FFB200] animate-spin" />
+            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>{t('technologies.loading')}</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-[#FFB200] text-black rounded-full font-bold"
+            >
+              {t('technologies.retry')}
             </button>
           </div>
+        ) : filteredServices.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredServices.map((service) => (
+              <div
+                key={service.id}
+                className={`group relative rounded-[2.5rem] pb-8 border overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${isDarkMode
+                  ? 'bg-slate-800 border-slate-700 hover:border-[#FDB103]/50'
+                  : 'bg-white border-[#1B4D58]/10 hover:border-[#1B4D58]'
+                  }`}
+              >
+                {/* Save Button */}
+                <button className={`absolute top-6 left-6 z-10 p-2.5 rounded-2xl transition-all shadow-sm ${isDarkMode ? 'bg-slate-700 hover:bg-slate-600 text-gray-400' : 'bg-[#bae6fd]/50 hover:bg-[#bae6fd] text-[#1B4D58]'
+                  }`}>
+                  <Bookmark className="w-5 h-5" />
+                </button>
 
-          {/* Logo Area */}
-          <div className="relative h-64 mb-2 flex items-center justify-center p-4 pt-6">
-            <img src={chatgpt} alt="ChatGPT" className="w-full h-full object-contain drop-shadow-sm" />
+                {/* Logo/Image Area */}
+                <div className="relative h-64 mb-4 flex items-center justify-center p-6 bg-gradient-to-b from-transparent to-black/5">
+                  <img
+                    src={service.main_image.startsWith('http') ? service.main_image : `${STORAGE_BASE_URL}${service.main_image}`}
+                    alt={service.name}
+                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+
+                {/* Content Area */}
+                <div className="px-8 text-right space-y-4">
+                  <div className="flex items-center justify-start gap-3">
+                    <h3 className={`text-2xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {localizeField(service.name, (service as any).name_en, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' })}
+                    </h3>
+                    <ExternalLink className={`w-6 h-6 ${isDarkMode ? 'text-[#FDB103]' : 'text-[#1B4D58]'}`} />
+                  </div>
+
+                  <p className={`text-sm leading-relaxed min-h-[3rem] line-clamp-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    {localizeField(service.short_description, (service as any).short_description_en, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' })}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100/10">
+                    <span className="bg-[#1B4D58] text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-sm">
+                      {localizeField(service.category.name, (service.category as any).name_en, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' })}
+                    </span>
+                    {service.is_free && (
+                      <span className="text-[#FFB200] text-xs font-bold">{t('technologies.free')}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-
-          {/* Content Area */}
-          <div className="text-right space-y-3 px-6">
-            {/* Title */}
-            <div className="flex items-center justify-start gap-3 mb-1">
-              <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Chatgpt</h3>
-              <ExternalLink className="w-8 h-8 text-[#1B4D58]" />
-            </div>
-
-            {/* Description */}
-            <p className="text-[#6B7280] text-[15px] leading-[1.6] font-normal" dir="rtl">
-              أداة ذكاء اصطناعي تساعدك على التفكير بوضوح، تطوير أفكارك، وإنجاز مهامك بسرعة وسهولة.
-            </p>
-
-            {/* Tag */}
-            <div className="flex justify-start pt-3">
-              <span className="bg-[#1B4D58] text-white px-3 py-1 rounded-full text-sm font-semibold tracking-wide shadow-sm hover:bg-[#153d47] transition-colors cursor-pointer">
-                AI Assistant
-              </span>
-            </div>
+        ) : (
+          <div className="text-center py-20">
+            <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('technologies.noResults')}</p>
           </div>
-        </div>
-        <div className="relative rounded-[2.5rem] pb-6 border border-[#1B4D58] bg-white hover:shadow-lg overflow-hidden transition-shadow">
-          {/* Header Icons */}
-          <div className="absolute top-6 left-6 flex gap-3 z-10">
-            <button className="w-10 h-10 rounded-2xl bg-[#ffedd5] flex items-center justify-center hover:bg-[#fed7aa] transition-colors">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.935 1.99146C11.9136 0.635133 13.9028 -0.0430253 14.9728 1.02693C16.0427 2.09689 15.3646 4.08618 14.0083 8.06476L13.0847 10.7741C12.0431 13.8296 11.5222 15.3573 10.6637 15.4838C10.4329 15.5178 10.194 15.4973 9.96558 15.424C9.11625 15.1513 8.66725 13.5405 7.76925 10.3189C7.57008 9.60434 7.4705 9.24701 7.24366 8.97409C7.17783 8.89492 7.10483 8.82193 7.02566 8.75609C6.75275 8.52926 6.39541 8.42967 5.68087 8.23051C2.45926 7.33251 0.848447 6.88351 0.575747 6.03415C0.50243 5.80579 0.481972 5.56687 0.515964 5.33605C0.642397 4.47752 2.17016 3.95671 5.22566 2.91507L7.935 1.99146Z" stroke="#141B34" />
-              </svg>
-
-            </button>
-            <button className="w-10 h-10 rounded-2xl bg-[#bae6fd] flex items-center justify-center hover:bg-[#a5dbf9] transition-colors">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.5 14.984V10.5896C2.5 7.56182 2.5 6.04792 3.41529 5.1073C4.33058 4.16669 5.80372 4.16669 8.75 4.16669C11.6962 4.16669 13.1694 4.16669 14.0847 5.1073C15 6.04792 15 7.56182 15 10.5896V14.984C15 16.9056 15 17.8664 14.3962 18.2103C13.227 18.8762 11.0337 16.6544 9.99217 15.9854C9.38808 15.5974 9.08608 15.4034 8.75 15.4034C8.41392 15.4034 8.11188 15.5974 7.50782 15.9854C6.46625 16.6544 4.27302 18.8762 3.10378 18.2103C2.5 17.8664 2.5 16.9056 2.5 14.984Z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7.5 1.66669H9.16667C13.095 1.66669 15.0592 1.66669 16.2796 2.88708C17.5 4.10746 17.5 6.07165 17.5 10V15" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Logo Area */}
-          <div className="relative h-64 mb-2 flex items-center justify-center p-4 pt-6">
-            <img src={chatgpt} alt="ChatGPT" className="w-full h-full object-contain drop-shadow-sm" />
-          </div>
-
-          {/* Content Area */}
-          <div className="text-right space-y-3 px-6">
-            {/* Title */}
-            <div className="flex items-center justify-start gap-3 mb-1">
-              <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Chatgpt</h3>
-              <ExternalLink className="w-8 h-8 text-[#1B4D58]" />
-            </div>
-
-            {/* Description */}
-            <p className="text-[#6B7280] text-[15px] leading-[1.6] font-normal" dir="rtl">
-              أداة ذكاء اصطناعي تساعدك على التفكير بوضوح، تطوير أفكارك، وإنجاز مهامك بسرعة وسهولة.
-            </p>
-
-            {/* Tag */}
-            <div className="flex justify-start pt-3">
-              <span className="bg-[#1B4D58] text-white px-3 py-1 rounded-full text-sm font-semibold tracking-wide shadow-sm hover:bg-[#153d47] transition-colors cursor-pointer">
-                AI Assistant
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="relative rounded-[2.5rem] pb-6 border border-[#1B4D58] bg-white hover:shadow-lg overflow-hidden transition-shadow">
-          {/* Header Icons */}
-          <div className="absolute top-6 left-6 flex gap-3 z-10">
-            <button className="w-10 h-10 rounded-2xl bg-[#ffedd5] flex items-center justify-center hover:bg-[#fed7aa] transition-colors">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.935 1.99146C11.9136 0.635133 13.9028 -0.0430253 14.9728 1.02693C16.0427 2.09689 15.3646 4.08618 14.0083 8.06476L13.0847 10.7741C12.0431 13.8296 11.5222 15.3573 10.6637 15.4838C10.4329 15.5178 10.194 15.4973 9.96558 15.424C9.11625 15.1513 8.66725 13.5405 7.76925 10.3189C7.57008 9.60434 7.4705 9.24701 7.24366 8.97409C7.17783 8.89492 7.10483 8.82193 7.02566 8.75609C6.75275 8.52926 6.39541 8.42967 5.68087 8.23051C2.45926 7.33251 0.848447 6.88351 0.575747 6.03415C0.50243 5.80579 0.481972 5.56687 0.515964 5.33605C0.642397 4.47752 2.17016 3.95671 5.22566 2.91507L7.935 1.99146Z" stroke="#141B34" />
-              </svg>
-
-            </button>
-            <button className="w-10 h-10 rounded-2xl bg-[#bae6fd] flex items-center justify-center hover:bg-[#a5dbf9] transition-colors">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.5 14.984V10.5896C2.5 7.56182 2.5 6.04792 3.41529 5.1073C4.33058 4.16669 5.80372 4.16669 8.75 4.16669C11.6962 4.16669 13.1694 4.16669 14.0847 5.1073C15 6.04792 15 7.56182 15 10.5896V14.984C15 16.9056 15 17.8664 14.3962 18.2103C13.227 18.8762 11.0337 16.6544 9.99217 15.9854C9.38808 15.5974 9.08608 15.4034 8.75 15.4034C8.41392 15.4034 8.11188 15.5974 7.50782 15.9854C6.46625 16.6544 4.27302 18.8762 3.10378 18.2103C2.5 17.8664 2.5 16.9056 2.5 14.984Z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7.5 1.66669H9.16667C13.095 1.66669 15.0592 1.66669 16.2796 2.88708C17.5 4.10746 17.5 6.07165 17.5 10V15" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Logo Area */}
-          <div className="relative h-64 mb-2 flex items-center justify-center p-4 pt-6">
-            <img src={chatgpt} alt="ChatGPT" className="w-full h-full object-contain drop-shadow-sm" />
-          </div>
-
-          {/* Content Area */}
-          <div className="text-right space-y-3 px-6">
-            {/* Title */}
-            <div className="flex items-center justify-start gap-3 mb-1">
-              <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Chatgpt</h3>
-              <ExternalLink className="w-8 h-8 text-[#1B4D58]" />
-            </div>
-
-            {/* Description */}
-            <p className="text-[#6B7280] text-[15px] leading-[1.6] font-normal" dir="rtl">
-              أداة ذكاء اصطناعي تساعدك على التفكير بوضوح، تطوير أفكارك، وإنجاز مهامك بسرعة وسهولة.
-            </p>
-
-            {/* Tag */}
-            <div className="flex justify-start pt-3">
-              <span className="bg-[#1B4D58] text-white px-3 py-1 rounded-full text-sm font-semibold tracking-wide shadow-sm hover:bg-[#153d47] transition-colors cursor-pointer">
-                AI Assistant
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="relative rounded-[2.5rem] pb-6 border border-[#1B4D58] bg-white hover:shadow-lg overflow-hidden transition-shadow">
-          {/* Header Icons */}
-          <div className="absolute top-6 left-6 flex gap-3 z-10">
-            <button className="w-10 h-10 rounded-2xl bg-[#ffedd5] flex items-center justify-center hover:bg-[#fed7aa] transition-colors">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.935 1.99146C11.9136 0.635133 13.9028 -0.0430253 14.9728 1.02693C16.0427 2.09689 15.3646 4.08618 14.0083 8.06476L13.0847 10.7741C12.0431 13.8296 11.5222 15.3573 10.6637 15.4838C10.4329 15.5178 10.194 15.4973 9.96558 15.424C9.11625 15.1513 8.66725 13.5405 7.76925 10.3189C7.57008 9.60434 7.4705 9.24701 7.24366 8.97409C7.17783 8.89492 7.10483 8.82193 7.02566 8.75609C6.75275 8.52926 6.39541 8.42967 5.68087 8.23051C2.45926 7.33251 0.848447 6.88351 0.575747 6.03415C0.50243 5.80579 0.481972 5.56687 0.515964 5.33605C0.642397 4.47752 2.17016 3.95671 5.22566 2.91507L7.935 1.99146Z" stroke="#141B34" />
-              </svg>
-
-            </button>
-            <button className="w-10 h-10 rounded-2xl bg-[#bae6fd] flex items-center justify-center hover:bg-[#a5dbf9] transition-colors">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.5 14.984V10.5896C2.5 7.56182 2.5 6.04792 3.41529 5.1073C4.33058 4.16669 5.80372 4.16669 8.75 4.16669C11.6962 4.16669 13.1694 4.16669 14.0847 5.1073C15 6.04792 15 7.56182 15 10.5896V14.984C15 16.9056 15 17.8664 14.3962 18.2103C13.227 18.8762 11.0337 16.6544 9.99217 15.9854C9.38808 15.5974 9.08608 15.4034 8.75 15.4034C8.41392 15.4034 8.11188 15.5974 7.50782 15.9854C6.46625 16.6544 4.27302 18.8762 3.10378 18.2103C2.5 17.8664 2.5 16.9056 2.5 14.984Z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7.5 1.66669H9.16667C13.095 1.66669 15.0592 1.66669 16.2796 2.88708C17.5 4.10746 17.5 6.07165 17.5 10V15" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Logo Area */}
-          <div className="relative h-64 mb-2 flex items-center justify-center p-4 pt-6">
-            <img src={chatgpt} alt="ChatGPT" className="w-full h-full object-contain drop-shadow-sm" />
-          </div>
-
-          {/* Content Area */}
-          <div className="text-right space-y-3 px-6">
-            {/* Title */}
-            <div className="flex items-center justify-start gap-3 mb-1">
-              <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Chatgpt</h3>
-              <ExternalLink className="w-8 h-8 text-[#1B4D58]" />
-            </div>
-
-            {/* Description */}
-            <p className="text-[#6B7280] text-[15px] leading-[1.6] font-normal" dir="rtl">
-              أداة ذكاء اصطناعي تساعدك على التفكير بوضوح، تطوير أفكارك، وإنجاز مهامك بسرعة وسهولة.
-            </p>
-
-            {/* Tag */}
-            <div className="flex justify-start pt-3">
-              <span className="bg-[#1B4D58] text-white px-3 py-1 rounded-full text-sm font-semibold tracking-wide shadow-sm hover:bg-[#153d47] transition-colors cursor-pointer">
-                AI Assistant
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="relative rounded-[2.5rem] pb-6 border border-[#1B4D58] bg-white hover:shadow-lg overflow-hidden transition-shadow">
-          {/* Header Icons */}
-          <div className="absolute top-6 left-6 flex gap-3 z-10">
-            <button className="w-10 h-10 rounded-2xl bg-[#ffedd5] flex items-center justify-center hover:bg-[#fed7aa] transition-colors">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.935 1.99146C11.9136 0.635133 13.9028 -0.0430253 14.9728 1.02693C16.0427 2.09689 15.3646 4.08618 14.0083 8.06476L13.0847 10.7741C12.0431 13.8296 11.5222 15.3573 10.6637 15.4838C10.4329 15.5178 10.194 15.4973 9.96558 15.424C9.11625 15.1513 8.66725 13.5405 7.76925 10.3189C7.57008 9.60434 7.4705 9.24701 7.24366 8.97409C7.17783 8.89492 7.10483 8.82193 7.02566 8.75609C6.75275 8.52926 6.39541 8.42967 5.68087 8.23051C2.45926 7.33251 0.848447 6.88351 0.575747 6.03415C0.50243 5.80579 0.481972 5.56687 0.515964 5.33605C0.642397 4.47752 2.17016 3.95671 5.22566 2.91507L7.935 1.99146Z" stroke="#141B34" />
-              </svg>
-
-            </button>
-            <button className="w-10 h-10 rounded-2xl bg-[#bae6fd] flex items-center justify-center hover:bg-[#a5dbf9] transition-colors">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.5 14.984V10.5896C2.5 7.56182 2.5 6.04792 3.41529 5.1073C4.33058 4.16669 5.80372 4.16669 8.75 4.16669C11.6962 4.16669 13.1694 4.16669 14.0847 5.1073C15 6.04792 15 7.56182 15 10.5896V14.984C15 16.9056 15 17.8664 14.3962 18.2103C13.227 18.8762 11.0337 16.6544 9.99217 15.9854C9.38808 15.5974 9.08608 15.4034 8.75 15.4034C8.41392 15.4034 8.11188 15.5974 7.50782 15.9854C6.46625 16.6544 4.27302 18.8762 3.10378 18.2103C2.5 17.8664 2.5 16.9056 2.5 14.984Z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7.5 1.66669H9.16667C13.095 1.66669 15.0592 1.66669 16.2796 2.88708C17.5 4.10746 17.5 6.07165 17.5 10V15" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Logo Area */}
-          <div className="relative h-64 mb-2 flex items-center justify-center p-4 pt-6">
-            <img src={chatgpt} alt="ChatGPT" className="w-full h-full object-contain drop-shadow-sm" />
-          </div>
-
-          {/* Content Area */}
-          <div className="text-right space-y-3 px-6">
-            {/* Title */}
-            <div className="flex items-center justify-start gap-3 mb-1">
-              <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Chatgpt</h3>
-              <ExternalLink className="w-8 h-8 text-[#1B4D58]" />
-            </div>
-
-            {/* Description */}
-            <p className="text-[#6B7280] text-[15px] leading-[1.6] font-normal" dir="rtl">
-              أداة ذكاء اصطناعي تساعدك على التفكير بوضوح، تطوير أفكارك، وإنجاز مهامك بسرعة وسهولة.
-            </p>
-
-            {/* Tag */}
-            <div className="flex justify-start pt-3">
-              <span className="bg-[#1B4D58] text-white px-3 py-1 rounded-full text-sm font-semibold tracking-wide shadow-sm hover:bg-[#153d47] transition-colors cursor-pointer">
-                AI Assistant
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="relative rounded-[2.5rem] pb-6 border border-[#1B4D58] bg-white hover:shadow-lg overflow-hidden transition-shadow">
-          {/* Header Icons */}
-          <div className="absolute top-6 left-6 flex gap-3 z-10">
-            <button className="w-10 h-10 rounded-2xl bg-[#ffedd5] flex items-center justify-center hover:bg-[#fed7aa] transition-colors">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.935 1.99146C11.9136 0.635133 13.9028 -0.0430253 14.9728 1.02693C16.0427 2.09689 15.3646 4.08618 14.0083 8.06476L13.0847 10.7741C12.0431 13.8296 11.5222 15.3573 10.6637 15.4838C10.4329 15.5178 10.194 15.4973 9.96558 15.424C9.11625 15.1513 8.66725 13.5405 7.76925 10.3189C7.57008 9.60434 7.4705 9.24701 7.24366 8.97409C7.17783 8.89492 7.10483 8.82193 7.02566 8.75609C6.75275 8.52926 6.39541 8.42967 5.68087 8.23051C2.45926 7.33251 0.848447 6.88351 0.575747 6.03415C0.50243 5.80579 0.481972 5.56687 0.515964 5.33605C0.642397 4.47752 2.17016 3.95671 5.22566 2.91507L7.935 1.99146Z" stroke="#141B34" />
-              </svg>
-
-            </button>
-            <button className="w-10 h-10 rounded-2xl bg-[#bae6fd] flex items-center justify-center hover:bg-[#a5dbf9] transition-colors">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.5 14.984V10.5896C2.5 7.56182 2.5 6.04792 3.41529 5.1073C4.33058 4.16669 5.80372 4.16669 8.75 4.16669C11.6962 4.16669 13.1694 4.16669 14.0847 5.1073C15 6.04792 15 7.56182 15 10.5896V14.984C15 16.9056 15 17.8664 14.3962 18.2103C13.227 18.8762 11.0337 16.6544 9.99217 15.9854C9.38808 15.5974 9.08608 15.4034 8.75 15.4034C8.41392 15.4034 8.11188 15.5974 7.50782 15.9854C6.46625 16.6544 4.27302 18.8762 3.10378 18.2103C2.5 17.8664 2.5 16.9056 2.5 14.984Z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7.5 1.66669H9.16667C13.095 1.66669 15.0592 1.66669 16.2796 2.88708C17.5 4.10746 17.5 6.07165 17.5 10V15" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Logo Area */}
-          <div className="relative h-64 mb-2 flex items-center justify-center p-4 pt-6">
-            <img src={chatgpt} alt="ChatGPT" className="w-full h-full object-contain drop-shadow-sm" />
-          </div>
-
-          {/* Content Area */}
-          <div className="text-right space-y-3 px-6">
-            {/* Title */}
-            <div className="flex items-center justify-start gap-3 mb-1">
-              <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Chatgpt</h3>
-              <ExternalLink className="w-8 h-8 text-[#1B4D58]" />
-            </div>
-
-            {/* Description */}
-            <p className="text-[#6B7280] text-[15px] leading-[1.6] font-normal" dir="rtl">
-              أداة ذكاء اصطناعي تساعدك على التفكير بوضوح، تطوير أفكارك، وإنجاز مهامك بسرعة وسهولة.
-            </p>
-
-            {/* Tag */}
-            <div className="flex justify-start pt-3">
-              <span className="bg-[#1B4D58] text-white px-3 py-1 rounded-full text-sm font-semibold tracking-wide shadow-sm hover:bg-[#153d47] transition-colors cursor-pointer">
-                AI Assistant
-              </span>
-            </div>
-          </div>
-        </div>
-
+        )}
       </div>
     </div>
   );
 };
 
 export default Technologies;
-

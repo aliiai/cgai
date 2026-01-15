@@ -12,7 +12,7 @@ interface LogoProps {
 const sizeClasses = {
   sm: 'w-[40px] h-[40px]',
   md: 'w-[60px] h-[60px]',
-  lg: 'w-[100px] h-[100px]',
+  lg: 'w-[150px] h-[150px]',
 };
 
 const Logo = ({ onClick, className = '', size = 'lg' }: LogoProps) => {

@@ -1,12 +1,14 @@
 import AuthButtons from '../AuthButtons';
 import type { TechnologiesSectionData } from '../../storeApi/api/home.api';
+import { useThemeStore } from '../../storeApi/store/theme.store';
 
 interface NewsletterSectionProps {
   data?: TechnologiesSectionData;
 }
 
 const NewsletterSection = ({ data }: NewsletterSectionProps) => {
-  // استخدام البيانات من API إذا كانت متوفرة
+  const { isDarkMode } = useThemeStore();
+  // ... state ...
   const heading = data?.heading;
   const description = data?.description;
   const backgroundImage = data?.background_image;
@@ -20,7 +22,8 @@ const NewsletterSection = ({ data }: NewsletterSectionProps) => {
   ];
 
   return (
-    <section className="bg-white flex items-center justify-center h-auto py-8 md:py-12 lg:h-[70vh] lg:py-0">
+    <section className={`flex items-center justify-center h-auto py-8 md:py-12 lg:h-[70vh] lg:py-0 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900' : 'bg-white'
+      }`}>
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 h-full flex items-center justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-0 rounded-2xl md:rounded-3xl overflow-hidden shadow-xl md:shadow-2xl w-full lg:h-[90%]">
           {/* Left Section - Text and CTA */}
@@ -35,7 +38,7 @@ const NewsletterSection = ({ data }: NewsletterSectionProps) => {
                 {description}
               </p>
             )}
-            
+
             {/* CTA Buttons */}
             <AuthButtons
               buttons={buttons.map((btn) => ({

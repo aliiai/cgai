@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
-import { CreditCard, FileText, Loader2, Calendar, CheckCircle2, XCircle, Clock } from 'lucide-react';
-import { useThemeStore } from '../../storeApi/store/theme.store';
+import { CreditCard, FileText, Loader2, Calendar, CheckCircle2, XCircle, Clock, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { getInvoices } from '../../storeApi/api/invoices.api';
 import InvoicePopup from '../../components/dashboard/InvoicePopup';
+import LoadingState from '../../components/dashboard/LoadingState';
+import EmptyState from '../../components/dashboard/EmptyState';
 import type { Invoice } from '../../types/types';
 
 const Payments = () => {
   const { t, i18n } = useTranslation();
-  const { isDarkMode } = useThemeStore();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -100,33 +100,33 @@ const Payments = () => {
   };
 
   const getPaymentStatusBadge = (status: string) => {
-    const baseClasses = "px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5";
+    const baseClasses = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border";
     
     switch (status) {
       case 'paid':
         return (
-          <span className={`${baseClasses} bg-green-100 text-green-700 ${isDarkMode ? 'bg-green-900/30 text-green-400' : ''}`}>
+          <span className={`${baseClasses} bg-green-50 text-green-700 border-green-200`}>
             <CheckCircle2 className="w-3.5 h-3.5" />
             {t('dashboard.payments.paid')}
           </span>
         );
       case 'unpaid':
         return (
-          <span className={`${baseClasses} bg-red-100 text-red-700 ${isDarkMode ? 'bg-red-900/30 text-red-400' : ''}`}>
+          <span className={`${baseClasses} bg-red-50 text-red-700 border-red-200`}>
             <XCircle className="w-3.5 h-3.5" />
             {t('dashboard.payments.unpaid')}
           </span>
         );
       case 'pending':
         return (
-          <span className={`${baseClasses} bg-yellow-100 text-yellow-700 ${isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : ''}`}>
+          <span className={`${baseClasses} bg-[#FFB200]/10 text-[#FFB200] border-[#FFB200]/20`}>
             <Clock className="w-3.5 h-3.5" />
             {t('dashboard.payments.pending')}
           </span>
         );
       default:
         return (
-          <span className={`${baseClasses} bg-gray-100 text-gray-700 ${isDarkMode ? 'bg-gray-700 text-gray-300' : ''}`}>
+          <span className={`${baseClasses} bg-gray-100 text-gray-700 border-gray-200`}>
             {status}
           </span>
         );
@@ -134,30 +134,30 @@ const Payments = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const baseClasses = "px-3 py-1 rounded-lg text-xs font-bold";
+    const baseClasses = "px-3 py-1.5 rounded-lg text-xs font-semibold border";
     
     switch (status) {
       case 'completed':
         return (
-          <span className={`${baseClasses} bg-blue-100 text-blue-700 ${isDarkMode ? 'bg-blue-900/30 text-blue-400' : ''}`}>
+          <span className={`${baseClasses} bg-blue-50 text-blue-700 border-blue-200`}>
             {t('dashboard.payments.completed')}
           </span>
         );
       case 'pending':
         return (
-          <span className={`${baseClasses} bg-yellow-100 text-yellow-700 ${isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : ''}`}>
+          <span className={`${baseClasses} bg-[#FFB200]/10 text-[#FFB200] border-[#FFB200]/20`}>
             {t('dashboard.payments.pending')}
           </span>
         );
       case 'cancelled':
         return (
-          <span className={`${baseClasses} bg-red-100 text-red-700 ${isDarkMode ? 'bg-red-900/30 text-red-400' : ''}`}>
+          <span className={`${baseClasses} bg-red-50 text-red-700 border-red-200`}>
             {t('dashboard.payments.cancelled')}
           </span>
         );
       default:
         return (
-          <span className={`${baseClasses} bg-gray-100 text-gray-700 ${isDarkMode ? 'bg-gray-700 text-gray-300' : ''}`}>
+          <span className={`${baseClasses} bg-gray-100 text-gray-700 border-gray-200`}>
             {status}
           </span>
         );
@@ -165,86 +165,132 @@ const Payments = () => {
   };
   
   return (
-    <div className="space-y-6 animate-fadeIn">
-      <DashboardPageHeader title={t('dashboard.payments.title')} />
+    <div className="space-y-6">
+      <DashboardPageHeader 
+        title={t('dashboard.payments.title')} 
+        subtitle={t('dashboard.payments.subtitle')}
+      />
       
-      <div className={`rounded-[32px] p-4 sm:p-6 lg:p-8 border shadow-sm ${
-        isDarkMode 
-          ? 'bg-slate-800 border-slate-700' 
-          : 'bg-white border-slate-100'
-      }`}>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 text-primary rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0">
-              <CreditCard className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <h2 className={`text-lg sm:text-xl md:text-2xl font-black ${
-                isDarkMode ? 'text-white' : 'text-slate-900'
-              }`}>{t('dashboard.payments.title')}</h2>
-              <p className={`text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest mt-0.5 ${
-                isDarkMode ? 'text-slate-400' : 'text-slate-400'
-              }`}>{t('dashboard.payments.subtitle')}</p>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-[#114C5A]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all duration-200 group">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A] group-hover:bg-[#114C5A]/20 transition-colors">
+              <FileText className="w-5 h-5" />
             </div>
           </div>
+          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.payments.totalInvoices') || 'إجمالي الفواتير'}</p>
+          <p className="text-2xl font-bold text-[#114C5A]">{total}</p>
         </div>
 
+        <div className="bg-white border border-green-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-green-400 transition-all duration-200 group">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-500 group-hover:bg-green-100 transition-colors">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.payments.paid')}</p>
+          <p className="text-2xl font-bold text-green-500">{invoices.filter(inv => inv.payment_status === 'paid').length}</p>
+        </div>
 
+        <div className="bg-white border border-red-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-red-400 transition-all duration-200 group">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-500 group-hover:bg-red-100 transition-colors">
+              <XCircle className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.payments.unpaid')}</p>
+          <p className="text-2xl font-bold text-red-500">{invoices.filter(inv => inv.payment_status === 'unpaid').length}</p>
+        </div>
+
+        <div className="bg-white border border-[#FFB200]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#FFB200]/40 transition-all duration-200 group">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-[#FFB200]/10 rounded-xl flex items-center justify-center text-[#FFB200] group-hover:bg-[#FFB200]/20 transition-colors">
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.payments.pending')}</p>
+          <p className="text-2xl font-bold text-[#FFB200]">{invoices.filter(inv => inv.payment_status === 'pending').length}</p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-2 rounded-xl bg-[#114C5A]/10">
+              <Filter className="w-5 h-5 text-[#114C5A]" />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-3 rounded-xl border border-[#114C5A]/10 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] font-semibold transition-all min-w-[150px]"
+              dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
+            >
+              <option value="">{t('dashboard.payments.allStatuses') || 'جميع الحالات'}</option>
+              <option value="paid">{t('dashboard.payments.paid')}</option>
+              <option value="unpaid">{t('dashboard.payments.unpaid')}</option>
+              <option value="pending">{t('dashboard.payments.pending')}</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2 flex-1">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => {
+                setDateFrom(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-3 rounded-xl border border-[#114C5A]/10 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] font-semibold transition-all flex-1"
+            />
+            <span className="text-gray-500 font-semibold">{t('dashboard.payments.to') || 'إلى'}</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => {
+                setDateTo(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-3 rounded-xl border border-[#114C5A]/10 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] font-semibold transition-all flex-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Invoices List */}
+      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm overflow-hidden">
         {/* Loading State */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="p-12">
+            <LoadingState />
           </div>
         ) : invoices.length === 0 ? (
           /* Empty State */
-          <div className="text-center py-20">
-            <div className={`w-20 h-20 rounded-[32px] flex items-center justify-center mx-auto mb-6 ${
-              isDarkMode 
-                ? 'bg-slate-700 text-slate-400' 
-                : 'bg-slate-50 text-slate-200'
-            }`}>
-              <FileText className="w-10 h-10" />
-            </div>
-            <h3 className={`text-xl font-black mb-2 ${
-              isDarkMode ? 'text-slate-400' : 'text-slate-400'
-            }`}>{t('dashboard.payments.noInvoices')}</h3>
-            <p className={`text-sm ${
-              isDarkMode ? 'text-slate-400' : 'text-slate-500'
-            }`}>{t('dashboard.payments.noInvoicesMessage')}</p>
+          <div className="p-12">
+            <EmptyState
+              icon={FileText}
+              title={t('dashboard.payments.noInvoices') || 'لا توجد فواتير'}
+              message={t('dashboard.payments.noInvoicesMessage') || 'لم يتم العثور على فواتير'}
+            />
           </div>
         ) : (
           <>
-                {/* Desktop Table View */}
+            {/* Desktop Table View */}
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full min-w-[800px]">
                 <thead>
-                  <tr className={`border-b ${
-                    isDarkMode ? 'border-slate-700' : 'border-slate-200'
-                  }`}>
-                    <th className={`text-right py-3 px-3 font-black text-xs ${
-                      isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                    }`}>{t('dashboard.payments.invoiceNumber')}</th>
-                    <th className={`text-right py-3 px-3 font-black text-xs ${
-                      isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                    }`}>{t('dashboard.payments.service')}</th>
-                    <th className={`text-right py-3 px-3 font-black text-xs hidden xl:table-cell ${
-                      isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                    }`}>{t('dashboard.payments.employee')}</th>
-                    <th className={`text-right py-3 px-3 font-black text-xs ${
-                      isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                    }`}>{t('dashboard.payments.date')}</th>
-                    <th className={`text-right py-3 px-3 font-black text-xs hidden xl:table-cell ${
-                      isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                    }`}>{t('dashboard.payments.time')}</th>
-                    <th className={`text-right py-3 px-3 font-black text-xs ${
-                      isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                    }`}>{t('dashboard.payments.amount')}</th>
-                    <th className={`text-right py-3 px-3 font-black text-xs ${
-                      isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                    }`}>{t('dashboard.payments.paymentStatus')}</th>
-                    <th className={`text-right py-3 px-3 font-black text-xs hidden xl:table-cell ${
-                      isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                    }`}>{t('dashboard.payments.status')}</th>
+                  <tr className="border-b border-[#114C5A]/10 bg-gray-50">
+                    <th className="text-right py-4 px-4 font-bold text-xs text-gray-700">{t('dashboard.payments.invoiceNumber')}</th>
+                    <th className="text-right py-4 px-4 font-bold text-xs text-gray-700">{t('dashboard.payments.service')}</th>
+                    <th className="text-right py-4 px-4 font-bold text-xs hidden xl:table-cell text-gray-700">{t('dashboard.payments.employee')}</th>
+                    <th className="text-right py-4 px-4 font-bold text-xs text-gray-700">{t('dashboard.payments.date')}</th>
+                    <th className="text-right py-4 px-4 font-bold text-xs hidden xl:table-cell text-gray-700">{t('dashboard.payments.time')}</th>
+                    <th className="text-right py-4 px-4 font-bold text-xs text-gray-700">{t('dashboard.payments.amount')}</th>
+                    <th className="text-right py-4 px-4 font-bold text-xs text-gray-700">{t('dashboard.payments.paymentStatus')}</th>
+                    <th className="text-right py-4 px-4 font-bold text-xs hidden xl:table-cell text-gray-700">{t('dashboard.payments.status')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -252,53 +298,37 @@ const Payments = () => {
                     <tr 
                       key={invoice.id}
                       onClick={() => setSelectedInvoice(invoice)}
-                      className={`border-b transition-colors hover:bg-opacity-50 cursor-pointer ${
-                        isDarkMode 
-                          ? 'border-slate-700 hover:bg-slate-700/50' 
-                          : 'border-slate-100 hover:bg-slate-50'
-                      }`}
+                      className="border-b border-[#114C5A]/10 transition-colors hover:bg-[#114C5A]/5 cursor-pointer"
                     >
-                      <td className={`py-3 px-3 font-bold text-xs ${
-                        isDarkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
+                      <td className="py-4 px-4 font-bold text-sm text-gray-900">
                         {invoice.invoice_number}
                       </td>
-                      <td className={`py-3 px-3 font-bold text-xs ${
-                        isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                      }`}>
+                      <td className="py-4 px-4 font-semibold text-sm text-gray-700">
                         <div className="max-w-[150px] truncate" title={invoice.service.name}>
                           {invoice.service.name}
                         </div>
                       </td>
-                      <td className={`py-3 px-3 font-bold text-xs hidden xl:table-cell ${
-                        isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                      }`}>
+                      <td className="py-4 px-4 font-semibold text-sm hidden xl:table-cell text-gray-700">
                         <div className="max-w-[120px] truncate" title={invoice.employee.name}>
                           {invoice.employee.name}
                         </div>
                       </td>
-                      <td className={`py-3 px-3 font-bold text-xs ${
-                        isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                      }`}>
+                      <td className="py-4 px-4 font-semibold text-sm text-gray-700">
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                          <Calendar className="w-4 h-4 flex-shrink-0 text-[#114C5A]" />
                           <span className="truncate">{formatDate(invoice.booking_date)}</span>
                         </div>
                       </td>
-                      <td className={`py-3 px-3 font-bold text-xs hidden xl:table-cell ${
-                        isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                      }`}>
+                      <td className="py-4 px-4 font-semibold text-sm hidden xl:table-cell text-gray-700">
                         {formatTime(invoice.start_time)} - {formatTime(invoice.end_time)}
                       </td>
-                      <td className={`py-3 px-3 font-black text-xs ${
-                        isDarkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
+                      <td className="py-4 px-4 font-bold text-sm text-[#114C5A]">
                         {parseFloat(invoice.total_price).toLocaleString('ar-SA')} {t('dashboard.stats.currency')}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-4 px-4">
                         {getPaymentStatusBadge(invoice.payment_status)}
                       </td>
-                      <td className="py-3 px-3 hidden xl:table-cell">
+                      <td className="py-4 px-4 hidden xl:table-cell">
                         {getStatusBadge(invoice.status)}
                       </td>
                     </tr>
@@ -308,27 +338,19 @@ const Payments = () => {
             </div>
 
             {/* Mobile/Tablet Card View */}
-            <div className="lg:hidden space-y-4">
+            <div className="lg:hidden space-y-4 p-4">
               {invoices.map((invoice) => (
                 <div
                   key={invoice.id}
                   onClick={() => setSelectedInvoice(invoice)}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all hover:shadow-lg ${
-                    isDarkMode 
-                      ? 'bg-slate-700/50 border-slate-600 hover:bg-slate-700' 
-                      : 'bg-white border-slate-200 hover:bg-slate-50'
-                  }`}
+                  className="p-4 rounded-xl border border-[#114C5A]/10 cursor-pointer transition-all hover:shadow-md hover:border-[#114C5A]/20 bg-white"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h3 className={`text-lg font-black mb-1 ${
-                        isDarkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
+                      <h3 className="text-lg font-bold mb-1 text-gray-900">
                         {invoice.invoice_number}
                       </h3>
-                      <p className={`text-sm font-bold ${
-                        isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                      }`}>
+                      <p className="text-sm font-semibold text-gray-600">
                         {invoice.service.name}
                       </p>
                     </div>
@@ -340,54 +362,38 @@ const Payments = () => {
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs font-bold ${
-                        isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                      }`}>
+                      <span className="text-xs font-semibold text-gray-600">
                         {t('dashboard.payments.employeeLabel')}
                       </span>
-                      <span className={`text-xs font-black ${
-                        isDarkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
+                      <span className="text-xs font-bold text-gray-900">
                         {invoice.employee.name}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs font-bold ${
-                        isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                      }`}>
+                      <span className="text-xs font-semibold text-gray-600">
                         {t('dashboard.payments.date')}:
                       </span>
-                      <span className={`text-xs font-black flex items-center gap-1.5 ${
-                        isDarkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
-                        <Calendar className="w-3.5 h-3.5" />
+                      <span className="text-xs font-bold flex items-center gap-1.5 text-gray-900">
+                        <Calendar className="w-3.5 h-3.5 text-[#114C5A]" />
                         {formatDate(invoice.booking_date)}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs font-bold ${
-                        isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                      }`}>
+                      <span className="text-xs font-semibold text-gray-600">
                         {t('dashboard.payments.time')}:
                       </span>
-                      <span className={`text-xs font-black ${
-                        isDarkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
+                      <span className="text-xs font-bold text-gray-900">
                         {formatTime(invoice.start_time)} - {formatTime(invoice.end_time)}
                       </span>
                     </div>
                     
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
-                      <span className={`text-sm font-bold ${
-                        isDarkMode ? 'text-slate-300' : 'text-slate-700'
-                      }`}>
+                    <div className="flex items-center justify-between pt-2 border-t border-[#114C5A]/10">
+                      <span className="text-sm font-semibold text-gray-700">
                         {t('dashboard.payments.amount')}:
                       </span>
-                      <span className={`text-lg font-black text-primary ${
-                        isDarkMode ? 'text-primary-400' : 'text-primary'
-                      }`}>
+                      <span className="text-lg font-bold text-[#114C5A]">
                         {parseFloat(invoice.total_price).toLocaleString('ar-SA')} {t('dashboard.stats.currency')}
                       </span>
                     </div>
@@ -398,27 +404,25 @@ const Payments = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-slate-200 dark:border-slate-700">
-                <div className={`text-xs sm:text-sm font-bold text-center sm:text-right ${
-                  isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                }`}>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-[#114C5A]/10 p-4">
+                <div className="text-xs sm:text-sm font-semibold text-center sm:text-right text-gray-600">
                   {t('dashboard.payments.showing', { from: ((currentPage - 1) * 15) + 1, to: Math.min(currentPage * 15, total), total })}
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`px-3 sm:px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${
-                      isDarkMode
-                        ? 'bg-slate-700 hover:bg-slate-600 text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                    className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                      currentPage === 1
+                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                     }`}
                   >
-                    <span className="hidden sm:inline">{t('dashboard.payments.previous')}</span>
-                    <span className="sm:hidden">←</span>
+                    <ChevronRight size={18} />
+                    <span className="font-semibold">{t('dashboard.bookings.previous')}</span>
                   </button>
                   
-                  <div className="flex items-center gap-1 sm:gap-2">
+                  <div className="flex items-center gap-2">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum;
                       if (totalPages <= 5) {
@@ -435,12 +439,10 @@ const Payments = () => {
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`px-3 sm:px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${
+                          className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
                             currentPage === pageNum
-                              ? 'bg-primary text-white shadow-lg'
-                              : isDarkMode
-                                ? 'bg-slate-700 hover:bg-slate-600 text-gray-300'
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                              ? 'bg-[#114C5A] text-white shadow-md'
+                              : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                           }`}
                         >
                           {pageNum}
@@ -452,14 +454,14 @@ const Payments = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`px-3 sm:px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${
-                      isDarkMode
-                        ? 'bg-slate-700 hover:bg-slate-600 text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                    className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
+                      currentPage === totalPages
+                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                     }`}
                   >
-                    <span className="hidden sm:inline">{t('dashboard.payments.next')}</span>
-                    <span className="sm:hidden">→</span>
+                    <span className="font-semibold">{t('dashboard.bookings.next')}</span>
+                    <ChevronLeft size={18} />
                   </button>
                 </div>
               </div>

@@ -1,41 +1,76 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Slider from 'react-slick';
 import type { Settings } from 'react-slick';
-import serviceImage from '../../assets/images/bgHero.jpg';
 import SectionHeader from '../SectionHeader';
 import ServicesSlider from '../ServicesSlider';
 import ServicesGrid from '../ServicesGrid';
-import { getCompanyLogos, type CompanyLogo } from '../../storeApi/api/home.api';
+import { getCompanyLogos, getServicesSection, getReadyAppsSection, type CompanyLogo, type ServicesSectionData, type ReadyAppsSectionData } from '../../storeApi/api/home.api';
+
+import { useThemeStore } from '../../storeApi/store/theme.store';
 
 const ServicesSection = () => {
-  // State for company logos data
+  const { isDarkMode } = useThemeStore();
+  const { i18n } = useTranslation();
+  // ... state ...
   const [companyLogosData, setCompanyLogosData] = useState<{
     heading: string;
     logos: CompanyLogo[];
   } | null>(null);
+  const [servicesData, setServicesData] = useState<ServicesSectionData | null>(null);
+  const [readyAppsData, setReadyAppsData] = useState<ReadyAppsSectionData | null>(null);
   const [loadingLogos, setLoadingLogos] = useState(true);
 
   // Fetch company logos from API
-  useEffect(() => {
-    const fetchCompanyLogos = async () => {
-      try {
-        setLoadingLogos(true);
-        const response = await getCompanyLogos();
-        if (response.success && response.data) {
-          setCompanyLogosData({
-            heading: response.data.heading,
-            logos: response.data.logos,
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching company logos:', error);
-      } finally {
-        setLoadingLogos(false);
+  const fetchCompanyLogos = useCallback(async () => {
+    try {
+      setLoadingLogos(true);
+      const locale = i18n.language === 'ar' ? 'ar' : 'en';
+      const response = await getCompanyLogos(locale);
+      if (response.success && response.data) {
+        setCompanyLogosData({
+          heading: response.data.heading,
+          logos: response.data.logos,
+        });
       }
-    };
+    } catch (error) {
+      console.error('Error fetching company logos:', error);
+    } finally {
+      setLoadingLogos(false);
+    }
+  }, [i18n.language]);
 
+  const fetchServicesData = useCallback(async () => {
+    try {
+      const locale = i18n.language === 'ar' ? 'ar' : 'en';
+      const response = await getServicesSection(locale);
+      if (response.success && response.data) {
+        setServicesData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching services data:', error);
+    }
+  }, [i18n.language]);
+
+  const fetchReadyAppsData = useCallback(async () => {
+    try {
+      const locale = i18n.language === 'ar' ? 'ar' : 'en';
+      const response = await getReadyAppsSection(locale);
+      if (response.success && response.data) {
+        setReadyAppsData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching ready apps data:', error);
+    }
+  }, [i18n.language]);
+
+  // جلب البيانات عند التحميل الأولي وعند تغيير اللغة
+  useEffect(() => {
+    console.log('Language changed to:', i18n.language, '- Refetching services data...');
     fetchCompanyLogos();
-  }, []);
+    fetchServicesData();
+    fetchReadyAppsData();
+  }, [i18n.language, fetchCompanyLogos, fetchServicesData, fetchReadyAppsData]);
 
   // Array of company logos (from API)
   const companies = useMemo(() => {
@@ -48,60 +83,32 @@ const ServicesSection = () => {
     }));
   }, [companyLogosData]);
 
-  // Array of services for slider
-  const services = useMemo(() => [
-    {
-      id: 1,
-      title: 'تصميم وتجربة مستخدم',
-      description: 'واجهات بسيطة وفعالة تركّز على المستخدم.',
-      image: serviceImage,
-    },
-    {
-      id: 2,
-      title: 'أنظمة برمجية ذكية',
-      description: 'أنظمة مرنة تدعم الأتمتة وتحسين الأداء.',
-      image: serviceImage,
-    },
-    {
-      id: 3,
-      title: 'حلول ذكاء اصطناعي',
-      description: 'نماذج جاهزة ومخصصة قابلة للتطبيق الفوري.',
-      image: serviceImage,
-    },
+  // Array of services for slider (from API only)
+  const sliderServices = useMemo(() => {
+    if (!servicesData?.categories || servicesData.categories.length === 0) {
+      return [];
+    }
+    return servicesData.categories.map(cat => ({
+      id: cat.id,
+      title: cat.name,
+      description: cat.description,
+      image: cat.image
+    }));
+  }, [servicesData]);
 
-  ], []);
-
-  // Array of service cards for grid display
-  const serviceCards = useMemo(() => [
-    {
-      id: 1,
-      title: 'الذكاء الاصطناعي',
-      description: 'نوفر نماذج جاهزة أو مخصصة تساعدك على تحسين الأداء واتخاذ قرارات ذكية بشكل عملي وسهل.',
-      image: serviceImage,
-      imagePosition: 'right' as const, // Image on right, text on left
-    },
-    {
-      id: 2,
-      title: 'تطوير البرمجيات',
-      description: 'تصميم وتطوير أنظمة ومنصات رقمية متقدمة، مع دمج الذكاء الاصطناعي لتعزيز الأتمتة وتحسين العمليات اليومية.',
-      image: serviceImage,
-      imagePosition: 'left' as const, // Image on left, text on right
-    },
-    {
-      id: 3,
-      title: 'التصميم وتجربة المستخدم',
-      description: 'تصميم واجهات وتجارب مستخدم جذابة وبسيطة، تركز على التفاعل السلس وسهولة الاستخدام.',
-      image: serviceImage,
-      imagePosition: 'right' as const, // Image on right, text on left
-    },
-    {
-      id: 4,
-      title: 'البيانات والتحليلات',
-      description: 'تحليل وتنظيم البيانات وتحويلها إلى رؤى واضحة وتقارير دقيقة لدعم اتخاذ القرارات الاستراتيجية.',
-      image: serviceImage,
-      imagePosition: 'left' as const, // Image on left, text on right
-    },
-  ], []);
+  // Array of service cards for grid display (from API only)
+  const serviceCards = useMemo(() => {
+    if (!readyAppsData?.categories || readyAppsData.categories.length === 0) {
+      return [];
+    }
+    return readyAppsData.categories.map((cat, index) => ({
+      id: cat.id,
+      title: cat.name,
+      description: cat.description,
+      image: cat.image,
+      imagePosition: index % 2 === 0 ? 'right' as const : 'left' as const
+    }));
+  }, [readyAppsData]);
 
   // Repeat companies multiple times for seamless infinite loop
   const repeatedCompanies = useMemo(() => {
@@ -160,11 +167,13 @@ const ServicesSection = () => {
   };
 
   return (
-    <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-white min-h-screen lg:h-auto">
+    <section className={`py-8 sm:py-12 md:py-16 lg:py-20 min-h-screen lg:h-auto transition-colors duration-300 ${isDarkMode ? 'bg-slate-900' : 'bg-white'
+      }`}>
       {/* Companies Marquee */}
       {companyLogosData && (
         <>
-          <p className='text-center text-[18px] md:text-[24px] lg:text-[40px] font-thin text-black mb-10'>
+          <p className={`text-center text-[18px] md:text-[24px] lg:text-[40px] font-thin mb-10 ${isDarkMode ? 'text-white' : 'text-black'
+            }`}>
             {companyLogosData.heading}
           </p>
           {!loadingLogos && companies.length > 0 && (
@@ -175,7 +184,7 @@ const ServicesSection = () => {
                     key={`${company.id}-${index}`}
                     className="!flex items-center justify-center px-8"
                   >
-                    <div 
+                    <div
                       className="flex items-center justify-center h-16 md:h-20 cursor-pointer"
                       onClick={() => handleLogoClick(company.link)}
                     >
@@ -193,21 +202,35 @@ const ServicesSection = () => {
         </>
       )}
 
-      <SectionHeader
-        title="نبني حلول رقمية ذكية تُحدث فرقًا حقيقيًا"
-        subtitle="حلول ذكاء اصطناعي وأنظمة ذكية وتجارب مستخدم مصممة لاحتياجات أعمالك."
-      />
+      {/* Services Section - Only show if data exists */}
+      {servicesData && (
+        <>
+          <SectionHeader
+            title={servicesData.heading}
+            subtitle={servicesData.description}
+          />
 
-      {/* Services Slider */}
-      <ServicesSlider services={services} />
+          {/* Services Slider - Only show if there are services */}
+          {sliderServices.length > 0 && (
+            <ServicesSlider services={sliderServices} />
+          )}
+        </>
+      )}
 
-      <SectionHeader
-        title="خدماتنا"
-        subtitle="حلول متكاملة لدعم أعمالك بالذكاء الاصطناعي، البرمجة، التصميم، وتحليل البيانات."
-      />
+      {/* Ready Apps Section - Only show if data exists */}
+      {readyAppsData && (
+        <>
+          <SectionHeader
+            title={readyAppsData.heading}
+            subtitle={readyAppsData.description}
+          />
 
-      {/* Services Grid Cards */}
-      <ServicesGrid serviceCards={serviceCards} />
+          {/* Services Grid Cards - Only show if there are cards */}
+          {serviceCards.length > 0 && (
+            <ServicesGrid serviceCards={serviceCards} />
+          )}
+        </>
+      )}
 
     </section>
   );

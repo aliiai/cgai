@@ -1,4 +1,5 @@
 import type { ServiceCategory, ServiceSubCategory, Service, Consultation } from '../../types/types';
+import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
 
 interface CategoryIconProps {
   item: ServiceCategory | ServiceSubCategory | Service | Consultation;
@@ -24,19 +25,28 @@ const CategoryIcon = ({ item, size = 'md' }: CategoryIconProps) => {
     lg: 'text-4xl',
   };
 
+  const imageUrl = item.image && item.image.startsWith('http') 
+    ? item.image 
+    : item.image 
+      ? `${STORAGE_BASE_URL}${item.image.startsWith('/') ? '' : '/'}${item.image}`
+      : null;
+
   return (
-    <div className={`${sizeClasses[size]} rounded-2xl bg-primary/10 flex items-center justify-center overflow-hidden`}>
-      {item.image ? (
+    <div className={`${sizeClasses[size]} rounded-xl bg-[#114C5A]/10 border border-[#114C5A]/20 flex items-center justify-center overflow-hidden`}>
+      {imageUrl ? (
         <img 
-          src={item.image} 
+          src={imageUrl} 
           alt={item.name}
-          className="w-full h-full object-cover rounded-2xl"
+          className="w-full h-full object-cover rounded-xl"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
         />
       ) : item.icon ? (
         <span className={textSizeClasses[size]}>{item.icon}</span>
       ) : (
         <svg 
-          className={`${iconSizeClasses[size]} text-primary`} 
+          className={`${iconSizeClasses[size]} text-[#114C5A]`} 
           fill="none" 
           stroke="currentColor" 
           strokeWidth="2" 
@@ -50,4 +60,3 @@ const CategoryIcon = ({ item, size = 'md' }: CategoryIconProps) => {
 };
 
 export default CategoryIcon;
-

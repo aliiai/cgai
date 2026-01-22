@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LayoutGrid, FileText, TrendingUp, ExternalLink } from 'lucide-react';
+import { LayoutGrid, FileText, TrendingUp, ExternalLink, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getTechnologiesContent, type TechnologyContent } from '../storeApi/api/home.api';
 
 interface Technology {
     id: number;
@@ -11,79 +12,74 @@ interface Technology {
     category: string;
 }
 
-// Static data
-const latestTechnologies: Technology[] = [
-    {
-        id: 1,
-        title: 'تطورات جديدة في الذكاء الاصطناعي',
-        description: 'اكتشف أحدث التطورات في مجال الذكاء الاصطناعي والتعلم الآلي التي ستغير مستقبل التكنولوجيا.',
-        image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800&h=400',
-        category: 'ذكاء اصطناعي'
-    },
-    {
-        id: 2,
-        title: 'مستقبل التعلم الآلي',
-        description: 'كيف سيغير التعلم الآلي طريقة عملنا وحياتنا اليومية في السنوات القادمة.',
-        image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&q=80&w=800&h=400',
-        category: 'تعلم آلي'
-    },
-    {
-        id: 3,
-        title: 'تطبيقات الذكاء الاصطناعي في الطب',
-        description: 'استكشف كيف يساعد الذكاء الاصطناعي في تحسين الرعاية الصحية والتشخيص الطبي.',
-        image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&q=80&w=800&h=400',
-        category: 'صحة'
-    },
-    {
-        id: 4,
-        title: 'الذكاء الاصطناعي في التعليم',
-        description: 'كيف يمكن للذكاء الاصطناعي أن يحدث ثورة في مجال التعليم والتعلم.',
-        image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=800&h=400',
-        category: 'تعليم'
-    }
-];
-
-const bestTechnologies: Technology[] = [
-    {
-        id: 5,
-        title: 'أفضل أدوات الذكاء الاصطناعي لعام 2024',
-        description: 'تعرف على أفضل وأحدث أدوات الذكاء الاصطناعي التي يجب أن تعرفها هذا العام.',
-        image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800&h=400',
-        category: 'أدوات'
-    },
-    {
-        id: 6,
-        title: 'الذكاء الاصطناعي في الأعمال',
-        description: 'كيف تستخدم الشركات الذكاء الاصطناعي لتحسين عملياتها وزيادة الإنتاجية.',
-        image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800&h=400',
-        category: 'أعمال'
-    },
-    {
-        id: 7,
-        title: 'أمان الذكاء الاصطناعي',
-        description: 'التحديات والحلول المتعلقة بأمان أنظمة الذكاء الاصطناعي وحماية البيانات.',
-        image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800&h=400',
-        category: 'أمان'
-    },
-    {
-        id: 8,
-        title: 'الذكاء الاصطناعي والبيئة',
-        description: 'كيف يمكن للذكاء الاصطناعي أن يساعد في حل المشاكل البيئية والاستدامة.',
-        image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=800&h=400',
-        category: 'بيئة'
-    }
-];
-
 const News = () => {
-    const { t } = useTranslation();
-    const isRTL = true; // Always RTL for Arabic content
+    const { i18n, t } = useTranslation();
+    const isRTL = i18n.language === 'ar';
     const [activeFilter, setActiveFilter] = useState('all');
+    const [latestTechnologies, setLatestTechnologies] = useState<Technology[]>([]);
+    const [bestTechnologies, setBestTechnologies] = useState<Technology[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const filters = [
         { id: 'all', label: t('news.filters.all') || 'الكل', icon: LayoutGrid },
         { id: 'latest', label: t('news.filters.latest') || 'أحدث التقنيات', icon: FileText },
         { id: 'best', label: t('news.filters.best') || 'أفضل التقنيات', icon: TrendingUp },
     ];
+
+    const fetchTechnologies = useCallback(async () => {
+        try {
+            setLoading(true);
+            const locale = i18n.language === 'ar' ? 'ar' : 'en';
+            const response = await getTechnologiesContent(locale);
+            
+            if (response.success && response.data) {
+                // Convert API data to Technology format
+                const convertToTechnology = (item: TechnologyContent): Technology => {
+                    // Use first image from images array, or image, or placeholder
+                    const imageUrl = item.images && item.images.length > 0 
+                        ? item.images[0] 
+                        : (item.image || 'https://via.placeholder.com/800x400?text=No+Image');
+                    
+                    return {
+                        id: item.id,
+                        title: item.name,
+                        description: item.description || item.short_description || '',
+                        image: imageUrl,
+                        category: item.category.name,
+                    };
+                };
+
+                const latestTechs = (response.data.latest_technologies as unknown as TechnologyContent[]) || [];
+                const bestTechs = (response.data.best_technologies_of_month as unknown as TechnologyContent[]) || [];
+                
+                const latest = latestTechs.map(convertToTechnology);
+                const best = bestTechs.map(convertToTechnology);
+                
+                setLatestTechnologies(latest);
+                setBestTechnologies(best);
+            }
+        } catch (error) {
+            console.error('Error fetching technologies:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [i18n.language]);
+
+    useEffect(() => {
+        fetchTechnologies();
+    }, [fetchTechnologies]);
+
+    // Refetch when language changes
+    useEffect(() => {
+        const handleLanguageChanged = async () => {
+            await fetchTechnologies();
+        };
+
+        i18n.on('languageChanged', handleLanguageChanged);
+        return () => {
+            i18n.off('languageChanged', handleLanguageChanged);
+        };
+    }, [i18n, fetchTechnologies]);
 
     // Get filtered items
     const getFilteredItems = (): Technology[] => {
@@ -152,9 +148,15 @@ const News = () => {
 
 
 
-                {/* Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {newsItems.map((item) => (
+                {/* Loading State */}
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-12 h-12 text-[#FFB200] animate-spin" />
+                    </div>
+                ) : newsItems.length > 0 ? (
+                    /* Cards Grid */
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {newsItems.map((item) => (
                         <motion.div
                             key={item.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -196,8 +198,20 @@ const News = () => {
                                 </p>
                             </div>
                         </motion.div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20">
+                        <p className="text-gray-600 text-lg">لا توجد تقنيات متاحة حالياً</p>
+                    </div>
+                )}
+            </div>
+
+
+
+
+            <div>
+                
             </div>
         </div>
     );

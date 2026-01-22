@@ -3,13 +3,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
-import { getTickets, createTicket } from '../../storeApi/storeApi';
+import { getTickets, createTicket, useThemeStore } from '../../storeApi/storeApi';
 import type { Ticket } from '../../types/types';
 import Swal from 'sweetalert2';
 import LoadingState from '../../components/dashboard/LoadingState';
 
 const Support = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -208,7 +209,28 @@ const Support = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
+    const styles: Record<string, { bg: string; text: string; icon: React.ReactNode }> = isDarkMode ? {
+      open: {
+        bg: 'bg-blue-900/30',
+        text: 'text-blue-400 border-blue-700',
+        icon: <AlertCircle size={14} className="stroke-2" />,
+      },
+      pending: {
+        bg: 'bg-[#FFB200]/20',
+        text: 'text-[#FFB200] border-[#FFB200]/30',
+        icon: <Clock size={14} className="stroke-2" />,
+      },
+      closed: {
+        bg: 'bg-green-900/30',
+        text: 'text-green-400 border-green-700',
+        icon: <CheckCircle size={14} className="stroke-2" />,
+      },
+      resolved: {
+        bg: 'bg-emerald-900/30',
+        text: 'text-emerald-400 border-emerald-700',
+        icon: <CheckCircle size={14} className="stroke-2" />,
+      },
+    } : {
       open: {
         bg: 'bg-blue-50',
         text: 'text-blue-700 border-blue-200',
@@ -254,7 +276,12 @@ const Support = () => {
   };
 
   const getPriorityBadge = (priority: string) => {
-    const styles: Record<string, string> = {
+    const styles: Record<string, string> = isDarkMode ? {
+      low: 'bg-slate-700 text-gray-300 border-slate-600',
+      medium: 'bg-[#FFB200]/20 text-[#FFB200] border-[#FFB200]/30',
+      high: 'bg-orange-900/30 text-orange-400 border-orange-700',
+      urgent: 'bg-red-900/30 text-red-400 border-red-700',
+    } : {
       low: 'bg-gray-100 text-gray-700 border-gray-200',
       medium: 'bg-[#FFB200]/10 text-[#FFB200] border-[#FFB200]/30',
       high: 'bg-orange-100 text-orange-700 border-orange-200',
@@ -309,30 +336,50 @@ const Support = () => {
             <div
               key={value}
               onClick={() => setFilter(value as 'all' | 'open' | 'closed' | 'pending')}
-              className={`bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group ${
-                isActive
-                  ? 'border-[#114C5A] bg-[#114C5A]/5'
-                  : 'border-[#114C5A]/10 hover:border-[#114C5A]/30'
+              className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group ${
+                isDarkMode
+                  ? isActive
+                    ? 'bg-slate-700/50 border-[#114C5A]'
+                    : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                  : isActive
+                    ? 'border-[#114C5A] bg-[#114C5A]/5 bg-white'
+                    : 'border-[#114C5A]/10 hover:border-[#114C5A]/30 bg-white'
               }`}
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
                   isActive
                     ? 'bg-[#114C5A] text-white'
-                    : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
+                    : isDarkMode
+                      ? 'bg-[#114C5A]/20 text-[#FFB200] group-hover:bg-[#114C5A]/30'
+                      : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
                 }`}>
                   <Icon className="w-5 h-5" />
                 </div>
               </div>
-              <p className="text-xs text-gray-600 mb-2 leading-tight">{label}</p>
-              <p className={`text-2xl font-bold ${isActive ? 'text-[#114C5A]' : 'text-gray-700'}`}>{count}</p>
+              <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>{label}</p>
+              <p className={`text-2xl font-bold transition-colors duration-300 ${
+                isDarkMode
+                  ? isActive
+                    ? 'text-white'
+                    : 'text-gray-300'
+                  : isActive
+                    ? 'text-[#114C5A]'
+                    : 'text-gray-700'
+              }`}>{count}</p>
             </div>
           );
         })}
       </div>
 
       {/* Tickets List */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm overflow-hidden">
+      <div className={`rounded-xl border shadow-sm overflow-hidden transition-colors duration-300 ${
+        isDarkMode
+          ? 'bg-slate-800 border-slate-700'
+          : 'bg-white border-[#114C5A]/10'
+      }`}>
         {isLoading ? (
           <div className="p-12">
             <LoadingState />
@@ -340,11 +387,21 @@ const Support = () => {
         ) : filteredTickets.length === 0 ? (
           <div className="p-12">
             <div className="text-center py-8">
-              <div className="w-20 h-20 bg-[#114C5A]/10 rounded-xl flex items-center justify-center mx-auto mb-4 border border-[#114C5A]/20">
-                <Headphones className="w-10 h-10 text-[#114C5A]" />
+              <div className={`w-20 h-20 rounded-xl flex items-center justify-center mx-auto mb-4 border transition-colors duration-300 ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 border-[#114C5A]/30'
+                  : 'bg-[#114C5A]/10 border-[#114C5A]/20'
+              }`}>
+                <Headphones className={`w-10 h-10 transition-colors duration-300 ${
+                  isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                }`} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('dashboard.support.noTickets')}</h3>
-              <p className="text-gray-600 text-base mb-6">{t('dashboard.support.noTicketsMessage')}</p>
+              <h3 className={`text-xl font-bold mb-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>{t('dashboard.support.noTickets')}</h3>
+              <p className={`text-base mb-6 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>{t('dashboard.support.noTicketsMessage')}</p>
               <button
                 onClick={showNewTicketPopup}
                 className="px-6 py-3 bg-[#114C5A] text-white rounded-xl font-semibold shadow-md hover:bg-[#114C5A]/90 hover:shadow-lg transition-all duration-200 flex items-center gap-2 mx-auto"
@@ -358,51 +415,85 @@ const Support = () => {
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[#114C5A]/5 border-b border-[#114C5A]/10">
+                <thead className={`border-b transition-colors duration-300 ${
+                  isDarkMode
+                    ? 'bg-slate-700/50 border-slate-700'
+                    : 'bg-[#114C5A]/5 border-[#114C5A]/10'
+                }`}>
                   <tr>
-                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold text-gray-900`}>
+                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                    }`}>
                       {t('dashboard.support.tableHeaders.number')}
                     </th>
-                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold text-gray-900`}>
+                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                    }`}>
                       {t('dashboard.support.tableHeaders.subject')}
                     </th>
-                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                    <th className={`px-6 py-4 text-center text-sm font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                    }`}>
                       {t('dashboard.support.tableHeaders.status')}
                     </th>
-                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                    <th className={`px-6 py-4 text-center text-sm font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                    }`}>
                       {t('dashboard.support.tableHeaders.priority')}
                     </th>
-                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold text-gray-900`}>
+                    <th className={`px-6 py-4 text-${isRTL ? 'right' : 'left'} text-sm font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                    }`}>
                       {t('dashboard.support.tableHeaders.date')}
                     </th>
-                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                    <th className={`px-6 py-4 text-center text-sm font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                    }`}>
                       {t('dashboard.support.tableHeaders.attachments')}
                     </th>
-                    <th className="px-6 py-4 text-center text-sm font-bold text-gray-900">
+                    <th className={`px-6 py-4 text-center text-sm font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                    }`}>
                       {t('dashboard.support.tableHeaders.actions')}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className={`divide-y transition-colors duration-300 ${
+                  isDarkMode ? 'divide-slate-700' : 'divide-gray-100'
+                }`}>
                   {filteredTickets.map((ticket) => (
                     <tr
                       key={ticket.id}
                       onClick={() => navigate(`/admin/tickets/${ticket.id}`)}
-                      className="hover:bg-[#114C5A]/5 transition-colors cursor-pointer"
+                      className={`transition-colors cursor-pointer ${
+                        isDarkMode
+                          ? 'hover:bg-slate-700/50'
+                          : 'hover:bg-[#114C5A]/5'
+                      }`}
                     >
-                      <td className="px-6 py-4 text-sm font-semibold text-gray-600">
+                      <td className={`px-6 py-4 text-sm font-semibold transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`}>
                         #{ticket.id}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-[#114C5A]/10 rounded-lg flex items-center justify-center text-[#114C5A] border border-[#114C5A]/20 flex-shrink-0">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center border flex-shrink-0 transition-colors duration-300 ${
+                            isDarkMode
+                              ? 'bg-[#114C5A]/20 text-[#FFB200] border-[#114C5A]/30'
+                              : 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20'
+                          }`}>
                             <MessageSquare size={18} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-sm font-semibold mb-1 line-clamp-1 text-gray-900">
+                            <h3 className={`text-sm font-semibold mb-1 line-clamp-1 transition-colors duration-300 ${
+                              isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>
                               {ticket.subject}
                             </h3>
-                            <p className="text-xs line-clamp-2 text-gray-600">
+                            <p className={`text-xs line-clamp-2 transition-colors duration-300 ${
+                              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
                               {ticket.description}
                             </p>
                           </div>
@@ -414,9 +505,13 @@ const Support = () => {
                       <td className="px-6 py-4 text-center">
                         {getPriorityBadge(ticket.priority)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className={`px-6 py-4 text-sm transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
                         <div className="flex items-center gap-1.5">
-                          <Clock size={14} className="text-gray-400" />
+                          <Clock size={14} className={`transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                          }`} />
                           <span dir="ltr" className="text-xs">
                             {new Date(ticket.created_at).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US', {
                               year: 'numeric',
@@ -428,12 +523,18 @@ const Support = () => {
                       </td>
                       <td className="px-6 py-4 text-center">
                         {ticket.attachments && ticket.attachments.length > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#114C5A]/10 text-[#114C5A] rounded-lg text-xs font-semibold border border-[#114C5A]/20">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors duration-300 ${
+                            isDarkMode
+                              ? 'bg-[#114C5A]/20 text-[#FFB200] border-[#114C5A]/30'
+                              : 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20'
+                          }`}>
                             <Paperclip size={12} />
                             {ticket.attachments.length}
                           </span>
                         ) : (
-                          <span className="text-gray-400 text-xs">-</span>
+                          <span className={`text-xs transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                          }`}>-</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -442,7 +543,11 @@ const Support = () => {
                             e.stopPropagation();
                             navigate(`/admin/tickets/${ticket.id}`);
                           }}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#114C5A]/10 hover:bg-[#114C5A]/20 text-[#114C5A] rounded-xl font-semibold transition-colors border border-[#114C5A]/20"
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors border ${
+                            isDarkMode
+                              ? 'bg-[#114C5A]/20 hover:bg-[#114C5A]/30 text-[#FFB200] border-[#114C5A]/30'
+                              : 'bg-[#114C5A]/10 hover:bg-[#114C5A]/20 text-[#114C5A] border-[#114C5A]/20'
+                          }`}
                         >
                           <MessageSquare size={16} />
                           <span>{t('dashboard.support.view')}</span>
@@ -456,8 +561,12 @@ const Support = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-[#114C5A]/10 p-4">
-                <div className="text-xs sm:text-sm font-semibold text-center sm:text-right text-gray-600">
+              <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t p-4 transition-colors duration-300 ${
+                isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+              }`}>
+                <div className={`text-xs sm:text-sm font-semibold text-center sm:text-right transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
                   {t('dashboard.support.showing', { from, to, total }) || `عرض ${from}-${to} من ${total}`}
                 </div>
                 <div className="flex items-center gap-2">
@@ -466,8 +575,12 @@ const Support = () => {
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
                       currentPage === 1
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                        ? isDarkMode
+                          ? 'border-slate-700 bg-slate-700 text-gray-500 cursor-not-allowed'
+                          : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : isDarkMode
+                          ? 'border-slate-600 bg-slate-700 text-white hover:bg-slate-600 hover:border-slate-500'
+                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                     }`}
                   >
                     <ChevronRight size={18} />
@@ -494,7 +607,9 @@ const Support = () => {
                           className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
                             currentPage === pageNum
                               ? 'bg-[#114C5A] text-white shadow-md'
-                              : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                              : isDarkMode
+                                ? 'border border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                                : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                           }`}
                         >
                           {pageNum}
@@ -508,8 +623,12 @@ const Support = () => {
                     disabled={currentPage === totalPages}
                     className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
                       currentPage === totalPages
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                        ? isDarkMode
+                          ? 'border-slate-700 bg-slate-700 text-gray-500 cursor-not-allowed'
+                          : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : isDarkMode
+                          ? 'border-slate-600 bg-slate-700 text-white hover:bg-slate-600 hover:border-slate-500'
+                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                     }`}
                   >
                     <span className="font-semibold">{t('dashboard.support.next')}</span>

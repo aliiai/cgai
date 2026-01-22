@@ -181,6 +181,7 @@ export interface AIService {
   name: string;
   short_description: string;
   main_image: string;
+  website_url?: string | null;
   category: {
     id: number;
     name: string;
@@ -220,6 +221,8 @@ export const getAIServices = async (params?: {
   page?: number;
   per_page?: number;
   is_free?: boolean;
+  search?: string;
+  category?: string;
   locale?: string;
 }): Promise<AIServicesResponse> => {
   try {
@@ -394,12 +397,104 @@ export interface TechnologiesContentResponse {
   message?: string;
 }
 
+// ----------------------------------------------------------------------
+// Subscriptions API
+// ----------------------------------------------------------------------
+
+export interface Subscription {
+  id: number;
+  name: string;
+  description: string;
+  features: string[];
+  price: string;
+  duration_type: 'month' | 'year';
+  max_debtors: number;
+  max_messages: number;
+  ai_enabled: boolean;
+  is_active: boolean;
+  is_pro: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubscriptionsData {
+  subscriptions: Subscription[];
+  active_subscription: any | null;
+  pending_request: any | null;
+}
+
+export interface SubscriptionsResponse {
+  success: boolean;
+  data?: SubscriptionsData;
+  message?: string;
+}
+
 /**
- * الحصول على محتوى التقنيات (أحدث وأفضل التقنيات)
+ * الحصول على بيانات الاشتراكات المتاحة
+ */
+export const getSubscriptions = async (locale: string = 'ar'): Promise<SubscriptionsResponse> => {
+  try {
+    const response = await axiosInstance.get('/subscriptions', { params: { locale } });
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message,
+    };
+  } catch (error: any) {
+    console.error('Get Subscriptions error:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'فشل في جلب بيانات الاشتراكات',
+      data: undefined,
+    };
+  }
+};
+
+// ----------------------------------------------------------------------
+// Technologies Content API
+// ----------------------------------------------------------------------
+
+export interface TechnologyCategory {
+  id: number;
+  name: string;
+}
+
+export interface TechnologyContent {
+  id: number;
+  name: string;
+  description: string;
+  short_description: string;
+  price: number;
+  original_price: number;
+  image: string | null;
+  images: string[];
+  category: TechnologyCategory;
+  rating: number;
+  reviews_count: number;
+  purchases_count: number;
+  is_featured: boolean;
+  is_latest: boolean;
+  is_best_of_month: boolean;
+  slug: string;
+}
+
+export interface TechnologiesContentData {
+  latest_technologies: TechnologyContent[];
+  best_technologies_of_month: TechnologyContent[];
+}
+
+export interface TechnologiesContentResponse {
+  success: boolean;
+  data?: TechnologiesContentData;
+  message?: string;
+}
+
+/**
+ * الحصول على محتوى التقنيات (لصفحة الأخبار)
  */
 export const getTechnologiesContent = async (locale: string = 'ar'): Promise<TechnologiesContentResponse> => {
   try {
-    const response = await axiosInstance.get('/technologies-content', { params: { locale } });
+    const response = await axiosInstance.get('/customer/ai-content/technologies', { params: { locale } });
     return {
       success: true,
       data: response.data.data,
@@ -410,6 +505,87 @@ export const getTechnologiesContent = async (locale: string = 'ar'): Promise<Tec
     return {
       success: false,
       message: error.response?.data?.message || 'فشل في جلب محتوى التقنيات',
+      data: undefined,
+    };
+  }
+};
+
+// ----------------------------------------------------------------------
+// Services API (for Discover Services page)
+// ----------------------------------------------------------------------
+
+export interface ServiceSubCategory {
+  id: number;
+  category_id: number;
+  name_en: string;
+  slug: string;
+  description_en: string;
+  order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  category: {
+    id: number;
+    name_en: string;
+    slug: string;
+    description_en: string;
+    image: string;
+    icon: string | null;
+    order: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+export interface ServiceItem {
+  id: number;
+  sub_category_id: number;
+  name_en: string;
+  slug: string;
+  description_en: string;
+  image?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  price: number;
+  sub_category: ServiceSubCategory;
+  points_pricing: {
+    id: number;
+    service_id: number;
+    consultation_id: number | null;
+    subscription_id: number | null;
+    item_type: string;
+    points_price: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  };
+  points_price: number;
+}
+
+export interface ServicesResponse {
+  success: boolean;
+  data?: ServiceItem[];
+  message?: string;
+}
+
+/**
+ * الحصول على جميع الخدمات
+ */
+export const getAllServices = async (locale: string = 'en'): Promise<ServicesResponse> => {
+  try {
+    const response = await axiosInstance.get('/services/services', { params: { locale } });
+    return {
+      success: true,
+      data: response.data.data || [],
+      message: response.data.message,
+    };
+  } catch (error: any) {
+    console.error('Get All Services error:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'فشل في جلب الخدمات',
       data: undefined,
     };
   }

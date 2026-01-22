@@ -25,11 +25,19 @@ import EmptyState from '../../components/dashboard/EmptyState';
 import { getReadyAppOrders, type ReadyAppOrder } from '../../storeApi/api/ready-apps.api';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
 import { parseDate } from '../../utils/date.utils';
+import { useThemeStore } from '../../storeApi/storeApi';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const { t } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   
-  const styles: Record<string, string> = {
+  const styles: Record<string, string> = isDarkMode ? {
+    pending: 'bg-[#FFB200]/20 text-[#FFB200] border-[#FFB200]/30',
+    processing: 'bg-blue-900/30 text-blue-400 border-blue-700',
+    completed: 'bg-green-900/30 text-green-400 border-green-700',
+    cancelled: 'bg-red-900/30 text-red-400 border-red-700',
+    rejected: 'bg-red-900/30 text-red-400 border-red-700',
+  } : {
     pending: 'bg-[#FFB200]/10 text-[#FFB200] border-[#FFB200]/20',
     processing: 'bg-blue-50 text-blue-700 border-blue-200',
     completed: 'bg-green-50 text-green-700 border-green-200',
@@ -67,6 +75,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 const MyPurchases = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<ReadyAppOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -170,9 +179,15 @@ const MyPurchases = () => {
           subtitle={t('dashboard.myPurchases.subtitle') || 'عرض جميع طلبات شراء التطبيقات الجاهزة'}
         />
         <div className="flex flex-col justify-center items-center py-32">
-          <Loader2 className="w-10 h-10 text-[#114C5A] animate-spin mb-4" />
-          <p className="text-gray-600 font-semibold text-lg">{t('dashboard.bookings.loading')}</p>
-          <p className="text-gray-500 text-sm mt-2">{t('dashboard.bookings.pleaseWait')}</p>
+          <Loader2 className={`w-10 h-10 animate-spin mb-4 transition-colors duration-300 ${
+            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+          }`} />
+          <p className={`font-semibold text-lg transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>{t('dashboard.bookings.loading')}</p>
+          <p className={`text-sm mt-2 transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+          }`}>{t('dashboard.bookings.pleaseWait')}</p>
         </div>
       </div>
     );
@@ -188,52 +203,92 @@ const MyPurchases = () => {
 
       {/* Statistics Cards - Similar to Dashboard */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-[#114C5A]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all duration-200 group">
+        <div className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 group ${
+          isDarkMode
+            ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+            : 'bg-white border-[#114C5A]/20 hover:border-[#114C5A]/40'
+        }`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A] group-hover:bg-[#114C5A]/20 transition-colors">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors ${
+              isDarkMode ? 'bg-[#114C5A]/20 text-[#FFB200]' : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
+            }`}>
               <ShoppingBag className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.myPurchases.totalOrders') || 'إجمالي الطلبات'}</p>
-          <p className="text-2xl font-bold text-[#114C5A]">{pagination?.total || orders.length}</p>
+          <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>{t('dashboard.myPurchases.totalOrders') || 'إجمالي الطلبات'}</p>
+          <p className={`text-2xl font-bold transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-[#114C5A]'
+          }`}>{pagination?.total || orders.length}</p>
         </div>
 
-        <div className="bg-white border border-[#FFB200]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#FFB200]/40 transition-all duration-200 group">
+        <div className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 group ${
+          isDarkMode
+            ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+            : 'bg-white border-[#FFB200]/20 hover:border-[#FFB200]/40'
+        }`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-[#FFB200]/10 rounded-xl flex items-center justify-center text-[#FFB200] group-hover:bg-[#FFB200]/20 transition-colors">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors ${
+              isDarkMode ? 'bg-[#FFB200]/20 text-[#FFB200]' : 'bg-[#FFB200]/10 text-[#FFB200] group-hover:bg-[#FFB200]/20'
+            }`}>
               <Clock className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.myPurchases.status.pending') || 'قيد الانتظار'}</p>
+          <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>{t('dashboard.myPurchases.status.pending') || 'قيد الانتظار'}</p>
           <p className="text-2xl font-bold text-[#FFB200]">{orders.filter(o => o.status === 'pending').length}</p>
         </div>
 
-        <div className="bg-white border border-blue-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-blue-400 transition-all duration-200 group">
+        <div className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 group ${
+          isDarkMode
+            ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+            : 'bg-white border-blue-200 hover:border-blue-400'
+        }`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors ${
+              isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-500 group-hover:bg-blue-100'
+            }`}>
               <Loader2 className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.myPurchases.status.processing') || 'قيد المعالجة'}</p>
+          <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>{t('dashboard.myPurchases.status.processing') || 'قيد المعالجة'}</p>
           <p className="text-2xl font-bold text-blue-500">{orders.filter(o => o.status === 'processing').length}</p>
         </div>
 
-        <div className="bg-white border border-green-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-green-400 transition-all duration-200 group">
+        <div className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 group ${
+          isDarkMode
+            ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+            : 'bg-white border-green-200 hover:border-green-400'
+        }`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-500 group-hover:bg-green-100 transition-colors">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors ${
+              isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-500 group-hover:bg-green-100'
+            }`}>
               <CheckCircle className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.myPurchases.status.completed') || 'مكتمل'}</p>
+          <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>{t('dashboard.myPurchases.status.completed') || 'مكتمل'}</p>
           <p className="text-2xl font-bold text-green-500">{orders.filter(o => o.status === 'completed').length}</p>
         </div>
       </div>
 
       {/* Filter */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-4">
+      <div className={`rounded-xl border shadow-sm p-4 transition-colors duration-300 ${
+        isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-[#114C5A]/10'
+      }`}>
         <div className="flex items-center gap-4">
-          <div className="p-2 rounded-xl bg-[#114C5A]/10">
-            <Filter className="w-5 h-5 text-[#114C5A]" />
+          <div className={`p-2 rounded-xl transition-colors duration-300 ${
+            isDarkMode ? 'bg-[#114C5A]/20' : 'bg-[#114C5A]/10'
+          }`}>
+            <Filter className={`w-5 h-5 transition-colors duration-300 ${
+              isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+            }`} />
           </div>
           <select
             value={filter}
@@ -241,7 +296,11 @@ const MyPurchases = () => {
               setFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="flex-1 px-4 py-3 rounded-xl border border-[#114C5A]/10 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] font-semibold transition-all"
+            className={`flex-1 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:border-[#114C5A] font-semibold transition-all ${
+              isDarkMode
+                ? 'bg-slate-700 border-slate-600 text-white focus:ring-[#114C5A]/20'
+                : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 focus:ring-[#114C5A]/20'
+            }`}
             dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
           >
             {filterOptions.map(option => (
@@ -269,7 +328,11 @@ const MyPurchases = () => {
             return (
               <div
                 key={order.id}
-                className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm hover:shadow-md hover:border-[#114C5A]/20 transition-all duration-300 group overflow-hidden flex flex-col"
+                className={`rounded-xl border shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden flex flex-col ${
+                  isDarkMode
+                    ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                    : 'bg-white border-[#114C5A]/10 hover:border-[#114C5A]/20'
+                }`}
               >
                 {/* Header with gradient */}
                 <div className="bg-gradient-to-br from-[#114C5A] to-[#114C5A]/90 p-4 text-white">
@@ -296,7 +359,9 @@ const MyPurchases = () => {
                   {/* App Image */}
                   {order.app.main_image && (
                     <div 
-                      className="w-full h-32 rounded-xl overflow-hidden border border-[#114C5A]/10 cursor-pointer group/image"
+                      className={`w-full h-32 rounded-xl overflow-hidden border cursor-pointer group/image transition-colors duration-300 ${
+                        isDarkMode ? 'border-slate-600' : 'border-[#114C5A]/10'
+                      }`}
                       onClick={() => navigate(`/admin/ready-apps/${order.app.id}`)}
                     >
                       <img
@@ -312,12 +377,22 @@ const MyPurchases = () => {
                   )}
 
                   {/* Price */}
-                  <div className="p-3 rounded-xl border border-[#114C5A]/10 bg-[#114C5A]/5">
+                  <div className={`p-3 rounded-xl border transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'border-[#114C5A]/30 bg-[#114C5A]/20'
+                      : 'border-[#114C5A]/10 bg-[#114C5A]/5'
+                  }`}>
                     <div className="flex items-center gap-2">
-                      <DollarSign size={16} className="text-[#114C5A]" />
+                      <DollarSign size={16} className={`transition-colors duration-300 ${
+                        isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                      }`} />
                       <div className="flex-1">
-                        <p className="text-xs text-gray-600 font-medium">{t('dashboard.myPurchases.price') || 'السعر'}</p>
-                        <p className="text-lg font-bold text-[#114C5A]">
+                        <p className={`text-xs font-medium transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>{t('dashboard.myPurchases.price') || 'السعر'}</p>
+                        <p className={`text-lg font-bold transition-colors duration-300 ${
+                          isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                        }`}>
                           {order.price.toLocaleString()} {order.currency || 'ر.س'}
                         </p>
                       </div>
@@ -325,18 +400,32 @@ const MyPurchases = () => {
                   </div>
 
                   {/* Order Date */}
-                  <div className="p-3 rounded-xl border border-[#114C5A]/10 bg-[#114C5A]/5">
+                  <div className={`p-3 rounded-xl border transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'border-[#114C5A]/30 bg-[#114C5A]/20'
+                      : 'border-[#114C5A]/10 bg-[#114C5A]/5'
+                  }`}>
                     <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-[#114C5A]" />
+                      <Calendar size={16} className={`transition-colors duration-300 ${
+                        isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                      }`} />
                       <div className="flex-1">
-                        <p className="text-xs text-gray-600 font-medium">{t('dashboard.myPurchases.orderDate') || 'تاريخ الطلب'}</p>
-                        <p className="text-sm font-semibold text-gray-900">{formatDate(order.created_at)}</p>
+                        <p className={`text-xs font-medium transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>{t('dashboard.myPurchases.orderDate') || 'تاريخ الطلب'}</p>
+                        <p className={`text-sm font-semibold transition-colors duration-300 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>{formatDate(order.created_at)}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Contact Preference */}
-                  <div className="p-3 rounded-xl border border-[#114C5A]/10 bg-[#114C5A]/5">
+                  <div className={`p-3 rounded-xl border transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'border-[#114C5A]/30 bg-[#114C5A]/20'
+                      : 'border-[#114C5A]/10 bg-[#114C5A]/5'
+                  }`}>
                     <div className="flex items-center gap-2">
                       {order.contact_preference === 'phone' ? (
                         <Phone size={16} className="text-green-500" />
@@ -344,8 +433,12 @@ const MyPurchases = () => {
                         <Mail size={16} className="text-purple-500" />
                       )}
                       <div className="flex-1">
-                        <p className="text-xs text-gray-600 font-medium">{t('dashboard.myPurchases.contactPreference') || 'تفضيل التواصل'}</p>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className={`text-xs font-medium transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>{t('dashboard.myPurchases.contactPreference') || 'تفضيل التواصل'}</p>
+                        <p className={`text-sm font-semibold transition-colors duration-300 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>
                           {order.contact_preference === 'phone' 
                             ? (t('dashboard.myPurchases.phone') || 'هاتف')
                             : (t('dashboard.myPurchases.email') || 'بريد إلكتروني')
@@ -357,12 +450,20 @@ const MyPurchases = () => {
 
                   {/* Processed At */}
                   {order.processed_at && (
-                    <div className="p-3 rounded-xl border border-green-200 bg-green-50">
+                    <div className={`p-3 rounded-xl border transition-colors duration-300 ${
+                      isDarkMode
+                        ? 'border-green-700 bg-green-900/30'
+                        : 'border-green-200 bg-green-50'
+                    }`}>
                       <div className="flex items-center gap-2">
                         <CheckCircle size={16} className="text-green-500" />
                         <div className="flex-1">
-                          <p className="text-xs text-gray-600 font-medium">{t('dashboard.myPurchases.processedAt') || 'تاريخ المعالجة'}</p>
-                          <p className="text-sm font-semibold text-gray-900">{formatDate(order.processed_at)}</p>
+                          <p className={`text-xs font-medium transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                          }`}>{t('dashboard.myPurchases.processedAt') || 'تاريخ المعالجة'}</p>
+                          <p className={`text-sm font-semibold transition-colors duration-300 ${
+                            isDarkMode ? 'text-white' : 'text-gray-900'
+                          }`}>{formatDate(order.processed_at)}</p>
                         </div>
                       </div>
                     </div>
@@ -370,12 +471,18 @@ const MyPurchases = () => {
 
                   {/* Notes */}
                   {order.notes && (
-                    <div className="p-3 rounded-xl border border-[#FFB200]/20 bg-[#FFB200]/5">
+                    <div className={`p-3 rounded-xl border transition-colors duration-300 ${
+                      isDarkMode
+                        ? 'border-[#FFB200]/30 bg-[#FFB200]/10'
+                        : 'border-[#FFB200]/20 bg-[#FFB200]/5'
+                    }`}>
                       <div className="flex items-start gap-2">
                         <FileText size={16} className="text-[#FFB200] mt-0.5" />
                         <div className="flex-1">
                           <p className="text-xs text-[#FFB200] font-semibold mb-1">{t('dashboard.myPurchases.notes') || 'ملاحظات'}</p>
-                          <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">{order.notes}</p>
+                          <p className={`text-sm leading-relaxed line-clamp-2 transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                          }`}>{order.notes}</p>
                         </div>
                       </div>
                     </div>
@@ -383,7 +490,11 @@ const MyPurchases = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 pt-3 border-t border-[#114C5A]/10 bg-gray-50">
+                <div className={`p-4 pt-3 border-t transition-colors duration-300 ${
+                  isDarkMode
+                    ? 'border-slate-700 bg-slate-700/30'
+                    : 'border-[#114C5A]/10 bg-gray-50'
+                }`}>
                   <button
                     onClick={() => navigate(`/admin/ready-apps/${order.app.id}`)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#114C5A] text-white rounded-xl font-semibold transition-all shadow-sm hover:bg-[#114C5A]/90 hover:shadow-md"
@@ -397,7 +508,9 @@ const MyPurchases = () => {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-8">
+        <div className={`rounded-xl border shadow-sm p-8 transition-colors duration-300 ${
+          isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-[#114C5A]/10'
+        }`}>
           <EmptyState
             icon={ShoppingBag}
             title={t('dashboard.myPurchases.noOrders') || 'لا توجد طلبات'}
@@ -414,8 +527,12 @@ const MyPurchases = () => {
             disabled={currentPage === 1}
             className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
               currentPage === 1
-                ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                ? isDarkMode
+                  ? 'border-slate-700 bg-slate-700/50 text-gray-500 cursor-not-allowed'
+                  : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                : isDarkMode
+                  ? 'border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                  : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
             }`}
           >
             <ChevronRight size={18} />
@@ -442,7 +559,9 @@ const MyPurchases = () => {
                   className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
                     currentPage === pageNum
                       ? 'bg-[#114C5A] text-white shadow-md'
-                      : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                      : isDarkMode
+                        ? 'border border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                        : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                   }`}
                 >
                   {pageNum}
@@ -468,7 +587,9 @@ const MyPurchases = () => {
 
       {/* Pagination Info */}
       {pagination && (
-        <div className="text-center text-sm text-gray-600">
+        <div className={`text-center text-sm transition-colors duration-300 ${
+          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+        }`}>
           {t('dashboard.myPurchases.showing') || 'عرض'} {pagination.from}-{pagination.to} {t('dashboard.myPurchases.of') || 'من'} {pagination.total} {t('dashboard.myPurchases.results') || 'نتيجة'}
         </div>
       )}

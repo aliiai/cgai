@@ -4,12 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
 import CountdownTimer from '../../components/dashboard/CountdownTimer';
-import { getCustomerBookings } from '../../storeApi/storeApi';
+import { getCustomerBookings, useThemeStore } from '../../storeApi/storeApi';
 import type { CustomerBooking } from '../../types/types';
 
 const StatusBadge = ({ status }: { status: string }) => {
     const { t } = useTranslation();
-    const styles: Record<string, string> = {
+    const { isDarkMode } = useThemeStore();
+    const styles: Record<string, string> = isDarkMode ? {
+        confirmed: 'bg-[#114C5A]/30 text-[#114C5A] border-[#114C5A]/40',
+        pending: 'bg-[#FFB200]/20 text-[#FFB200] border-[#FFB200]/30',
+        completed: 'bg-green-900/30 text-green-400 border-green-700',
+        cancelled: 'bg-red-900/30 text-red-400 border-red-700',
+    } : {
         confirmed: 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20',
         pending: 'bg-[#FFB200]/10 text-[#FFB200] border-[#FFB200]/20',
         completed: 'bg-green-50 text-green-700 border-green-200',
@@ -44,7 +50,12 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 const PaymentStatusBadge = ({ paymentStatus }: { paymentStatus: string }) => {
     const { t } = useTranslation();
-    const styles: Record<string, string> = {
+    const { isDarkMode } = useThemeStore();
+    const styles: Record<string, string> = isDarkMode ? {
+        paid: 'bg-green-900/30 text-green-400 border-green-700',
+        unpaid: 'bg-orange-900/30 text-orange-400 border-orange-700',
+        refunded: 'bg-slate-700 text-gray-400 border-slate-600',
+    } : {
         paid: 'bg-green-50 text-green-700 border-green-200',
         unpaid: 'bg-orange-50 text-orange-700 border-orange-200',
         refunded: 'bg-gray-50 text-gray-700 border-gray-200',
@@ -76,6 +87,7 @@ const PaymentStatusBadge = ({ paymentStatus }: { paymentStatus: string }) => {
 
 const Bookings = () => {
     const { t } = useTranslation();
+    const { isDarkMode } = useThemeStore();
     const navigate = useNavigate();
     const [filter, setFilter] = useState('all');
     const [bookings, setBookings] = useState<CustomerBooking[]>([]);
@@ -132,9 +144,15 @@ const Bookings = () => {
             {/* Loading State */}
             {isLoading ? (
                 <div className="flex flex-col justify-center items-center py-32">
-                    <Loader2 className="w-10 h-10 text-[#114C5A] animate-spin mb-4" />
-                    <p className="text-gray-600 font-semibold text-lg">{t('dashboard.bookings.loading')}</p>
-                    <p className="text-gray-500 text-sm mt-2">{t('dashboard.bookings.pleaseWait')}</p>
+                    <Loader2 className={`w-10 h-10 animate-spin mb-4 transition-colors duration-300 ${
+                        isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                    }`} />
+                    <p className={`font-semibold text-lg transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>{t('dashboard.bookings.loading')}</p>
+                    <p className={`text-sm mt-2 transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>{t('dashboard.bookings.pleaseWait')}</p>
                 </div>
             ) : (
                 /* Bookings Grid - New Compact Design */
@@ -159,7 +177,11 @@ const Bookings = () => {
                         return (
                             <div
                                 key={booking.id}
-                                className="rounded-xl border border-[#114C5A]/10 bg-white shadow-sm hover:shadow-lg hover:border-[#114C5A]/30 transition-all duration-300 group overflow-hidden flex flex-col"
+                                className={`rounded-xl border shadow-sm hover:shadow-lg transition-all duration-300 group overflow-hidden flex flex-col ${
+                                    isDarkMode
+                                        ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                                        : 'border-[#114C5A]/10 bg-white hover:border-[#114C5A]/30'
+                                }`}
                             >
                                 {/* Header with gradient */}
                                 <div className="bg-gradient-to-br from-[#114C5A] to-[#114C5A]/90 p-4 text-white">
@@ -190,22 +212,42 @@ const Bookings = () => {
                                     {/* Date & Time */}
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-sm">
-                                            <Calendar size={14} className="text-[#114C5A] flex-shrink-0" />
-                                            <span className="text-gray-600 font-medium">{t('dashboard.bookings.date')}:</span>
-                                            <span className="text-gray-900 font-semibold">{formattedDate}</span>
+                                            <Calendar size={14} className={`flex-shrink-0 transition-colors duration-300 ${
+                                                isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                                            }`} />
+                                            <span className={`font-medium transition-colors duration-300 ${
+                                                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                            }`}>{t('dashboard.bookings.date')}:</span>
+                                            <span className={`font-semibold transition-colors duration-300 ${
+                                                isDarkMode ? 'text-white' : 'text-gray-900'
+                                            }`}>{formattedDate}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm">
-                                            <Clock size={14} className="text-[#114C5A] flex-shrink-0" />
-                                            <span className="text-gray-600 font-medium">{t('dashboard.bookings.time')}:</span>
-                                            <span className="text-gray-900 font-semibold" dir="ltr">{startTime} - {endTime}</span>
+                                            <Clock size={14} className={`flex-shrink-0 transition-colors duration-300 ${
+                                                isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                                            }`} />
+                                            <span className={`font-medium transition-colors duration-300 ${
+                                                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                            }`}>{t('dashboard.bookings.time')}:</span>
+                                            <span className={`font-semibold transition-colors duration-300 ${
+                                                isDarkMode ? 'text-white' : 'text-gray-900'
+                                            }`} dir="ltr">{startTime} - {endTime}</span>
                                         </div>
                                     </div>
 
                                     {/* Employee */}
-                                    <div className="flex items-center gap-2 p-2.5 bg-[#114C5A]/5 border border-[#114C5A]/10 rounded-lg">
-                                        <User size={14} className="text-[#114C5A] flex-shrink-0" />
+                                    <div className={`flex items-center gap-2 p-2.5 border rounded-lg transition-colors duration-300 ${
+                                        isDarkMode
+                                            ? 'bg-[#114C5A]/20 border-[#114C5A]/30'
+                                            : 'bg-[#114C5A]/5 border-[#114C5A]/10'
+                                    }`}>
+                                        <User size={14} className={`flex-shrink-0 transition-colors duration-300 ${
+                                            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                                        }`} />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-gray-600 font-medium truncate">
+                                            <p className={`text-xs font-medium truncate transition-colors duration-300 ${
+                                                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                            }`}>
                                                 {booking.employee?.name || booking.employee?.user?.name || t('dashboard.bookings.cgaiTeam')}
                                             </p>
                                         </div>
@@ -215,10 +257,20 @@ const Bookings = () => {
                                     <div className="space-y-2">
                                         <PaymentStatusBadge paymentStatus={booking.payment_status} />
                                         {booking.payment_method === 'points' && booking.points_used && (
-                                            <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[#114C5A]/5 border border-[#114C5A]/10 rounded-lg">
-                                                <Sparkles size={12} className="text-[#114C5A]" />
-                                                <span className="text-xs text-gray-600">{t('dashboard.wallet.pointsUsed')}:</span>
-                                                <span className="text-xs font-semibold text-[#114C5A]">{booking.points_used.toLocaleString()}</span>
+                                            <div className={`flex items-center gap-2 px-2.5 py-1.5 border rounded-lg transition-colors duration-300 ${
+                                                isDarkMode
+                                                    ? 'bg-[#114C5A]/20 border-[#114C5A]/30'
+                                                    : 'bg-[#114C5A]/5 border-[#114C5A]/10'
+                                            }`}>
+                                                <Sparkles size={12} className={`transition-colors duration-300 ${
+                                                    isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                                                }`} />
+                                                <span className={`text-xs transition-colors duration-300 ${
+                                                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                                }`}>{t('dashboard.wallet.pointsUsed')}:</span>
+                                                <span className={`text-xs font-semibold transition-colors duration-300 ${
+                                                    isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                                                }`}>{booking.points_used.toLocaleString()}</span>
                                             </div>
                                         )}
                                     </div>
@@ -236,12 +288,22 @@ const Bookings = () => {
                                 </div>
 
                                 {/* Footer */}
-                                <div className="p-4 pt-3 border-t border-[#114C5A]/10 bg-gray-50">
+                                <div className={`p-4 pt-3 border-t transition-colors duration-300 ${
+                                    isDarkMode
+                                        ? 'border-slate-700 bg-slate-700/30'
+                                        : 'border-[#114C5A]/10 bg-gray-50'
+                                }`}>
                                     <div className="flex items-center justify-between mb-3">
                                         <div>
-                                            <p className="text-xs text-gray-600 font-medium mb-0.5">{t('dashboard.bookings.totalCost')}</p>
-                                            <p className="text-lg font-bold text-[#114C5A]">
-                                                {Math.abs(parseFloat(booking.total_price)).toFixed(2)} <span className="text-xs text-gray-600">{t('dashboard.stats.currency')}</span>
+                                            <p className={`text-xs font-medium mb-0.5 transition-colors duration-300 ${
+                                                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                            }`}>{t('dashboard.bookings.totalCost')}</p>
+                                            <p className={`text-lg font-bold transition-colors duration-300 ${
+                                                isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                                            }`}>
+                                                {Math.abs(parseFloat(booking.total_price)).toFixed(2)} <span className={`text-xs transition-colors duration-300 ${
+                                                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                                }`}>{t('dashboard.stats.currency')}</span>
                                             </p>
                                         </div>
                                         <button
@@ -259,11 +321,19 @@ const Bookings = () => {
 
                     {filteredBookings.length === 0 && (
                         <div className="col-span-full py-16 flex flex-col items-center justify-center text-center">
-                            <div className="w-20 h-20 bg-[#114C5A]/10 rounded-xl flex items-center justify-center mb-6">
-                                <Calendar size={40} className="text-[#114C5A]" />
+                            <div className={`w-20 h-20 rounded-xl flex items-center justify-center mb-6 transition-colors duration-300 ${
+                                isDarkMode ? 'bg-[#114C5A]/20' : 'bg-[#114C5A]/10'
+                            }`}>
+                                <Calendar size={40} className={`transition-colors duration-300 ${
+                                    isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                                }`} />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('dashboard.bookings.noBookings')}</h3>
-                            <p className="text-gray-600 max-w-md mx-auto mb-6">
+                            <h3 className={`text-xl font-bold mb-2 transition-colors duration-300 ${
+                                isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>{t('dashboard.bookings.noBookings')}</h3>
+                            <p className={`max-w-md mx-auto mb-6 transition-colors duration-300 ${
+                                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                            }`}>
                                 {t('dashboard.bookings.noBookingsMessage')}
                             </p>
                             <button 
@@ -286,8 +356,12 @@ const Bookings = () => {
                         disabled={currentPage === 1}
                         className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
                             currentPage === 1
-                                ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                                : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                                ? isDarkMode
+                                    ? 'border-slate-700 bg-slate-700/50 text-gray-500 cursor-not-allowed'
+                                    : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                                : isDarkMode
+                                    ? 'border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                                    : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                         }`}
                     >
                         <ChevronRight size={18} />
@@ -314,7 +388,9 @@ const Bookings = () => {
                                     className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
                                         currentPage === pageNum
                                             ? 'bg-[#114C5A] text-white shadow-md'
-                                            : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                                            : isDarkMode
+                                                ? 'border border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                                                : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                                     }`}
                                 >
                                     {pageNum}

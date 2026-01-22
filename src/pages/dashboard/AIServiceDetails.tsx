@@ -14,12 +14,15 @@ import {
   Maximize2,
   Eye,
   Heart,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ExternalLink
 } from 'lucide-react';
 import LoadingState from '../../components/dashboard/LoadingState';
 import EmptyState from '../../components/dashboard/EmptyState';
 import { getAIServiceDetails, purchaseAIService, type AIServiceDetails } from '../../storeApi/api/ai-services.api';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
+import { createRating } from '../../storeApi/api/ratings.api';
+import { useAuthStore } from '../../storeApi/storeApi';
 import Swal from 'sweetalert2';
 
 const AIServiceDetails = () => {
@@ -27,11 +30,16 @@ const AIServiceDetails = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+  const { user } = useAuthStore();
   const [service, setService] = useState<AIServiceDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [rating, setRating] = useState<number>(5);
+  const [comment, setComment] = useState<string>('');
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
   const serviceId = id ? parseInt(id) : null;
 
@@ -164,6 +172,11 @@ const AIServiceDetails = () => {
     ? service.rating.total_reviews
     : (service?.reviews_count || 0);
 
+  // Check if current user has already rated this service
+  const hasUserRated = service?.reviews && user?.id 
+    ? service.reviews.some((review: any) => review.user?.id === user.id)
+    : false;
+
   // Get price as number
   const price = typeof service?.price === 'string' ? parseFloat(service.price) : (service?.price || 0);
   const originalPrice = service?.original_price 
@@ -214,6 +227,64 @@ const AIServiceDetails = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [isLightboxOpen, service, images]);
+
+  const handleSubmitRating = async () => {
+    if (!serviceId) return;
+
+    if (rating < 1 || rating > 5) {
+      Swal.fire({
+        icon: 'warning',
+        title: i18n.language === 'ar' ? 'تنبيه!' : 'Warning!',
+        text: i18n.language === 'ar' ? 'يرجى اختيار تقييم من 1 إلى 5' : 'Please select a rating from 1 to 5',
+        confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
+        confirmButtonColor: '#114C5A',
+      });
+      return;
+    }
+
+    setIsSubmittingRating(true);
+    try {
+      const result = await createRating({
+        ratable_id: serviceId,
+        ratable_type: 'ai_service',
+        rating: rating,
+        comment: comment || undefined,
+      });
+
+      if (result.success) {
+        Swal.fire({
+          icon: 'success',
+          title: i18n.language === 'ar' ? 'تم بنجاح!' : 'Success!',
+          text: result.message || (i18n.language === 'ar' ? 'تم إضافة التقييم بنجاح' : 'Rating added successfully'),
+          confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
+          confirmButtonColor: '#114C5A',
+        });
+        setShowRatingModal(false);
+        setComment('');
+        setRating(5);
+        // Refresh service details to show updated rating
+        await fetchServiceDetails();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: i18n.language === 'ar' ? 'حدث خطأ!' : 'Error!',
+          text: result.message || (i18n.language === 'ar' ? 'فشل إضافة التقييم' : 'Failed to add rating'),
+          confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
+          confirmButtonColor: '#ef4444',
+        });
+      }
+    } catch (error: any) {
+      Swal.fire({
+        icon: 'error',
+        title: i18n.language === 'ar' ? 'حدث خطأ!' : 'Error!',
+        text: error.message || (i18n.language === 'ar' ? 'فشل إضافة التقييم. يرجى المحاولة مرة أخرى.' : 'Failed to add rating. Please try again.'),
+        confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
+        confirmButtonColor: '#ef4444',
+      });
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
 
   const handleUseService = async () => {
     if (!service || !serviceId) return;
@@ -661,6 +732,17 @@ const AIServiceDetails = () => {
                 <Sparkles className="w-3.5 h-3.5" />
                 {t('dashboard.aiServiceDetails.useService') || 'استخدم الخدمة'}
               </button>
+              {service.website_url && (
+                <a
+                  href={service.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 bg-white/20 text-white rounded-lg font-medium hover:bg-white/30 transition-colors flex items-center gap-1 text-xs border border-white/30"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  {t('dashboard.aiServiceDetails.visitWebsite') || 'زيارة الموقع'}
+                </a>
+              )}
               <button
                 onClick={handleShare}
                 className="px-3 py-1.5 bg-white/20 text-white rounded-lg font-medium hover:bg-white/30 transition-colors flex items-center gap-1 text-xs border border-white/30"
@@ -857,6 +939,19 @@ const AIServiceDetails = () => {
               {t('dashboard.aiServiceDetails.useService') || 'استخدم الخدمة'}
             </button>
 
+            {/* Visit Website Button */}
+            {service.website_url && (
+              <a
+                href={service.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full px-4 py-2.5 bg-[#FFB200] text-white rounded-lg font-semibold hover:bg-[#FFB200]/90 transition-colors flex items-center justify-center gap-1.5 shadow-lg mb-3 text-sm"
+              >
+                <ExternalLink className="w-4 h-4" />
+                {t('dashboard.aiServiceDetails.visitWebsite') || 'زيارة الموقع'}
+              </a>
+            )}
+
             <div className="space-y-2 pt-3 border-t border-[#114C5A]/10">
               <div className="flex items-center gap-2 text-xs">
                 <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
@@ -871,6 +966,19 @@ const AIServiceDetails = () => {
                 <span className="text-gray-700">{t('dashboard.aiServiceDetails.support') || 'دعم فني'}</span>
               </div>
             </div>
+
+            {/* Add Rating Button */}
+            {!hasUserRated && (
+              <div className="mt-4 pt-4 border-t border-[#114C5A]/10">
+                <button
+                  onClick={() => setShowRatingModal(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#FFB200] text-white rounded-lg font-semibold hover:bg-[#FFB200]/90 transition-colors text-sm"
+                >
+                  <Star className="w-4 h-4" />
+                  {t('dashboard.aiServiceDetails.addRating') || 'أضف تقييم'}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Related Services */}
@@ -947,6 +1055,111 @@ const AIServiceDetails = () => {
           </div>
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm">
             {selectedImageIndex + 1} / {images.length}
+          </div>
+        </div>
+      )}
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowRatingModal(false);
+              setComment('');
+              setRating(5);
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="bg-[#114C5A] text-white p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold">
+                {t('dashboard.aiServiceDetails.rateService') || 'قيم الخدمة'}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowRatingModal(false);
+                  setComment('');
+                  setRating(5);
+                }}
+                className="text-white hover:text-gray-200 transition-colors p-1"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Rating Stars */}
+              <div className="space-y-3">
+                <label className="block text-gray-700 font-semibold text-lg">
+                  {t('dashboard.aiServiceDetails.rating') || 'التقييم'}:
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        className="focus:outline-none transform hover:scale-110 transition-transform"
+                      >
+                        <Star
+                          className={`w-10 h-10 transition ${
+                            star <= rating
+                              ? 'text-[#FFB200] fill-[#FFB200]'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-xl font-bold text-gray-700">({rating}/5)</span>
+                </div>
+              </div>
+
+              {/* Comment */}
+              <div className="space-y-2">
+                <label className="block text-gray-700 font-semibold text-lg">
+                  {t('dashboard.aiServiceDetails.comment') || 'التعليق'}:
+                </label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder={t('dashboard.aiServiceDetails.commentPlaceholder') || 'اكتب تعليقك هنا...'}
+                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#114C5A] resize-none"
+                  rows={5}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleSubmitRating}
+                  disabled={isSubmittingRating}
+                  className="flex-1 px-6 py-3 bg-[#114C5A] text-white rounded-lg font-semibold hover:bg-[#114C5A]/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmittingRating
+                    ? (i18n.language === 'ar' ? 'جاري الإرسال...' : 'Submitting...')
+                    : (t('dashboard.aiServiceDetails.submitRating') || 'إرسال التقييم')}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowRatingModal(false);
+                    setComment('');
+                    setRating(5);
+                  }}
+                  disabled={isSubmittingRating}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('dashboard.aiServiceDetails.cancel') || 'إلغاء'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

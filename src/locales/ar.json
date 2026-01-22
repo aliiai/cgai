@@ -33,7 +33,9 @@
     "login": "تسجيل الدخول",
     "register": "تسجيل حساب",
     "startNow": "ابدأ الآن",
-    "menu": "القائمة"
+    "menu": "القائمة",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن"
   },
   "sidebar": {
     "dashboard": "لوحة التحكم",
@@ -424,6 +426,8 @@
       "amountPaid": "المبلغ المدفوع",
       "availablePackages": "الباقات المتاحة",
       "noPackages": "لا توجد باقات متاحة حالياً",
+      "price": "السعر",
+      "duration": "مدة الاشتراك",
       "pendingReview": "لديك طلب قيد المراجعة",
       "activateAccount": "سيتم تنشيط الحساب فور الموافقة",
       "noActiveMessage": "اختر إحدى الباقات المتاحة أدناه للبدء في استخدام كافة مميزات النظام",
@@ -829,6 +833,15 @@
       "totalApps": "إجمالي التطبيقات",
       "showing": "عرض",
       "of": "من",
+      "addRating": "أضف تقييم",
+      "rateApp": "قيم التطبيق",
+      "rating": "التقييم",
+      "comment": "التعليق",
+      "commentPlaceholder": "اكتب تعليقك هنا...",
+      "submitRating": "إرسال التقييم",
+      "cancel": "إلغاء",
+      "reviewsList": "التقييمات والتعليقات",
+      "anonymous": "مجهول",
       "apps": "تطبيق",
       "results": "نتيجة",
       "search": "بحث",
@@ -931,6 +944,13 @@
       "processing": "جاري المعالجة...",
       "pleaseWait": "يرجى الانتظار",
       "requestSentSuccessfully": "✅ تم إرسال الطلب بنجاح!",
+      "addRating": "أضف تقييم",
+      "rateService": "قيم الخدمة",
+      "rating": "التقييم",
+      "comment": "التعليق",
+      "commentPlaceholder": "اكتب تعليقك هنا...",
+      "submitRating": "إرسال التقييم",
+      "visitWebsite": "زيارة الموقع",
       "requestCreatedSuccessfully": "تم إنشاء طلب الخدمة بنجاح، سنتواصل معك قريباً",
       "orderId": "رقم الطلب",
       "serviceName": "اسم الخدمة",
@@ -971,7 +991,8 @@
     "error": {
       "loadingError": "فشل في تحميل الخدمات",
       "connectionError": "حدث خطأ أثناء الاتصال بالخادم"
-    }
+    },
+    "visitWebsite": "زيارة الموقع"
   },
   "news": {
     "title": "آخر أخبار الذكاء الاصطناعي",
@@ -1023,6 +1044,50 @@
         "5": "دعم تقني مستمر"
       }
     }
+  },
+  "requestService": {
+    "loading": "جاري تحميل الخدمات...",
+    "errorFetching": "فشل في جلب بيانات الخدمات",
+    "errorOccurred": "حدث خطأ أثناء جلب بيانات الخدمات",
+    "retry": "إعادة المحاولة",
+    "discoverServices": "اكتشف الخدمات",
+    "noServices": "لا توجد خدمات متاحة حالياً",
+    "footerTitle": "جاهز للبدء؟",
+    "footerDescription": "نحن هنا لمساعدتك في تحقيق أهدافك من خلال خدماتنا المتميزة. سجل الآن وابدأ رحلتك معنا اليوم",
+    "registerNow": "سجل الآن",
+    "contactUs": "تواصل معنا"
+  },
+  "discoverServices": {
+    "title": "اكتشف الخدمات",
+    "subtitle": "استكشف جميع خدماتنا المتاحة واختر ما يناسب احتياجاتك",
+    "all": "الكل",
+    "loadingSubCategories": "جاري تحميل التصنيفات الفرعية...",
+    "noDescription": "لا يوجد وصف متاح",
+    "perHour": "ريال/ساعة",
+    "bookService": "احجز الخدمة",
+    "noServices": "لا توجد خدمات متاحة حالياً",
+    "notSpecified": "غير محدد"
+  },
+  "contact": {
+    "title": "تواصل معنا",
+    "description": "نحن هنا للإجابة على أسئلتك والاستماع إلى اقتراحاتك. تواصل معنا عبر النموذج أدناه أو من خلال معلومات الاتصال",
+    "formTitle": "أرسل لنا رسالة",
+    "name": "الاسم",
+    "namePlaceholder": "أدخل اسمك الكامل",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "example@email.com",
+    "phone": "رقم الهاتف",
+    "phonePlaceholder": "05xxxxxxxx",
+    "message": "الرسالة",
+    "messagePlaceholder": "اكتب رسالتك هنا...",
+    "sendButton": "إرسال الرسالة",
+    "sending": "جاري الإرسال...",
+    "successMessage": "تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.",
+    "contactInfoTitle": "معلومات الاتصال",
+    "workingHours": "ساعات العمل",
+    "workingHoursContent": "الأحد - الخميس: 9:00 ص - 6:00 م<br />الجمعة - السبت: مغلق",
+    "helpTitle": "نحن هنا لمساعدتك",
+    "helpDescription": "فريقنا متاح للإجابة على استفساراتك ومساعدتك في أي وقت. لا تتردد في التواصل معنا، وسنكون سعداء بمساعدتك."
   }
 }
 

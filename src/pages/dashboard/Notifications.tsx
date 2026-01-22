@@ -2,7 +2,7 @@ import { Bell, Calendar, CheckCircle, Loader2, CheckCheck, ChevronLeft, ChevronR
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
-import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../../storeApi/storeApi';
+import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, useThemeStore } from '../../storeApi/storeApi';
 import type { Notification } from '../../types/types';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import LoadingState from '../../components/dashboard/LoadingState';
 
 const Notifications = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -263,23 +264,39 @@ const Notifications = () => {
             <div
               key={value}
               onClick={() => setFilter(value as 'all' | 'unread' | 'read')}
-              className={`bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group ${
-                isActive
-                  ? 'border-[#114C5A] bg-[#114C5A]/5'
-                  : 'border-[#114C5A]/10 hover:border-[#114C5A]/30'
+              className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group ${
+                isDarkMode
+                  ? isActive
+                    ? 'bg-slate-700/50 border-[#114C5A]'
+                    : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                  : isActive
+                    ? 'border-[#114C5A] bg-[#114C5A]/5 bg-white'
+                    : 'border-[#114C5A]/10 hover:border-[#114C5A]/30 bg-white'
               }`}
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
                   isActive
                     ? 'bg-[#114C5A] text-white'
-                    : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
+                    : isDarkMode
+                      ? 'bg-[#114C5A]/20 text-[#FFB200] group-hover:bg-[#114C5A]/30'
+                      : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
                 }`}>
                   <Icon className="w-5 h-5" />
                 </div>
               </div>
-              <p className="text-xs text-gray-600 mb-2 leading-tight">{label}</p>
-              <p className={`text-2xl font-bold ${isActive ? 'text-[#114C5A]' : 'text-gray-700'}`}>
+              <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>{label}</p>
+              <p className={`text-2xl font-bold transition-colors duration-300 ${
+                isDarkMode
+                  ? isActive
+                    ? 'text-white'
+                    : 'text-gray-300'
+                  : isActive
+                    ? 'text-[#114C5A]'
+                    : 'text-gray-700'
+              }`}>
                 {count}
                 {value === 'unread' && unreadCount > 0 && (
                   <span className="ml-2 text-sm text-[#FFB200]">({unreadCount})</span>
@@ -325,7 +342,11 @@ const Notifications = () => {
       })()}
 
       {/* Notifications List */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm overflow-hidden">
+      <div className={`rounded-xl border shadow-sm overflow-hidden transition-colors duration-300 ${
+        isDarkMode
+          ? 'bg-slate-800 border-slate-700'
+          : 'bg-white border-[#114C5A]/10'
+      }`}>
         {isLoading ? (
           <div className="p-12">
             <LoadingState />
@@ -333,15 +354,25 @@ const Notifications = () => {
         ) : filteredNotifications.length === 0 ? (
           <div className="p-12">
             <div className="text-center py-8">
-              <div className="w-20 h-20 bg-[#114C5A]/10 rounded-xl flex items-center justify-center mx-auto mb-4 border border-[#114C5A]/20">
-                <Bell className="w-10 h-10 text-[#114C5A]" />
+              <div className={`w-20 h-20 rounded-xl flex items-center justify-center mx-auto mb-4 border transition-colors duration-300 ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 border-[#114C5A]/30'
+                  : 'bg-[#114C5A]/10 border-[#114C5A]/20'
+              }`}>
+                <Bell className={`w-10 h-10 transition-colors duration-300 ${
+                  isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                }`} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className={`text-xl font-bold mb-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
                 {filter === 'unread' ? t('dashboard.notifications.noUnread') : 
                  filter === 'read' ? t('dashboard.notifications.noRead') : 
                  t('dashboard.notifications.noNotifications')}
               </h3>
-              <p className="text-gray-600 text-base">
+              <p className={`text-base transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
                 {filter === 'unread' ? t('dashboard.notifications.allReadMessage') :
                  filter === 'read' ? t('dashboard.notifications.noReadMessage') :
                  t('dashboard.notifications.noNotificationsMessage')}
@@ -359,19 +390,25 @@ const Notifications = () => {
                     rounded-xl p-5 
                     border transition-all duration-200
                     hover:shadow-md cursor-pointer
-                    ${!notification.read 
-                      ? 'bg-[#114C5A]/5 border-[#114C5A]/20 shadow-sm'
-                      : 'bg-white border-gray-200 hover:border-gray-300'
+                    ${isDarkMode
+                      ? !notification.read
+                        ? 'bg-slate-700/50 border-slate-600 shadow-sm'
+                        : 'bg-slate-700/30 border-slate-700 hover:border-slate-600'
+                      : !notification.read
+                        ? 'bg-[#114C5A]/5 border-[#114C5A]/20 shadow-sm bg-white'
+                        : 'bg-white border-gray-200 hover:border-gray-300'
                     }
                   `}
                 >
                   <div className="flex items-start gap-4">
                     {/* Icon */}
                     <div className={`
-                      mt-1 p-3 rounded-xl flex-shrink-0
+                      mt-1 p-3 rounded-xl flex-shrink-0 transition-colors duration-300
                       ${!notification.read 
                         ? 'bg-[#114C5A] text-white' 
-                        : 'bg-gray-100 text-gray-400'
+                        : isDarkMode
+                          ? 'bg-slate-600 text-gray-400'
+                          : 'bg-gray-100 text-gray-400'
                       }
                     `}>
                       <Calendar size={20} />
@@ -381,10 +418,14 @@ const Notifications = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <h3 className={`
-                          text-base font-semibold line-clamp-2
-                          ${!notification.read 
-                            ? 'text-gray-900'
-                            : 'text-gray-600'
+                          text-base font-semibold line-clamp-2 transition-colors duration-300
+                          ${isDarkMode
+                            ? !notification.read
+                              ? 'text-white'
+                              : 'text-gray-300'
+                            : !notification.read
+                              ? 'text-gray-900'
+                              : 'text-gray-600'
                           }
                         `}>
                           {notification.title}
@@ -394,19 +435,27 @@ const Notifications = () => {
                         )}
                       </div>
                       
-                      <p className="text-sm mb-3 line-clamp-3 text-gray-600">
+                      <p className={`text-sm mb-3 line-clamp-3 transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`}>
                         {notification.message}
                       </p>
 
                       {/* Metadata */}
                       <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                           <Calendar size={14} />
                           <span>{formatDate(notification.created_at)}</span>
                         </div>
                         
                         {notification.data?.booking_id && (
-                          <span className="px-3 py-1 bg-[#114C5A]/10 text-[#114C5A] text-xs font-semibold rounded-lg border border-[#114C5A]/20">
+                          <span className={`px-3 py-1 text-xs font-semibold rounded-lg border transition-colors duration-300 ${
+                            isDarkMode
+                              ? 'bg-[#114C5A]/20 text-[#FFB200] border-[#114C5A]/30'
+                              : 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20'
+                          }`}>
                             {t('dashboard.notifications.booking')} #{notification.data.booking_id}
                           </span>
                         )}
@@ -419,8 +468,12 @@ const Notifications = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-[#114C5A]/10 p-4">
-                <div className="text-xs sm:text-sm font-semibold text-center sm:text-right text-gray-600">
+              <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t p-4 transition-colors duration-300 ${
+                isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+              }`}>
+                <div className={`text-xs sm:text-sm font-semibold text-center sm:text-right transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
                   {t('dashboard.notifications.showing', { from, to, total }) || `عرض ${from}-${to} من ${total}`}
                 </div>
                 <div className="flex items-center gap-2">
@@ -429,8 +482,12 @@ const Notifications = () => {
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
                       currentPage === 1
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                        ? isDarkMode
+                          ? 'border-slate-700 bg-slate-700 text-gray-500 cursor-not-allowed'
+                          : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : isDarkMode
+                          ? 'border-slate-600 bg-slate-700 text-white hover:bg-slate-600 hover:border-slate-500'
+                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                     }`}
                   >
                     <ChevronRight size={18} />
@@ -457,7 +514,9 @@ const Notifications = () => {
                           className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
                             currentPage === pageNum
                               ? 'bg-[#114C5A] text-white shadow-md'
-                              : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                              : isDarkMode
+                                ? 'border border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                                : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                           }`}
                         >
                           {pageNum}
@@ -471,8 +530,12 @@ const Notifications = () => {
                     disabled={currentPage === totalPages}
                     className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
                       currentPage === totalPages
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                        ? isDarkMode
+                          ? 'border-slate-700 bg-slate-700 text-gray-500 cursor-not-allowed'
+                          : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : isDarkMode
+                          ? 'border-slate-600 bg-slate-700 text-white hover:bg-slate-600 hover:border-slate-500'
+                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                     }`}
                   >
                     <span className="font-semibold">{t('dashboard.support.next')}</span>

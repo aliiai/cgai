@@ -5,10 +5,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0', // السماح بالوصول من الشبكة المحلية
+    port: 5173, // يمكنك تغيير المنفذ إذا أردت
     proxy: {
       '/api': {
-        target: 'http://192.168.1.116:8000',
-        // target: 'http://127.0.0.1:8000',
+        target: 'https://dsai.sa/backend',
+        // target: 'http://192.168.1.128:8000',
         changeOrigin: true,
         secure: false,
       },

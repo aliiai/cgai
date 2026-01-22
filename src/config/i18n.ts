@@ -22,6 +22,7 @@ const initI18n = () => {
     // Initialize i18next
     .init({
       // Default language
+      lng: 'ar',
       fallbackLng: 'ar',
       
       // Supported languages
@@ -47,6 +48,16 @@ const initI18n = () => {
         
         // Cache user language
         caches: ['localStorage'],
+        
+        // If no language is detected, use Arabic
+        convertDetectedLanguage: (lng: string) => {
+          // Only allow supported languages
+          if (lng && (lng.startsWith('en') || lng === 'en')) {
+            return 'en';
+          }
+          // Default to Arabic for all other cases
+          return 'ar';
+        },
       },
       
       // React i18next options

@@ -1,5 +1,6 @@
 import type { ServiceCategory, ServiceSubCategory, Service, Consultation } from '../../types/types';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
+import { useThemeStore } from '../../storeApi/storeApi';
 
 interface CategoryIconProps {
   item: ServiceCategory | ServiceSubCategory | Service | Consultation;
@@ -7,6 +8,8 @@ interface CategoryIconProps {
 }
 
 const CategoryIcon = ({ item, size = 'md' }: CategoryIconProps) => {
+  const { isDarkMode } = useThemeStore();
+  
   const sizeClasses = {
     sm: 'w-12 h-12',
     md: 'w-16 h-16',
@@ -32,7 +35,11 @@ const CategoryIcon = ({ item, size = 'md' }: CategoryIconProps) => {
       : null;
 
   return (
-    <div className={`${sizeClasses[size]} rounded-xl bg-[#114C5A]/10 border border-[#114C5A]/20 flex items-center justify-center overflow-hidden`}>
+    <div className={`${sizeClasses[size]} rounded-xl flex items-center justify-center overflow-hidden transition-colors duration-300 ${
+      isDarkMode
+        ? 'bg-[#114C5A]/20 border border-[#114C5A]/30'
+        : 'bg-[#114C5A]/10 border border-[#114C5A]/20'
+    }`}>
       {imageUrl ? (
         <img 
           src={imageUrl} 
@@ -46,7 +53,9 @@ const CategoryIcon = ({ item, size = 'md' }: CategoryIconProps) => {
         <span className={textSizeClasses[size]}>{item.icon}</span>
       ) : (
         <svg 
-          className={`${iconSizeClasses[size]} text-[#114C5A]`} 
+          className={`${iconSizeClasses[size]} transition-colors duration-300 ${
+            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+          }`} 
           fill="none" 
           stroke="currentColor" 
           strokeWidth="2" 

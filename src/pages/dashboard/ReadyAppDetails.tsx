@@ -18,18 +18,25 @@ import LoadingState from '../../components/dashboard/LoadingState';
 import { getReadyAppDetails, purchaseReadyApp, type ReadyApp } from '../../storeApi/api/ready-apps.api';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
 import { useLocalized } from '../../hooks/useLocalized';
+import { createRating } from '../../storeApi/api/ratings.api';
+import { useAuthStore } from '../../storeApi/storeApi';
 import Swal from 'sweetalert2';
 
 const ReadyAppDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { user } = useAuthStore();
   const [app, setApp] = useState<ReadyApp | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [mediaType, setMediaType] = useState<'images' | 'video'>('images');
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [rating, setRating] = useState<number>(5);
+  const [comment, setComment] = useState<string>('');
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
   const appId = id ? parseInt(id) : null;
 
@@ -85,7 +92,6 @@ const ReadyAppDetails = () => {
     
     setIsLoading(true);
     try {
-      const locale = i18n.language === 'ar' ? 'ar' : 'en';
       const result = await getReadyAppDetails(appId);
       
       if (result.success && result.data) {
@@ -115,6 +121,20 @@ const ReadyAppDetails = () => {
     };
   }, [i18n, fetchAppDetails]);
 
+  // Close rating modal on ESC key
+  useEffect(() => {
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showRatingModal) {
+        setShowRatingModal(false);
+        setComment('');
+        setRating(5);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscKey);
+    return () => window.removeEventListener('keydown', handleEscKey);
+  }, [showRatingModal]);
+
   // Use localized hook for app data - must always call hooks, even if app is null
   const localizedApp = useLocalized(app, ['name', 'description', 'short_description', 'full_description']);
 
@@ -140,6 +160,11 @@ const ReadyAppDetails = () => {
   const reviewsCount = typeof app?.rating === 'object' && app.rating?.total_reviews !== undefined
     ? app.rating.total_reviews
     : (app?.reviews_count || 0);
+
+  // Check if current user has already rated this app
+  const hasUserRated = app?.reviews && user?.id 
+    ? app.reviews.some((review: any) => review.user?.id === user.id)
+    : false;
 
   // Get category name
   const categoryName = app?.category
@@ -204,7 +229,6 @@ const ReadyAppDetails = () => {
 
     const primaryColor = '#114C5A';
     const bgColor = '#ffffff';
-    const cardBg = '#f8fafc';
     const textColor = '#1e293b';
     const borderColor = '#e2e8f0';
     const inputBg = '#ffffff';
@@ -433,6 +457,64 @@ const ReadyAppDetails = () => {
     }
   };
 
+  const handleSubmitRating = async () => {
+    if (!appId) return;
+
+    if (rating < 1 || rating > 5) {
+      Swal.fire({
+        icon: 'warning',
+        title: i18n.language === 'ar' ? 'تنبيه!' : 'Warning!',
+        text: i18n.language === 'ar' ? 'يرجى اختيار تقييم من 1 إلى 5' : 'Please select a rating from 1 to 5',
+        confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
+        confirmButtonColor: '#114C5A',
+      });
+      return;
+    }
+
+    setIsSubmittingRating(true);
+    try {
+      const result = await createRating({
+        ratable_id: appId,
+        ratable_type: 'ready_app',
+        rating: rating,
+        comment: comment || undefined,
+      });
+
+      if (result.success) {
+        Swal.fire({
+          icon: 'success',
+          title: i18n.language === 'ar' ? 'تم بنجاح!' : 'Success!',
+          text: result.message || (i18n.language === 'ar' ? 'تم إضافة التقييم بنجاح' : 'Rating added successfully'),
+          confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
+          confirmButtonColor: '#114C5A',
+        });
+        setShowRatingModal(false);
+        setComment('');
+        setRating(5);
+        // Refresh app details to show updated rating
+        await fetchAppDetails();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: i18n.language === 'ar' ? 'حدث خطأ!' : 'Error!',
+          text: result.message || (i18n.language === 'ar' ? 'فشل إضافة التقييم' : 'Failed to add rating'),
+          confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
+          confirmButtonColor: '#ef4444',
+        });
+      }
+    } catch (error: any) {
+      Swal.fire({
+        icon: 'error',
+        title: i18n.language === 'ar' ? 'حدث خطأ!' : 'Error!',
+        text: error.message || (i18n.language === 'ar' ? 'فشل إضافة التقييم. يرجى المحاولة مرة أخرى.' : 'Failed to add rating. Please try again.'),
+        confirmButtonText: i18n.language === 'ar' ? 'حسناً' : 'OK',
+        confirmButtonColor: '#ef4444',
+      });
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
   const handleShare = async () => {
     const appName = localizedApp?.name || app?.name_en || 'App';
     const appUrl = window.location.href;
@@ -615,6 +697,17 @@ const ReadyAppDetails = () => {
                 {t('dashboard.readyApps.share') || 'مشاركة'}
               </button>
             </div>
+
+            {/* Add Rating Button */}
+            {!hasUserRated && (
+              <button
+                onClick={() => setShowRatingModal(true)}
+                className="mt-8 px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition flex items-center justify-center gap-2"
+              >
+                <Star className="w-5 h-5" />
+                {t('dashboard.readyApps.addRating') || 'أضف تقييم'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -928,6 +1021,97 @@ const ReadyAppDetails = () => {
                 </div>
               )}
             </div>
+
+            {/* Reviews List Section */}
+            {app.reviews && app.reviews.length > 0 && (
+              <div className="rounded-xl p-6 border border-[#114C5A]/10 bg-white mt-6">
+                <h2 className="text-2xl font-bold mb-4 text-gray-900">
+                  {t('dashboard.readyApps.reviewsList') || 'التقييمات والتعليقات'} ({app.reviews.length})
+                </h2>
+                <div className="space-y-4">
+                  {app.reviews.map((review: any) => {
+                    // Get avatar URL
+                    const avatarUrl = review.user?.avatar 
+                      ? (review.user.avatar.startsWith('http') 
+                          ? review.user.avatar 
+                          : `${STORAGE_BASE_URL}/${review.user.avatar.replace(/^\//, '')}`)
+                      : null;
+                    
+                    // Format date
+                    const reviewDate = review.created_at 
+                      ? new Date(review.created_at).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : 'en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      : '';
+
+                    // Get comment based on language
+                    const reviewComment = i18n.language === 'ar' 
+                      ? review.comment 
+                      : (review.comment_en || review.comment);
+
+                    return (
+                      <div key={review.id} className="p-4 bg-gray-50 rounded-lg border border-[#114C5A]/10">
+                        <div className="flex items-start gap-3 mb-3">
+                          {/* User Avatar */}
+                          {avatarUrl ? (
+                            <img 
+                              src={avatarUrl} 
+                              alt={review.user?.name || 'User'} 
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                if (target.nextElementSibling) {
+                                  (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                                }
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className={`w-10 h-10 rounded-full bg-[#114C5A] text-white flex items-center justify-center font-bold text-sm ${avatarUrl ? 'hidden' : 'flex'}`}
+                          >
+                            {review.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                          </div>
+                          
+                          {/* User Info and Rating */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <p className="font-semibold text-gray-900 text-sm">
+                                {review.user?.name || t('dashboard.readyApps.anonymous') || 'مجهول'}
+                              </p>
+                              {reviewDate && (
+                                <span className="text-xs text-gray-500">
+                                  {reviewDate}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 mb-2">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`w-4 h-4 ${
+                                    star <= (review.rating || 0)
+                                      ? 'fill-[#FFB200] text-[#FFB200]'
+                                      : 'fill-gray-200 text-gray-200'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            {reviewComment && (
+                              <p className="text-sm text-gray-700 mt-2 leading-relaxed">
+                                {reviewComment}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
             {/* Sidebar - Purchase Section */}
@@ -974,6 +1158,19 @@ const ReadyAppDetails = () => {
                     {t('dashboard.readyApps.share') || 'مشاركة'}
                   </button>
                 </div>
+
+                {/* Add Rating Button */}
+                {!hasUserRated && (
+                  <div className="mt-6 pt-6 border-t border-gray-200/50">
+                    <button
+                      onClick={() => setShowRatingModal(true)}
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition hover:scale-105 bg-[#FFB200] text-white hover:bg-[#FFB200]/90"
+                    >
+                      <Star className="w-5 h-5" />
+                      {t('dashboard.readyApps.addRating') || 'أضف تقييم'}
+                    </button>
+                  </div>
+                )}
 
               {/* Info */}
               <div className="mt-6 pt-6 border-t border-gray-200/50 space-y-3 text-gray-500 text-sm">
@@ -1187,6 +1384,111 @@ const ReadyAppDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowRatingModal(false);
+              setComment('');
+              setRating(5);
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="bg-[#114C5A] text-white p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold">
+                {t('dashboard.readyApps.rateApp') || 'قيم التطبيق'}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowRatingModal(false);
+                  setComment('');
+                  setRating(5);
+                }}
+                className="text-white hover:text-gray-200 transition-colors p-1"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Rating Stars */}
+              <div className="space-y-3">
+                <label className="block text-gray-700 font-semibold text-lg">
+                  {t('dashboard.readyApps.rating') || 'التقييم'}:
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        className="focus:outline-none transform hover:scale-110 transition-transform"
+                      >
+                        <Star
+                          className={`w-10 h-10 transition ${
+                            star <= rating
+                              ? 'text-[#FFB200] fill-[#FFB200]'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-xl font-bold text-gray-700">({rating}/5)</span>
+                </div>
+              </div>
+
+              {/* Comment */}
+              <div className="space-y-2">
+                <label className="block text-gray-700 font-semibold text-lg">
+                  {t('dashboard.readyApps.comment') || 'التعليق'}:
+                </label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder={t('dashboard.readyApps.commentPlaceholder') || 'اكتب تعليقك هنا...'}
+                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#114C5A] resize-none"
+                  rows={5}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleSubmitRating}
+                  disabled={isSubmittingRating}
+                  className="flex-1 px-6 py-3 bg-[#114C5A] text-white rounded-lg font-semibold hover:bg-[#114C5A]/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmittingRating
+                    ? (i18n.language === 'ar' ? 'جاري الإرسال...' : 'Submitting...')
+                    : (t('dashboard.readyApps.submitRating') || 'إرسال التقييم')}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowRatingModal(false);
+                    setComment('');
+                    setRating(5);
+                  }}
+                  disabled={isSubmittingRating}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('dashboard.readyApps.cancel') || 'إلغاء'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

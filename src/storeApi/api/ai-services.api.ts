@@ -79,6 +79,7 @@ export interface AIServiceDetails {
   original_price?: string | number | null;
   currency?: string;
   video_url?: string | null;
+  website_url?: string | null;
   rating: AIServiceRating | number;
   reviews_count: number;
   views_count: number;
@@ -124,6 +125,18 @@ export interface AIServiceDetails {
     purchases: number;
     favorites: number;
   };
+  reviews?: Array<{
+    id: number;
+    user: {
+      id: number;
+      name: string;
+      avatar?: string;
+    };
+    rating: number;
+    comment: string;
+    comment_en?: string;
+    created_at: string;
+  }>;
 }
 
 export interface AIServiceCategory {

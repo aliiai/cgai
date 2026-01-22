@@ -1,4 +1,5 @@
 import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import bgSubCard from '../assets/images/bgSubCard.png';
 import { useThemeStore } from '../storeApi/store/theme.store';
 import { useTranslation } from 'react-i18next';
@@ -17,14 +18,15 @@ interface PricingCardProps {
 }
 
 const PricingCard = ({ plan }: PricingCardProps) => {
+  const navigate = useNavigate();
   const { isDarkMode } = useThemeStore();
   const { t } = useTranslation();
 
   return (
     <div
-      className={`group relative transition-all duration-500 hover:-translate-y-2 flex flex-col ${plan.isPopular
+      className={`group relative transition-all duration-500 flex flex-col ${plan.isPopular
         ? 'bg-[#FFB200] rounded-3xl py-32 px-8'
-        : `rounded-3xl py-24 px-8 shadow-lg hover:shadow-xl mt-10 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-white text-[#114C5A]'
+        : `rounded-3xl py-24 px-8 shadow-lg hover:shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-white text-[#114C5A]'
         }`
         }`}
       style={plan.isPopular ? {
@@ -33,8 +35,11 @@ const PricingCard = ({ plan }: PricingCardProps) => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        backgroundColor: '#FFB200' // Fallback color
-      } : undefined}
+        backgroundColor: '#FFB200',
+        transform: 'translateY(-2rem)',
+      } : {
+        transform: 'translateY(2rem)',
+      }}
     >
       {/* Plan Name */}
       <div className="flex flex-col items-start justify-center w-[70%] mx-auto">
@@ -79,12 +84,14 @@ const PricingCard = ({ plan }: PricingCardProps) => {
       </ul>
 
       {/* Action Button */}
-      <button className={`w-full py-4 rounded-2xl font-bold text-base transition-all duration-300 transform active:scale-95 ${plan.isPopular
-        ? 'bg-white text-[#114C5A] hover:bg-gray-50 shadow-lg'
-        : isDarkMode
-          ? 'bg-primary text-white hover:bg-primary/90 shadow-lg'
-          : 'bg-[#114C5A] text-white hover:bg-[#0d3a44] shadow-lg'
-        }`}>
+      <button 
+        onClick={() => navigate('/register')}
+        className={`w-full py-4 rounded-2xl font-bold text-base transition-all duration-300 transform active:scale-95 ${plan.isPopular
+          ? 'bg-white text-[#114C5A] hover:bg-gray-50 shadow-lg'
+          : isDarkMode
+            ? 'bg-primary text-white hover:bg-primary/90 shadow-lg'
+            : 'bg-[#114C5A] text-white hover:bg-[#0d3a44] shadow-lg'
+          }`}>
         {t('pricing.subscribeNow') || 'اشترك الآن'}
       </button>
     </div>

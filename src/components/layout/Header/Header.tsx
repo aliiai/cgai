@@ -44,10 +44,6 @@ const Header = () => {
   }, [location.pathname, navLinks, i18n.language]);
 
   const handleNavClick = (path: string, label: string) => {
-    // Prevent navigation for request-service and contact pages
-    if (path === '/request-service' || path === '/contact' || path === '/contact-us') {
-      return;
-    }
     setActiveLink(label);
     navigate(path);
   };
@@ -126,7 +122,7 @@ const Header = () => {
           {/* Logo - Right Side */}
           <motion.div variants={logoVariants} initial="hidden" animate="visible">
             <Logo onClick={handleLogoClick} size="sm" className="sm:hidden" />
-            <Logo onClick={handleLogoClick} className="hidden sm:block" />
+            <Logo onClick={handleLogoClick} size="md" className="hidden sm:block" />
           </motion.div>
 
           {/* Navigation Links - Center */}

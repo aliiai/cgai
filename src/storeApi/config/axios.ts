@@ -8,11 +8,15 @@
  */
 
 import axios from 'axios';
-import { API_BASE_URL } from './constants';
+import { API_BASE_URL, API_BASE } from './constants';
 import i18n from '../../config/i18n';
 
+// استخدام API_BASE (المسار الكامل) في production أو إذا لم يكن proxy متاحاً
+// استخدام API_BASE_URL (مسار نسبي) في development مع Vite proxy
+const baseURL = import.meta.env.PROD ? API_BASE : API_BASE_URL;
+
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: baseURL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

@@ -18,6 +18,7 @@ import {
   getActiveSubscription,
   getSubscriptionRequests,
   createSubscriptionRequest,
+  useThemeStore,
 } from '../../storeApi/storeApi';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
 import type {
@@ -30,6 +31,7 @@ import Swal from 'sweetalert2';
 
 const Subscriptions = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   
   // تحديد الاتجاه بناءً على اللغة
   const isRTL = i18n.language === 'ar';
@@ -236,7 +238,23 @@ const Subscriptions = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { text: string; icon: React.ReactNode; class: string }> = {
+    const statusMap: Record<string, { text: string; icon: React.ReactNode; class: string }> = isDarkMode ? {
+      pending: {
+        text: t('dashboard.subscriptions.underReview'),
+        icon: <Clock className="w-3.5 h-3.5" />,
+        class: 'bg-amber-900/30 text-amber-400 border-amber-700'
+      },
+      approved: {
+        text: t('dashboard.subscriptions.approved'),
+        icon: <CheckCircle className="w-3.5 h-3.5" />,
+        class: 'bg-emerald-900/30 text-emerald-400 border-emerald-700'
+      },
+      rejected: {
+        text: t('dashboard.subscriptions.rejected'),
+        icon: <XCircle className="w-3.5 h-3.5" />,
+        class: 'bg-rose-900/30 text-rose-400 border-rose-700'
+      }
+    } : {
       pending: {
         text: t('dashboard.subscriptions.underReview'),
         icon: <Clock className="w-3.5 h-3.5" />,
@@ -257,7 +275,7 @@ const Subscriptions = () => {
     const statusInfo = statusMap[status] || {
       text: status,
       icon: <AlertCircle className="w-3.5 h-3.5" />,
-      class: 'bg-gray-100 text-gray-700 border-gray-200'
+      class: isDarkMode ? 'bg-slate-700 text-gray-300 border-slate-600' : 'bg-gray-100 text-gray-700 border-gray-200'
     };
 
     return (
@@ -297,10 +315,10 @@ const Subscriptions = () => {
                     {t('dashboard.subscriptions.activeSubscription')}
                   </span>
                   <h3 className="text-3xl font-black mb-2">
-                    {getLocalizedName(activeSubscription.subscription) || t('dashboard.subscriptions.currentPackage')}
+                    {getLocalizedName(activeSubscription.subscription, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' }) || t('dashboard.subscriptions.currentPackage')}
                   </h3>
                   <p className="text-white/80 max-w-md line-clamp-2 font-normal">
-                    {getLocalizedDescription(activeSubscription.subscription)}
+                    {getLocalizedDescription(activeSubscription.subscription, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' })}
                   </p>
                 </div>
 
@@ -336,43 +354,73 @@ const Subscriptions = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 flex items-center gap-6">
-              <div className="bg-amber-100 p-4 rounded-xl">
-                <AlertCircle className="w-8 h-8 text-amber-600" />
+            <div className={`border rounded-xl p-8 flex items-center gap-6 transition-colors duration-300 ${
+              isDarkMode
+                ? 'bg-amber-900/20 border-amber-700/50'
+                : 'bg-amber-50 border-amber-200'
+            }`}>
+              <div className={`p-4 rounded-xl transition-colors duration-300 ${
+                isDarkMode ? 'bg-amber-900/30' : 'bg-amber-100'
+              }`}>
+                <AlertCircle className={`w-8 h-8 transition-colors duration-300 ${
+                  isDarkMode ? 'text-amber-400' : 'text-amber-600'
+                }`} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-amber-900 mb-1">{t('dashboard.subscription.noActive')}</h3>
-                <p className="text-amber-700 font-normal">{t('dashboard.subscriptions.noActiveMessage')}</p>
+                <h3 className={`text-xl font-bold mb-1 transition-colors duration-300 ${
+                  isDarkMode ? 'text-amber-300' : 'text-amber-900'
+                }`}>{t('dashboard.subscription.noActive')}</h3>
+                <p className={`font-normal transition-colors duration-300 ${
+                  isDarkMode ? 'text-amber-200' : 'text-amber-700'
+                }`}>{t('dashboard.subscriptions.noActiveMessage')}</p>
               </div>
             </div>
           )}
 
           {/* Pending Request Alert */}
           {pendingRequest && (
-            <div className="border-r-4 border-[#FFB200] rounded-xl shadow-sm p-6 flex items-center justify-between group hover:shadow-md transition-all duration-300 bg-white border-[#FFB200]/20">
+            <div className={`border-r-4 border-[#FFB200] rounded-xl shadow-sm p-6 flex items-center justify-between group hover:shadow-md transition-all duration-300 ${
+              isDarkMode
+                ? 'bg-slate-800 border-[#FFB200]/30'
+                : 'bg-white border-[#FFB200]/20'
+            }`}>
               <div className="flex items-center gap-4">
-                <div className="rounded-xl flex items-center justify-center text-[#FFB200] animate-pulse bg-[#FFB200]/10 w-12 h-12">
+                <div className={`rounded-xl flex items-center justify-center text-[#FFB200] animate-pulse w-12 h-12 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-[#FFB200]/20' : 'bg-[#FFB200]/10'
+                }`}>
                   <Clock className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-gray-900">{t('dashboard.subscriptions.pendingReview')}</h3>
+                    <h3 className={`font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>{t('dashboard.subscriptions.pendingReview')}</h3>
                     {getStatusBadge('pending')}
                   </div>
-                  <p className="text-sm font-normal text-gray-600">
-                    {t('dashboard.subscription.subscriptionName')} {getLocalizedName(pendingRequest.subscription)} - {formatDate(pendingRequest.created_at)}
+                  <p className={`text-sm font-normal transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                    {t('dashboard.subscription.subscriptionName')} {getLocalizedName(pendingRequest.subscription, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' })} - {formatDate(pendingRequest.created_at)}
                   </p>
                 </div>
               </div>
-              <p className="text-xs px-3 py-1 rounded-lg text-gray-600 bg-gray-50">{t('dashboard.subscriptions.activateAccount')}</p>
+              <p className={`text-xs px-3 py-1 rounded-lg transition-colors duration-300 ${
+                isDarkMode
+                  ? 'text-gray-300 bg-slate-700'
+                  : 'text-gray-600 bg-gray-50'
+              }`}>{t('dashboard.subscriptions.activateAccount')}</p>
             </div>
           )}
 
           {/* Available Subscriptions Grid */}
           <section className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-black text-gray-900">{t('dashboard.subscriptions.availablePackages')}</h3>
-              <div className="h-1 flex-1 mx-4 rounded-full bg-gray-100"></div>
+              <h3 className={`text-2xl font-black transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>{t('dashboard.subscriptions.availablePackages')}</h3>
+              <div className={`h-1 flex-1 mx-4 rounded-full transition-colors duration-300 ${
+                isDarkMode ? 'bg-slate-700' : 'bg-gray-100'
+              }`}></div>
             </div>
 
             {subscriptions.length === 0 ? (
@@ -394,10 +442,16 @@ const Subscriptions = () => {
                   return (
                     <div
                       key={subscription.id}
-                      className={`rounded-xl border border-[#114C5A]/10 p-8 shadow-sm hover:shadow-md transition-all duration-300 relative flex flex-col group overflow-hidden bg-white ${
+                      className={`rounded-xl border p-8 shadow-sm hover:shadow-md transition-all duration-300 relative flex flex-col group overflow-hidden ${
+                        isDarkMode
+                          ? 'bg-slate-800 border-slate-700'
+                          : 'bg-white border-[#114C5A]/10'
+                      } ${
                         isCurrentSubscription
                           ? 'border-[#FFB200] shadow-[#FFB200]/10 ring-2 ring-[#FFB200]/20'
-                          : 'hover:border-[#114C5A]/20'
+                          : isDarkMode
+                            ? 'hover:border-slate-600'
+                            : 'hover:border-[#114C5A]/20'
                       }`}
                     >
                       {isCurrentSubscription && (
@@ -409,24 +463,40 @@ const Subscriptions = () => {
                       <div className="absolute top-0 right-0 w-24 h-24 bg-[#114C5A]/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110"></div>
 
                       <div className="mb-8">
-                        <h4 className="text-xl font-black mb-2 group-hover:text-[#114C5A] transition-colors text-gray-900">
-                          {getLocalizedName(subscription)}
+                        <h4 className={`text-xl font-black mb-2 group-hover:text-[#114C5A] transition-colors ${
+                          isDarkMode
+                            ? 'text-white group-hover:text-[#FFB200]'
+                            : 'text-gray-900'
+                        }`}>
+                          {getLocalizedName(subscription, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' })}
                         </h4>
-                        <p className="text-sm leading-relaxed font-normal min-h-[40px] text-gray-600">
-                          {getLocalizedDescription(subscription)}
+                        <p className={`text-sm leading-relaxed font-normal min-h-[40px] transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {getLocalizedDescription(subscription, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' })}
                         </p>
                       </div>
 
-                      <div className="mb-8 rounded-xl p-6 flex flex-col items-center bg-[#114C5A]/5 border border-[#114C5A]/10">
+                      <div className={`mb-8 rounded-xl p-6 flex flex-col items-center border transition-colors duration-300 ${
+                        isDarkMode
+                          ? 'bg-[#114C5A]/20 border-[#114C5A]/30'
+                          : 'bg-[#114C5A]/5 border-[#114C5A]/10'
+                      }`}>
                         <div className="flex items-baseline gap-1">
-                          <span className="text-4xl font-black leading-none text-gray-900">
+                          <span className={`text-4xl font-black leading-none transition-colors duration-300 ${
+                            isDarkMode ? 'text-white' : 'text-gray-900'
+                          }`}>
                             {subscription.price === '0.00' ? t('dashboard.subscriptions.free') : subscription.price}
                           </span>
                           {subscription.price !== '0.00' && (
-                            <span className="font-bold text-sm text-gray-600">{t('dashboard.stats.currency')}</span>
+                            <span className={`font-bold text-sm transition-colors duration-300 ${
+                              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                            }`}>{t('dashboard.stats.currency')}</span>
                           )}
                         </div>
-                        <span className="text-xs mt-2 font-bold uppercase tracking-widest leading-none text-gray-500">
+                        <span className={`text-xs mt-2 font-bold uppercase tracking-widest leading-none transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                           / {getDurationText(subscription.duration_type)}
                         </span>
                       </div>
@@ -442,8 +512,14 @@ const Subscriptions = () => {
                               : getLocalizedName(feature as any);
                             
                             return (
-                              <li key={index} className="text-sm flex items-start gap-3 text-gray-700">
-                                <span className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 bg-[#114C5A]/10 text-[#114C5A]">
+                              <li key={index} className={`text-sm flex items-start gap-3 transition-colors duration-300 ${
+                                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                              }`}>
+                                <span className={`w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors duration-300 ${
+                                  isDarkMode
+                                    ? 'bg-[#114C5A]/20 text-[#FFB200]'
+                                    : 'bg-[#114C5A]/10 text-[#114C5A]'
+                                }`}>
                                   <CheckCircle className="w-3.5 h-3.5" />
                                 </span>
                                 <span className="font-semibold">{featureText}</span>
@@ -477,12 +553,22 @@ const Subscriptions = () => {
 
         {/* Sidebar Column: Subscription History */}
         <div className="space-y-8">
-          <div className="rounded-xl border border-[#114C5A]/10 shadow-sm p-6 overflow-hidden bg-white">
+          <div className={`rounded-xl border shadow-sm p-6 overflow-hidden transition-colors duration-300 ${
+            isDarkMode
+              ? 'bg-slate-800 border-slate-700'
+              : 'bg-white border-[#114C5A]/10'
+          }`}>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A]">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300 ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 text-[#FFB200]'
+                  : 'bg-[#114C5A]/10 text-[#114C5A]'
+              }`}>
                 <Clock className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-black tracking-tight text-gray-900">{t('dashboard.subscriptions.subscriptionHistory')}</h3>
+              <h3 className={`text-lg font-black tracking-tight transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>{t('dashboard.subscriptions.subscriptionHistory')}</h3>
             </div>
 
             {requests.length > 0 ? (
@@ -490,14 +576,24 @@ const Subscriptions = () => {
                 {requests.map((request) => (
                   <div
                     key={request.id}
-                    className="group border border-transparent rounded-xl p-4 transition-all duration-300 hover:border-[#114C5A]/20 hover:bg-[#114C5A]/5"
+                    className={`group border border-transparent rounded-xl p-4 transition-all duration-300 ${
+                      isDarkMode
+                        ? 'hover:border-slate-600 hover:bg-slate-700/50'
+                        : 'hover:border-[#114C5A]/20 hover:bg-[#114C5A]/5'
+                    }`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <h4 className="font-black text-sm group-hover:text-[#114C5A] transition-colors text-gray-900">
-                          {getLocalizedName(request.subscription) || t('dashboard.subscription.subscriptionName')}
+                        <h4 className={`font-black text-sm transition-colors ${
+                          isDarkMode
+                            ? 'text-white group-hover:text-[#FFB200]'
+                            : 'text-gray-900 group-hover:text-[#114C5A]'
+                        }`}>
+                          {getLocalizedName(request.subscription, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' }) || t('dashboard.subscription.subscriptionName')}
                         </h4>
-                        <p className="text-[11px] font-bold mt-0.5 italic text-gray-500">
+                        <p className={`text-[11px] font-bold mt-0.5 italic transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                           {formatDate(request.created_at)}
                         </p>
                       </div>
@@ -505,8 +601,14 @@ const Subscriptions = () => {
                     </div>
 
                     {request.admin_notes && (
-                      <div className="border border-[#114C5A]/10 rounded-xl p-3 mb-3 text-[11px] font-medium bg-[#114C5A]/5 text-gray-700">
-                        <p className="mb-1 font-black uppercase text-[9px] tracking-wider text-gray-500">{t('dashboard.subscriptions.adminNotes')}</p>
+                      <div className={`border rounded-xl p-3 mb-3 text-[11px] font-medium transition-colors duration-300 ${
+                        isDarkMode
+                          ? 'border-slate-700 bg-slate-700/50 text-gray-300'
+                          : 'border-[#114C5A]/10 bg-[#114C5A]/5 text-gray-700'
+                      }`}>
+                        <p className={`mb-1 font-black uppercase text-[9px] tracking-wider transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>{t('dashboard.subscriptions.adminNotes')}</p>
                         {request.admin_notes}
                       </div>
                     )}
@@ -535,10 +637,14 @@ const Subscriptions = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 bg-gray-100 text-gray-400">
+                <div className={`w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-400'
+                }`}>
                   <Clock className="w-8 h-8" />
                 </div>
-                <p className="text-sm font-bold uppercase tracking-wider font-normal text-gray-500">{t('dashboard.subscriptions.noHistory')}</p>
+                <p className={`text-sm font-bold uppercase tracking-wider font-normal transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>{t('dashboard.subscriptions.noHistory')}</p>
               </div>
             )}
           </div>
@@ -556,16 +662,28 @@ const Subscriptions = () => {
 
       {showSubscribeModal && selectedSubscription && (
         <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fadeIn bg-black/60">
-          <div className="rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn bg-white border border-[#114C5A]/10">
+          <div className={`rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn border transition-colors duration-300 ${
+            isDarkMode
+              ? 'bg-slate-800 border-slate-700'
+              : 'bg-white border-[#114C5A]/10'
+          }`}>
             <div className="p-8">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A]">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'bg-[#114C5A]/20 text-[#FFB200]'
+                      : 'bg-[#114C5A]/10 text-[#114C5A]'
+                  }`}>
                     <Upload className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-gray-900">{t('dashboard.subscriptions.confirmSubscription')}</h3>
-                    <p className="text-xs font-bold uppercase tracking-widest mt-0.5 text-gray-500">{t('dashboard.subscriptions.uploadPaymentProofDesc')}</p>
+                    <h3 className={`text-2xl font-black transition-colors duration-300 ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>{t('dashboard.subscriptions.confirmSubscription')}</h3>
+                    <p className={`text-xs font-bold uppercase tracking-widest mt-0.5 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>{t('dashboard.subscriptions.uploadPaymentProofDesc')}</p>
                   </div>
                 </div>
                 <button
@@ -576,44 +694,80 @@ const Subscriptions = () => {
                     setPaymentProofPreview(null);
                     setError(null);
                   }}
-                  className="w-10 h-10 rounded-xl transition-all flex items-center justify-center bg-gray-100 text-gray-600 hover:text-rose-500 hover:bg-rose-50"
+                  className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center ${
+                    isDarkMode
+                      ? 'bg-slate-700 text-gray-300 hover:text-rose-400 hover:bg-slate-600'
+                      : 'bg-gray-100 text-gray-600 hover:text-rose-500 hover:bg-rose-50'
+                  }`}
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="mb-8 p-6 border border-[#114C5A]/10 rounded-xl bg-[#114C5A]/5">
+              <div className={`mb-8 p-6 border rounded-xl transition-colors duration-300 ${
+                isDarkMode
+                  ? 'border-slate-700 bg-slate-700/50'
+                  : 'border-[#114C5A]/10 bg-[#114C5A]/5'
+              }`}>
                 {activeSubscription && activeSubscription.subscription_id === selectedSubscription.id ? (
-                  <div className="flex items-center gap-3 mb-4 p-3 border border-[#FFB200]/20 rounded-xl bg-[#FFB200]/10">
+                  <div className={`flex items-center gap-3 mb-4 p-3 border rounded-xl transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'border-[#FFB200]/30 bg-[#FFB200]/10'
+                      : 'border-[#FFB200]/20 bg-[#FFB200]/10'
+                  }`}>
                     <CheckCircle className="w-5 h-5 flex-shrink-0 text-[#FFB200]" />
                     <p className="text-sm font-black text-[#FFB200]">{t('dashboard.subscriptions.currentlySubscribed')}</p>
                   </div>
                 ) : activeSubscription ? (
-                  <div className="flex items-center gap-3 mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <div className={`flex items-center gap-3 mb-4 p-3 border rounded-xl transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'bg-amber-900/30 border-amber-700/50'
+                      : 'bg-amber-50 border-amber-200'
+                  }`}>
+                    <AlertCircle className={`w-5 h-5 flex-shrink-0 transition-colors duration-300 ${
+                      isDarkMode ? 'text-amber-400' : 'text-amber-600'
+                    }`} />
                     <div>
-                      <p className="text-sm font-black text-amber-900 mb-1">{t('dashboard.subscriptions.changePackage')}</p>
-                      <p className="text-xs text-amber-700">
-                        {t('dashboard.subscriptions.currentPackageNote', { name: getLocalizedName(activeSubscription.subscription) || t('dashboard.subscription.subscriptionName') })}
+                      <p className={`text-sm font-black mb-1 transition-colors duration-300 ${
+                        isDarkMode ? 'text-amber-300' : 'text-amber-900'
+                      }`}>{t('dashboard.subscriptions.changePackage')}</p>
+                      <p className={`text-xs transition-colors duration-300 ${
+                        isDarkMode ? 'text-amber-200' : 'text-amber-700'
+                      }`}>
+                        {t('dashboard.subscriptions.currentPackageNote', { name: getLocalizedName(activeSubscription.subscription, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' }) || t('dashboard.subscription.subscriptionName') })}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3 mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                    <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                    <p className="text-sm font-black text-emerald-900">{t('dashboard.subscriptions.newSubscription')}</p>
+                  <div className={`flex items-center gap-3 mb-4 p-3 border rounded-xl transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'bg-emerald-900/30 border-emerald-700/50'
+                      : 'bg-emerald-50 border-emerald-200'
+                  }`}>
+                    <CheckCircle className={`w-5 h-5 flex-shrink-0 transition-colors duration-300 ${
+                      isDarkMode ? 'text-emerald-400' : 'text-emerald-600'
+                    }`} />
+                    <p className={`text-sm font-black transition-colors duration-300 ${
+                      isDarkMode ? 'text-emerald-300' : 'text-emerald-900'
+                    }`}>{t('dashboard.subscriptions.newSubscription')}</p>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-black mb-1 text-gray-900">{getLocalizedName(selectedSubscription)}</h4>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <h4 className={`font-black mb-1 transition-colors duration-300 ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>{getLocalizedName(selectedSubscription, { preferredLanguage: i18n.language === 'ar' ? 'ar' : 'en' })}</h4>
+                    <div className={`flex items-center gap-1.5 text-xs transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
                       <Clock className="w-3.5 h-3.5" />
                       <span className="font-bold">{getDurationText(selectedSubscription.duration_type)}</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-black text-[#114C5A]">
+                    <p className={`text-2xl font-black transition-colors duration-300 ${
+                      isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                    }`}>
                       {selectedSubscription.price === '0.00' ? t('dashboard.subscriptions.free') : `${selectedSubscription.price} ${t('dashboard.stats.currency')}`}
                     </p>
                   </div>

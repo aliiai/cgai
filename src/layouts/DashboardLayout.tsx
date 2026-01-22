@@ -24,7 +24,7 @@ const DashboardLayout = () => {
 
   return (
     <div className={`h-screen flex ${isRTL ? '' : 'flex-row'} overflow-hidden ${
-      isDarkMode ? 'bg-[#114C5A]' : 'bg-[#FBFBFB]'
+      isDarkMode ? 'bg-slate-900' : 'bg-[#FBFBFB]'
     }`} dir={direction}>
       {/* Backdrop for mobile */}
       {isSidebarOpen && (
@@ -45,7 +45,7 @@ const DashboardLayout = () => {
         
         {/* Content - Outlet will render the child routes */}
         <main className={`flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto custom-scrollbar ${
-          isDarkMode ? 'bg-[#114C5A]' : 'bg-[#FBFBFB]'
+          isDarkMode ? 'bg-slate-900' : 'bg-[#FBFBFB]'
         }`}>
           <Outlet />
         </main>

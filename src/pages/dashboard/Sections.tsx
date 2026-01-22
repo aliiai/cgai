@@ -8,7 +8,7 @@ import {
   Sparkles,
   ArrowLeft
 } from 'lucide-react';
-import { getCategories, getCategory, getServices, getConsultations } from '../../storeApi/storeApi';
+import { getCategories, getCategory, getServices, getConsultations, useThemeStore } from '../../storeApi/storeApi';
 import type {
   ServiceCategory,
   CategoryWithSubCategories,
@@ -27,6 +27,7 @@ type ViewMode = 'categories' | 'subcategories' | 'services' | 'consultations';
 
 const Sections = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('categories');
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
@@ -208,7 +209,7 @@ const Sections = () => {
   };
 
   return (
-    <div className="pb-8 w-full bg-gray-50 min-h-screen">
+    <div className={`pb-8 w-full min-h-screen transition-colors duration-300 ${isDarkMode ? 'bg-slate-900' : 'bg-gray-50'}`}>
       {/* Header Section */}
       <div className="bg-gradient-to-r from-[#114C5A] to-[#114C5A]/95 rounded-xl mx-4 sm:mx-6 lg:mx-8 mt-6 mb-8 p-6 sm:p-8 shadow-lg">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -374,13 +375,21 @@ const Sections = () => {
 
       {/* Footer CTA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8">
-        <div className="bg-white border border-[#114C5A]/20 rounded-xl p-6 sm:p-8 shadow-sm">
+        <div className={`border rounded-xl p-6 sm:p-8 shadow-sm transition-colors duration-300 ${
+          isDarkMode 
+            ? 'bg-slate-800 border-slate-700' 
+            : 'bg-white border-[#114C5A]/20'
+        }`}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h3 className="text-lg sm:text-xl font-semibold text-[#114C5A] mb-2">
+              <h3 className={`text-lg sm:text-xl font-semibold mb-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-[#114C5A]'
+              }`}>
                 {t('dashboard.sections.lookingForCustom')}
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className={`text-sm transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>
                 {t('dashboard.sections.customServiceDescription')}
               </p>
             </div>

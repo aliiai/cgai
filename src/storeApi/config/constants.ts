@@ -10,7 +10,7 @@
 
 // الحصول على BASE_URL من environment variables أو استخدام القيمة الافتراضية
 // القيمة الافتراضية تتطابق مع vite.config.ts proxy target
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://192.168.1.116:8000";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://dsai.sa/backend";
 
 // API Base URL - للطلبات المباشرة (مع المسار الكامل)
 export const API_BASE = `${BASE_URL}/api`;

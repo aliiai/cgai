@@ -4,11 +4,12 @@ import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader'
 import LoadingState from '../../components/dashboard/LoadingState';
 import EmptyState from '../../components/dashboard/EmptyState';
 import { Star, MessageSquare, Filter, Search, ChevronLeft, ChevronRight, Calendar, User, CheckCircle } from 'lucide-react';
-import { getRatings } from '../../storeApi/storeApi';
+import { getRatings, useThemeStore } from '../../storeApi/storeApi';
 import type { Rating } from '../../types/types';
 
 const Reviews = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   
   // تحديد الاتجاه بناءً على اللغة
   const isRTL = i18n.language === 'ar';
@@ -119,7 +120,9 @@ const Reviews = () => {
             className={`w-5 h-5 ${
               star <= rating
                 ? 'fill-[#FFB200] text-[#FFB200]'
-                : 'fill-gray-200 text-gray-200'
+                : isDarkMode
+                  ? 'fill-slate-600 text-slate-600'
+                  : 'fill-gray-200 text-gray-200'
             }`}
           />
         ))}
@@ -150,49 +153,91 @@ const Reviews = () => {
       
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="bg-white border border-[#114C5A]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all duration-200 group">
+        <div className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 group ${
+          isDarkMode
+            ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+            : 'bg-white border-[#114C5A]/20 hover:border-[#114C5A]/40'
+        }`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A] group-hover:bg-[#114C5A]/20 transition-colors">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+              isDarkMode
+                ? 'bg-[#114C5A]/20 text-[#FFB200] group-hover:bg-[#114C5A]/30'
+                : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
+            }`}>
               <Star className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-xs text-gray-600 mb-2 leading-tight">{t('dashboard.reviews.totalLabel') || 'إجمالي التقييمات'}</p>
-          <p className="text-2xl font-bold text-[#114C5A]">{total}</p>
+          <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>{t('dashboard.reviews.totalLabel') || 'إجمالي التقييمات'}</p>
+          <p className={`text-2xl font-bold transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-[#114C5A]'
+          }`}>{total}</p>
         </div>
 
         {[5, 4, 3, 2, 1].map((starCount) => (
-          <div key={starCount} className="bg-white border border-[#FFB200]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#FFB200]/40 transition-all duration-200 group">
+          <div key={starCount} className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 group ${
+            isDarkMode
+              ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+              : 'bg-white border-[#FFB200]/20 hover:border-[#FFB200]/40'
+          }`}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-[#FFB200]/10 rounded-xl flex items-center justify-center text-[#FFB200] group-hover:bg-[#FFB200]/20 transition-colors">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                isDarkMode
+                  ? 'bg-[#FFB200]/20 text-[#FFB200] group-hover:bg-[#FFB200]/30'
+                  : 'bg-[#FFB200]/10 text-[#FFB200] group-hover:bg-[#FFB200]/20'
+              }`}>
                 <Star className="w-5 h-5 fill-[#FFB200] text-[#FFB200]" />
               </div>
             </div>
-            <p className="text-xs text-gray-600 mb-2 leading-tight">{starCount} {t('dashboard.reviews.stars') || 'نجمة'}</p>
+            <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>{starCount} {t('dashboard.reviews.stars') || 'نجمة'}</p>
             <p className="text-2xl font-bold text-[#FFB200]">{ratings.filter(r => r.rating === starCount).length}</p>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-4">
+      <div className={`rounded-xl border shadow-sm p-4 transition-colors duration-300 ${
+        isDarkMode
+          ? 'bg-slate-800 border-slate-700'
+          : 'bg-white border-[#114C5A]/10'
+      }`}>
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative group">
-            <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#114C5A] transition-colors`} />
+            <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${
+              isDarkMode
+                ? 'text-gray-500 group-focus-within:text-[#FFB200]'
+                : 'text-gray-400 group-focus-within:text-[#114C5A]'
+            }`} />
             <input
               type="text"
               placeholder={t('dashboard.reviews.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border border-[#114C5A]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] bg-gray-50 text-gray-900 placeholder:text-gray-400 transition-all`}
+              className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] transition-all ${
+                isDarkMode
+                  ? 'border-slate-700 bg-slate-700 text-white placeholder:text-gray-400'
+                  : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400'
+              }`}
               dir={isRTL ? 'rtl' : 'ltr'}
             />
           </div>
           <div className="relative group">
-            <Filter className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#114C5A] transition-colors pointer-events-none z-10`} />
+            <Filter className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none z-10 ${
+              isDarkMode
+                ? 'text-gray-500 group-focus-within:text-[#FFB200]'
+                : 'text-gray-400 group-focus-within:text-[#114C5A]'
+            }`} />
             <select
               value={ratingFilter || ''}
               onChange={(e) => setRatingFilter(e.target.value ? Number(e.target.value) : null)}
-              className={`appearance-none ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border border-[#114C5A]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] font-semibold bg-gray-50 text-gray-900 min-w-[150px] transition-all`}
+              className={`appearance-none ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] font-semibold min-w-[150px] transition-all ${
+                isDarkMode
+                  ? 'border-slate-700 bg-slate-700 text-white'
+                  : 'border-[#114C5A]/10 bg-gray-50 text-gray-900'
+              }`}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
               <option value="">{t('dashboard.reviews.allRatings')}</option>
@@ -207,7 +252,11 @@ const Reviews = () => {
       </div>
 
       {/* Reviews List */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm overflow-hidden">
+      <div className={`rounded-xl border shadow-sm overflow-hidden transition-colors duration-300 ${
+        isDarkMode
+          ? 'bg-slate-800 border-slate-700'
+          : 'bg-white border-[#114C5A]/10'
+      }`}>
         {isLoading ? (
           <div className="p-12">
             <LoadingState />
@@ -226,7 +275,11 @@ const Reviews = () => {
               {ratings.map((rating) => (
                 <div
                   key={rating.id}
-                  className="group border border-[#114C5A]/10 rounded-xl p-6 transition-all duration-300 hover:border-[#114C5A]/20 hover:shadow-md bg-white"
+                  className={`group border rounded-xl p-6 transition-all duration-300 hover:shadow-md ${
+                    isDarkMode
+                      ? 'bg-slate-700/50 border-slate-600 hover:border-slate-500'
+                      : 'border-[#114C5A]/10 hover:border-[#114C5A]/20 bg-white'
+                  }`}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-start gap-4 flex-1">
@@ -235,19 +288,27 @@ const Reviews = () => {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <h4 className="font-bold text-lg text-gray-900">
+                          <h4 className={`font-bold text-lg transition-colors duration-300 ${
+                            isDarkMode ? 'text-white' : 'text-gray-900'
+                          }`}>
                             {rating.customer?.name || t('dashboard.reviews.anonymous') || 'مجهول'}
                           </h4>
                           <div className="flex items-center gap-1">
                             {renderStars(rating.rating)}
-                            <span className={`text-sm font-semibold ${isRTL ? 'mr-2' : 'ml-2'} text-gray-600`}>
+                            <span className={`text-sm font-semibold ${isRTL ? 'mr-2' : 'ml-2'} transition-colors duration-300 ${
+                              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                            }`}>
                               ({rating.rating})
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4 text-sm mb-3 text-gray-500 flex-wrap">
+                        <div className={`flex items-center gap-4 text-sm mb-3 flex-wrap transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                           <div className="flex items-center gap-1.5">
-                            <Calendar className="w-4 h-4 text-[#114C5A]" />
+                            <Calendar className={`w-4 h-4 transition-colors duration-300 ${
+                              isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                            }`} />
                             <span>{formatDate(rating.created_at)}</span>
                           </div>
                           {rating.booking && (
@@ -258,7 +319,11 @@ const Reviews = () => {
                           )}
                         </div>
                         {rating.comment && (
-                          <p className="leading-relaxed rounded-xl p-4 border border-[#114C5A]/10 bg-[#114C5A]/5 text-gray-700">
+                          <p className={`leading-relaxed rounded-xl p-4 border transition-colors duration-300 ${
+                            isDarkMode
+                              ? 'border-slate-600 bg-slate-700/50 text-gray-300'
+                              : 'border-[#114C5A]/10 bg-[#114C5A]/5 text-gray-700'
+                          }`}>
                             {rating.comment}
                           </p>
                         )}
@@ -268,8 +333,12 @@ const Reviews = () => {
 
                   {/* معلومات الحجز */}
                   {rating.booking && (
-                    <div className="mt-4 pt-4 border-t border-[#114C5A]/10">
-                      <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+                    <div className={`mt-4 pt-4 border-t transition-colors duration-300 ${
+                      isDarkMode ? 'border-slate-600' : 'border-[#114C5A]/10'
+                    }`}>
+                      <div className={`flex items-center gap-4 text-xs flex-wrap transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
                         <span className="font-semibold">{t('dashboard.reviews.bookingNumber', { id: rating.booking.id }) || `رقم الحجز: #${rating.booking.id}`}</span>
                         {rating.booking.booking_date && (
                           <span className="font-semibold">{t('dashboard.reviews.date', { date: formatDate(rating.booking.booking_date) }) || `التاريخ: ${formatDate(rating.booking.booking_date)}`}</span>
@@ -286,8 +355,12 @@ const Reviews = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-[#114C5A]/10 p-4">
-                <div className="text-xs sm:text-sm font-semibold text-center sm:text-right text-gray-600">
+              <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t p-4 transition-colors duration-300 ${
+                isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+              }`}>
+                <div className={`text-xs sm:text-sm font-semibold text-center sm:text-right transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
                   {t('dashboard.reviews.showing', { from, to, total }) || `عرض ${from}-${to} من ${total}`}
                 </div>
                 <div className="flex items-center gap-2">
@@ -296,8 +369,12 @@ const Reviews = () => {
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
                       currentPage === 1
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                        ? isDarkMode
+                          ? 'border-slate-700 bg-slate-700 text-gray-500 cursor-not-allowed'
+                          : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : isDarkMode
+                          ? 'border-slate-600 bg-slate-700 text-white hover:bg-slate-600 hover:border-slate-500'
+                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                     }`}
                   >
                     <ChevronRight size={18} />
@@ -324,7 +401,9 @@ const Reviews = () => {
                           className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
                             currentPage === pageNum
                               ? 'bg-[#114C5A] text-white shadow-md'
-                              : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                              : isDarkMode
+                                ? 'border border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                                : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                           }`}
                         >
                           {pageNum}
@@ -338,8 +417,12 @@ const Reviews = () => {
                     disabled={currentPage === totalPages}
                     className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
                       currentPage === totalPages
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                        ? isDarkMode
+                          ? 'border-slate-700 bg-slate-700 text-gray-500 cursor-not-allowed'
+                          : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : isDarkMode
+                          ? 'border-slate-600 bg-slate-700 text-white hover:bg-slate-600 hover:border-slate-500'
+                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                     }`}
                   >
                     <span className="font-semibold">{t('dashboard.bookings.next')}</span>

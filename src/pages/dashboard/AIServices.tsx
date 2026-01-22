@@ -7,9 +7,11 @@ import LoadingState from '../../components/dashboard/LoadingState';
 import EmptyState from '../../components/dashboard/EmptyState';
 import { getAIServices, type AIService, type AIServiceCategory, type AIServiceTag } from '../../storeApi/api/ai-services.api';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
+import { useThemeStore } from '../../storeApi/storeApi';
 
 const AIServices = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [services, setServices] = useState<AIService[]>([]);
@@ -140,37 +142,63 @@ const AIServices = () => {
       {/* Statistics Cards */}
       {!isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white border border-[#114C5A]/20 rounded-lg p-4 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all duration-200">
+          <div className={`border rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 ${
+            isDarkMode
+              ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+              : 'bg-white border-[#114C5A]/20 hover:border-[#114C5A]/40'
+          }`}>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-[#114C5A]/10 rounded-lg flex items-center justify-center text-[#114C5A]">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                isDarkMode ? 'bg-[#114C5A]/20 text-[#FFB200]' : 'bg-[#114C5A]/10 text-[#114C5A]'
+              }`}>
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-1">{t('dashboard.aiServices.totalServices') || 'إجمالي الخدمات'}</p>
-                <p className="text-xl font-bold text-[#114C5A]">{totalServices}</p>
+                <p className={`text-xs mb-1 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>{t('dashboard.aiServices.totalServices') || 'إجمالي الخدمات'}</p>
+                <p className={`text-xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-[#114C5A]'
+                }`}>{totalServices}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white border border-[#FFB200]/20 rounded-lg p-4 shadow-sm hover:shadow-md hover:border-[#FFB200]/40 transition-all duration-200">
+          <div className={`border rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 ${
+            isDarkMode
+              ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+              : 'bg-white border-[#FFB200]/20 hover:border-[#FFB200]/40'
+          }`}>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-[#FFB200]/10 rounded-lg flex items-center justify-center text-[#FFB200]">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                isDarkMode ? 'bg-[#FFB200]/20 text-[#FFB200]' : 'bg-[#FFB200]/10 text-[#FFB200]'
+              }`}>
                 <Star className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-1">{t('dashboard.aiServices.freeServices') || 'خدمات مجانية'}</p>
+                <p className={`text-xs mb-1 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>{t('dashboard.aiServices.freeServices') || 'خدمات مجانية'}</p>
                 <p className="text-xl font-bold text-[#FFB200]">{freeServices}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white border border-pink-200 rounded-lg p-4 shadow-sm hover:shadow-md hover:border-pink-400 transition-all duration-200">
+          <div className={`border rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 ${
+            isDarkMode
+              ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+              : 'bg-white border-pink-200 hover:border-pink-400'
+          }`}>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center text-pink-500">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                isDarkMode ? 'bg-pink-900/30 text-pink-400' : 'bg-pink-50 text-pink-500'
+              }`}>
                 <Heart className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-600 mb-1">{t('dashboard.aiServices.favorites') || 'المفضلة'}</p>
+                <p className={`text-xs mb-1 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>{t('dashboard.aiServices.favorites') || 'المفضلة'}</p>
                 <p className="text-xl font-bold text-pink-500">{favoriteServices}</p>
               </div>
             </div>
@@ -179,23 +207,33 @@ const AIServices = () => {
       )}
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg border border-[#114C5A]/10 shadow-sm p-4">
+      <div className={`rounded-lg border shadow-sm p-4 transition-colors duration-300 ${
+        isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-[#114C5A]/10'
+      }`}>
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400`} />
+            <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-400'
+            }`} />
             <input
               type="text"
               placeholder={t('dashboard.aiServices.searchPlaceholder') || 'ابحث عن خدمة...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 border border-[#114C5A]/10 rounded-lg bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] transition-all text-sm`}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:border-[#114C5A] transition-all text-sm ${
+                isDarkMode
+                  ? 'bg-slate-700 border-slate-600 text-white placeholder:text-gray-400 focus:ring-[#114C5A]/20'
+                  : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:ring-[#114C5A]/20'
+              }`}
               dir={isRTL ? 'rtl' : 'ltr'}
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 transition`}
+                className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 p-1 rounded-full transition ${
+                  isDarkMode ? 'hover:bg-slate-600' : 'hover:bg-gray-200'
+                }`}
               >
                 <X className="w-3.5 h-3.5 text-gray-400" />
               </button>
@@ -204,14 +242,20 @@ const AIServices = () => {
 
           {/* Category Filter */}
           <div className="relative">
-            <Filter className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-10`} />
+            <Filter className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none z-10 transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-400'
+            }`} />
             <select
               value={selectedCategory}
               onChange={(e) => {
                 setSelectedCategory(e.target.value);
                 setCurrentPage(1);
               }}
-              className={`appearance-none ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 rounded-lg border border-[#114C5A]/10 bg-gray-50 text-gray-900 min-w-[180px] focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] transition-all cursor-pointer text-sm`}
+              className={`appearance-none ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 rounded-lg border min-w-[180px] focus:outline-none focus:ring-2 focus:border-[#114C5A] transition-all cursor-pointer text-sm ${
+                isDarkMode
+                  ? 'bg-slate-700 border-slate-600 text-white focus:ring-[#114C5A]/20'
+                  : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 focus:ring-[#114C5A]/20'
+              }`}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
               {categoryOptions.map(category => (
@@ -231,7 +275,11 @@ const AIServices = () => {
                 setIsFreeFilter(value === 'all' ? null : value === 'free');
                 setCurrentPage(1);
               }}
-              className={`appearance-none ${isRTL ? 'pr-4 pl-4' : 'pl-4 pr-4'} py-2.5 rounded-lg border border-[#114C5A]/10 bg-gray-50 text-gray-900 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] transition-all cursor-pointer text-sm`}
+              className={`appearance-none ${isRTL ? 'pr-4 pl-4' : 'pl-4 pr-4'} py-2.5 rounded-lg border min-w-[140px] focus:outline-none focus:ring-2 focus:border-[#114C5A] transition-all cursor-pointer text-sm ${
+                isDarkMode
+                  ? 'bg-slate-700 border-slate-600 text-white focus:ring-[#114C5A]/20'
+                  : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 focus:ring-[#114C5A]/20'
+              }`}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
               <option value="all">{t('dashboard.aiServices.allServices') || 'جميع الخدمات'}</option>
@@ -241,13 +289,19 @@ const AIServices = () => {
           </div>
 
           {/* View Mode Toggle */}
-          <div className="flex gap-1.5 p-1 rounded-lg border border-[#114C5A]/10 bg-gray-50">
+          <div className={`flex gap-1.5 p-1 rounded-lg border transition-colors duration-300 ${
+            isDarkMode
+              ? 'border-slate-600 bg-slate-700'
+              : 'border-[#114C5A]/10 bg-gray-50'
+          }`}>
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded transition-all ${
                 viewMode === 'grid'
                   ? 'bg-[#114C5A] text-white'
-                  : 'text-gray-600 hover:bg-gray-200'
+                  : isDarkMode
+                    ? 'text-gray-300 hover:bg-slate-600'
+                    : 'text-gray-600 hover:bg-gray-200'
               }`}
               title={t('dashboard.aiServices.gridView') || 'عرض الشبكة'}
             >
@@ -258,7 +312,9 @@ const AIServices = () => {
               className={`p-2 rounded transition-all ${
                 viewMode === 'list'
                   ? 'bg-[#114C5A] text-white'
-                  : 'text-gray-600 hover:bg-gray-200'
+                  : isDarkMode
+                    ? 'text-gray-300 hover:bg-slate-600'
+                    : 'text-gray-600 hover:bg-gray-200'
               }`}
               title={t('dashboard.aiServices.listView') || 'عرض القائمة'}
             >
@@ -269,10 +325,16 @@ const AIServices = () => {
 
         {/* Popular Tags */}
         {popularTags.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-[#114C5A]/10">
+          <div className={`mt-3 pt-3 border-t transition-colors duration-300 ${
+            isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+          }`}>
             <div className="flex items-center gap-2 mb-2">
-              <Tag className="w-3.5 h-3.5 text-[#114C5A]" />
-              <span className="text-xs font-semibold text-gray-700">{t('dashboard.aiServices.popularTags') || 'العلامات الشائعة'}</span>
+              <Tag className={`w-3.5 h-3.5 transition-colors duration-300 ${
+                isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+              }`} />
+              <span className={`text-xs font-semibold transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              }`}>{t('dashboard.aiServices.popularTags') || 'العلامات الشائعة'}</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {popularTags.map(tag => (
@@ -285,7 +347,9 @@ const AIServices = () => {
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
                     selectedTag === tag.slug
                       ? 'bg-[#114C5A] text-white border border-[#114C5A]'
-                      : 'bg-[#114C5A]/10 text-[#114C5A] border border-[#114C5A]/20 hover:bg-[#114C5A]/20'
+                      : isDarkMode
+                        ? 'bg-[#114C5A]/20 text-[#FFB200] border border-[#114C5A]/30 hover:bg-[#114C5A]/30'
+                        : 'bg-[#114C5A]/10 text-[#114C5A] border border-[#114C5A]/20 hover:bg-[#114C5A]/20'
                   }`}
                 >
                   {tag.image && (
@@ -300,11 +364,17 @@ const AIServices = () => {
 
         {/* Active Filters */}
         {(searchTerm || selectedCategory !== 'all' || selectedTag || isFreeFilter !== null) && (
-          <div className="mt-3 pt-3 border-t border-[#114C5A]/10 flex flex-wrap gap-1.5">
+          <div className={`mt-3 pt-3 border-t flex flex-wrap gap-1.5 transition-colors duration-300 ${
+            isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+          }`}>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-[#114C5A]/10 text-[#114C5A] border border-[#114C5A]/20 hover:bg-[#114C5A]/20"
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
+                  isDarkMode
+                    ? 'bg-[#114C5A]/20 text-[#FFB200] border-[#114C5A]/30 hover:bg-[#114C5A]/30'
+                    : 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20 hover:bg-[#114C5A]/20'
+                }`}
               >
                 {t('dashboard.aiServices.search') || 'بحث'}: {searchTerm}
                 <X className="w-3 h-3" />
@@ -313,7 +383,11 @@ const AIServices = () => {
             {selectedCategory !== 'all' && (
               <button
                 onClick={() => setSelectedCategory('all')}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-[#114C5A]/10 text-[#114C5A] border border-[#114C5A]/20 hover:bg-[#114C5A]/20"
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
+                  isDarkMode
+                    ? 'bg-[#114C5A]/20 text-[#FFB200] border-[#114C5A]/30 hover:bg-[#114C5A]/30'
+                    : 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20 hover:bg-[#114C5A]/20'
+                }`}
               >
                 {t('dashboard.aiServices.category') || 'الفئة'}: {categoryOptions.find(c => c.value === selectedCategory)?.label}
                 <X className="w-3 h-3" />
@@ -322,7 +396,11 @@ const AIServices = () => {
             {selectedTag && (
               <button
                 onClick={() => setSelectedTag('')}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-[#114C5A]/10 text-[#114C5A] border border-[#114C5A]/20 hover:bg-[#114C5A]/20"
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
+                  isDarkMode
+                    ? 'bg-[#114C5A]/20 text-[#FFB200] border-[#114C5A]/30 hover:bg-[#114C5A]/30'
+                    : 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20 hover:bg-[#114C5A]/20'
+                }`}
               >
                 {t('dashboard.aiServices.tag') || 'العلامة'}: {popularTags.find(t => t.slug === selectedTag)?.name}
                 <X className="w-3 h-3" />
@@ -331,7 +409,11 @@ const AIServices = () => {
             {isFreeFilter !== null && (
               <button
                 onClick={() => setIsFreeFilter(null)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-[#114C5A]/10 text-[#114C5A] border border-[#114C5A]/20 hover:bg-[#114C5A]/20"
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
+                  isDarkMode
+                    ? 'bg-[#114C5A]/20 text-[#FFB200] border-[#114C5A]/30 hover:bg-[#114C5A]/30'
+                    : 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20 hover:bg-[#114C5A]/20'
+                }`}
               >
                 {isFreeFilter ? (t('dashboard.aiServices.freeOnly') || 'مجانية فقط') : (t('dashboard.aiServices.paidOnly') || 'مدفوعة فقط')}
                 <X className="w-3 h-3" />
@@ -350,9 +432,13 @@ const AIServices = () => {
           {services.length > 0 ? (
             <>
               {/* Results Count */}
-              <div className="mb-4 flex items-center justify-between text-gray-700">
+              <div className={`mb-4 flex items-center justify-between transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#114C5A]" />
+                  <Sparkles className={`w-4 h-4 transition-colors duration-300 ${
+                    isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                  }`} />
                   <span className="text-sm font-semibold">
                     {pagination 
                       ? `${pagination.from}-${pagination.to} ${t('dashboard.aiServices.of') || 'من'} ${pagination.total} ${t('dashboard.aiServices.services') || 'خدمة'}`
@@ -370,8 +456,12 @@ const AIServices = () => {
                 {services.map(service => (
                   <div
                     key={service.id}
-                    className={`bg-white border border-[#114C5A]/10 rounded-lg shadow-sm hover:shadow-md hover:border-[#114C5A]/20 transition-all duration-200 overflow-hidden ${
+                    className={`border rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden ${
                       viewMode === 'list' ? 'flex gap-3 p-3' : ''
+                    } ${
+                      isDarkMode
+                        ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                        : 'bg-white border-[#114C5A]/10 hover:border-[#114C5A]/20'
                     }`}
                   >
                     {/* Image */}
@@ -383,8 +473,12 @@ const AIServices = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-[#114C5A]/10 flex items-center justify-center">
-                          <ImageIcon className="w-8 h-8 text-[#114C5A]/40" />
+                        <div className={`w-full h-full flex items-center justify-center transition-colors duration-300 ${
+                          isDarkMode ? 'bg-[#114C5A]/20' : 'bg-[#114C5A]/10'
+                        }`}>
+                          <ImageIcon className={`w-8 h-8 transition-colors duration-300 ${
+                            isDarkMode ? 'text-[#FFB200]/40' : 'text-[#114C5A]/40'
+                          }`} />
                         </div>
                       )}
                       {service.is_free && (
@@ -402,7 +496,9 @@ const AIServices = () => {
                     {/* Content */}
                     <div className={`${viewMode === 'list' ? 'flex-1' : 'p-3'}`}>
                       <div className="flex items-start justify-between mb-1.5">
-                        <h3 className="font-bold text-sm text-gray-900 line-clamp-2 flex-1">
+                        <h3 className={`font-bold text-sm line-clamp-2 flex-1 transition-colors duration-300 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>
                           {getServiceName(service)}
                         </h3>
                         {service.rating > 0 && (
@@ -415,14 +511,20 @@ const AIServices = () => {
 
                       {service.category && (
                         <div className="mb-1.5">
-                          <span className="text-[10px] px-1.5 py-0.5 bg-[#114C5A]/10 text-[#114C5A] rounded font-semibold">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold transition-colors duration-300 ${
+                            isDarkMode
+                              ? 'bg-[#114C5A]/20 text-[#FFB200]'
+                              : 'bg-[#114C5A]/10 text-[#114C5A]'
+                          }`}>
                             {getCategoryName(service.category)}
                           </span>
                         </div>
                       )}
 
                       {getServiceDescription(service) && (
-                        <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                        <p className={`text-xs line-clamp-2 mb-2 transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
                           {getServiceDescription(service)}
                         </p>
                       )}
@@ -450,8 +552,12 @@ const AIServices = () => {
                       disabled={currentPage === 1}
                       className={`px-3 py-2 rounded-lg border transition-all duration-300 flex items-center gap-1.5 text-sm ${
                         currentPage === 1
-                          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                          : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                          ? isDarkMode
+                            ? 'border-slate-700 bg-slate-700/50 text-gray-500 cursor-not-allowed'
+                            : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                          : isDarkMode
+                            ? 'border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                            : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                       }`}
                     >
                       <ChevronRight size={16} />
@@ -478,7 +584,9 @@ const AIServices = () => {
                             className={`w-9 h-9 rounded-lg font-semibold transition-all duration-300 text-sm ${
                               currentPage === pageNum
                                 ? 'bg-[#114C5A] text-white shadow-md'
-                                : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                                : isDarkMode
+                                  ? 'border border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                                  : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                             }`}
                           >
                             {pageNum}
@@ -502,14 +610,18 @@ const AIServices = () => {
                   </div>
 
                   {/* Pagination Info */}
-                  <div className="text-center text-xs text-gray-600 mt-3">
+                  <div className={`text-center text-xs mt-3 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
                     {t('dashboard.aiServices.showing') || 'عرض'} {pagination.from}-{pagination.to} {t('dashboard.aiServices.of') || 'من'} {pagination.total} {t('dashboard.aiServices.results') || 'نتيجة'}
                   </div>
                 </div>
               )}
             </>
           ) : (
-            <div className="bg-white rounded-lg border border-[#114C5A]/10 shadow-sm p-6">
+            <div className={`rounded-lg border shadow-sm p-6 transition-colors duration-300 ${
+              isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-[#114C5A]/10'
+            }`}>
               <EmptyState
                 message={t('dashboard.aiServices.noServicesMessage') || 'لم يتم العثور على خدمات تطابق معايير البحث'}
               />

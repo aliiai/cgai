@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Coins, Plus, Loader2, CreditCard, TrendingUp, Gift } from 'lucide-react';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
 import LoadingState from '../../components/dashboard/LoadingState';
-import { getWallet, purchasePoints } from '../../storeApi/storeApi';
+import { getWallet, purchasePoints, useThemeStore } from '../../storeApi/storeApi';
 import Swal from 'sweetalert2';
 import type { WalletData, PointsSettings } from '../../storeApi/api/wallet.api';
 
 const Wallet = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const [walletData, setWalletData] = useState<{ wallet: WalletData; settings: PointsSettings } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -124,7 +125,9 @@ const Wallet = () => {
         <DashboardPageHeader title={t('dashboard.wallet.title')} />
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <p className="text-lg text-red-600">
+            <p className={`text-lg transition-colors duration-300 ${
+              isDarkMode ? 'text-red-400' : 'text-red-600'
+            }`}>
               {error}
             </p>
             <button
@@ -178,19 +181,31 @@ const Wallet = () => {
       </div>
 
       {/* Purchase Points Section */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-6">
+      <div className={`rounded-xl border shadow-sm p-6 transition-colors duration-300 ${
+        isDarkMode
+          ? 'bg-slate-800 border-slate-700'
+          : 'bg-white border-[#114C5A]/10'
+      }`}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-xl bg-[#114C5A]/10">
-            <Plus className="w-5 h-5 text-[#114C5A]" />
+          <div className={`p-2 rounded-xl transition-colors duration-300 ${
+            isDarkMode ? 'bg-[#114C5A]/20' : 'bg-[#114C5A]/10'
+          }`}>
+            <Plus className={`w-5 h-5 transition-colors duration-300 ${
+              isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+            }`} />
           </div>
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className={`text-xl font-bold transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>
             {t('dashboard.wallet.purchaseNewPoints')}
           </h2>
         </div>
 
         {/* Preset Amounts */}
         <div className="mb-6">
-          <p className="text-sm font-semibold mb-3 text-gray-700">
+          <p className={`text-sm font-semibold mb-3 transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-700'
+          }`}>
             {t('dashboard.wallet.chooseQuickAmount')}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -203,15 +218,23 @@ const Wallet = () => {
                   disabled={isPurchasing || !walletData?.settings?.is_active}
                   className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
                     isPurchasing || !walletData?.settings?.is_active
-                      ? 'opacity-50 cursor-not-allowed border-gray-200 bg-gray-50'
-                      : 'hover:scale-105 hover:shadow-md cursor-pointer border-[#114C5A]/20 bg-white hover:border-[#114C5A]/40'
+                      ? isDarkMode
+                        ? 'opacity-50 cursor-not-allowed border-slate-700 bg-slate-700/50'
+                        : 'opacity-50 cursor-not-allowed border-gray-200 bg-gray-50'
+                      : isDarkMode
+                        ? 'hover:scale-105 hover:shadow-md cursor-pointer border-slate-600 bg-slate-700 hover:border-slate-500'
+                        : 'hover:scale-105 hover:shadow-md cursor-pointer border-[#114C5A]/20 bg-white hover:border-[#114C5A]/40'
                   }`}
                 >
                   <div className="text-center">
-                    <p className="text-lg font-bold text-gray-900">
+                    <p className={`text-lg font-bold transition-colors duration-300 ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
                       {amount} {t('dashboard.stats.currency')}
                     </p>
-                    <p className="text-xs mt-1 text-[#114C5A] font-semibold">
+                    <p className={`text-xs mt-1 font-semibold transition-colors duration-300 ${
+                      isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                    }`}>
                       {points.toLocaleString()} {t('dashboard.wallet.point')}
                     </p>
                   </div>
@@ -223,7 +246,9 @@ const Wallet = () => {
 
         {/* Custom Amount */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-2 text-gray-700">
+          <label className={`block text-sm font-semibold mb-2 transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-700'
+          }`}>
             {t('dashboard.wallet.orEnterCustomAmount')}
           </label>
           <div className="flex gap-3">
@@ -235,7 +260,11 @@ const Wallet = () => {
               onChange={(e) => setPurchaseAmount(e.target.value)}
               placeholder={t('dashboard.wallet.enterAmountInRiyal')}
               disabled={isPurchasing || !walletData?.settings?.is_active}
-              className={`flex-1 px-4 py-3 rounded-xl border border-[#114C5A]/10 focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 outline-none transition-all bg-gray-50 text-gray-900 placeholder:text-gray-400 font-semibold ${
+              className={`flex-1 px-4 py-3 rounded-xl border focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 outline-none transition-all font-semibold ${
+                isDarkMode
+                  ? 'border-slate-700 bg-slate-700 text-white placeholder:text-gray-400'
+                  : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400'
+              } ${
                 isPurchasing || !walletData?.settings?.is_active
                   ? 'opacity-50 cursor-not-allowed'
                   : ''
@@ -246,7 +275,9 @@ const Wallet = () => {
               disabled={isPurchasing || !walletData?.settings?.is_active || !purchaseAmount}
               className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 ${
                 isPurchasing || !walletData?.settings?.is_active || !purchaseAmount
-                  ? 'bg-gray-300 cursor-not-allowed text-white'
+                  ? isDarkMode
+                    ? 'bg-slate-600 cursor-not-allowed text-gray-400'
+                    : 'bg-gray-300 cursor-not-allowed text-white'
                   : 'bg-[#114C5A] hover:bg-[#114C5A]/90 text-white hover:shadow-lg'
               }`}
             >
@@ -264,8 +295,12 @@ const Wallet = () => {
             </button>
           </div>
           {purchaseAmount && parseFloat(purchaseAmount) > 0 && (
-            <p className="text-sm mt-2 text-gray-600">
-              {t('dashboard.wallet.youWillGet')} <span className="font-bold text-[#114C5A]">
+            <p className={`text-sm mt-2 transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>
+              {t('dashboard.wallet.youWillGet')} <span className={`font-bold transition-colors duration-300 ${
+                isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+              }`}>
                 {calculatePoints(parseFloat(purchaseAmount)).toLocaleString()} {t('dashboard.wallet.point')}
               </span>
             </p>
@@ -274,41 +309,67 @@ const Wallet = () => {
 
         {/* Info Message */}
         {!walletData?.settings?.is_active && (
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
-            <p className="text-sm text-amber-800">
+          <div className={`p-4 rounded-xl border transition-colors duration-300 ${
+            isDarkMode
+              ? 'bg-amber-900/30 border-amber-700/50'
+              : 'bg-amber-50 border-amber-200'
+          }`}>
+            <p className={`text-sm transition-colors duration-300 ${
+              isDarkMode ? 'text-amber-300' : 'text-amber-800'
+            }`}>
               ⚠️ {t('dashboard.wallet.pointsSystemInactive')}
             </p>
           </div>
         )}
 
         {/* How it works */}
-        <div className="mt-6 pt-6 border-t border-[#114C5A]/10">
-          <h3 className="text-lg font-bold mb-4 text-gray-900">
+        <div className={`mt-6 pt-6 border-t transition-colors duration-300 ${
+          isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+        }`}>
+          <h3 className={`text-lg font-bold mb-4 transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>
             {t('dashboard.wallet.howItWorks')}
           </h3>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-[#114C5A]/10">
-                <Gift className="w-5 h-5 text-[#114C5A]" />
+              <div className={`p-2 rounded-xl transition-colors duration-300 ${
+                isDarkMode ? 'bg-[#114C5A]/20' : 'bg-[#114C5A]/10'
+              }`}>
+                <Gift className={`w-5 h-5 transition-colors duration-300 ${
+                  isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                }`} />
               </div>
               <div>
-                <p className="font-semibold text-gray-900 mb-1">
+                <p className={`font-semibold mb-1 transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
                   {t('dashboard.wallet.purchasingPoints')}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
                   {t('dashboard.wallet.purchasingPointsDesc', { points: walletData?.settings?.points_per_riyal || 10 })}
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-[#114C5A]/10">
-                <Coins className="w-5 h-5 text-[#114C5A]" />
+              <div className={`p-2 rounded-xl transition-colors duration-300 ${
+                isDarkMode ? 'bg-[#114C5A]/20' : 'bg-[#114C5A]/10'
+              }`}>
+                <Coins className={`w-5 h-5 transition-colors duration-300 ${
+                  isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                }`} />
               </div>
               <div>
-                <p className="font-semibold text-gray-900 mb-1">
+                <p className={`font-semibold mb-1 transition-colors duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
                   {t('dashboard.wallet.usingPoints')}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
                   {t('dashboard.wallet.usingPointsDesc')}
                 </p>
               </div>

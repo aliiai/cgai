@@ -11,7 +11,7 @@ interface LogoProps {
 
 const sizeClasses = {
   sm: 'w-[40px] h-[40px]',
-  md: 'w-[60px] h-[60px]',
+  md: 'w-[80px] h-[80px]',
   lg: 'w-[150px] h-[150px]',
 };
 

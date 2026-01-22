@@ -287,7 +287,7 @@ const DashboardHeader = ({
     <header 
       className={`h-16 sm:h-18 border-b flex items-center ${isRTL ? 'justify-between' : 'justify-between'} px-4 sm:px-6 md:px-8 shadow-sm transition-all duration-300 ${
         isDarkMode 
-          ? 'bg-[#114C5A] border-[#114C5A]/30' 
+          ? 'bg-slate-800 border-slate-700' 
           : 'bg-[#FBFBFB] border-[#114C5A]/10'
       }`} 
       dir={isRTL ? 'rtl' : 'ltr'}
@@ -298,7 +298,7 @@ const DashboardHeader = ({
           onClick={onMenuClick}
           className={`lg:hidden p-2 sm:p-2.5 rounded-lg transition-all duration-200 mr-3 sm:mr-4 ${
             isDarkMode 
-              ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+              ? 'hover:bg-slate-700 text-gray-300' 
               : 'hover:bg-[#FBFBFB] text-[#333333]'
           }`}
           aria-label="Toggle menu"
@@ -330,7 +330,7 @@ const DashboardHeader = ({
           onClick={toggleDarkMode}
           className={`relative p-2 sm:p-2.5 rounded-lg transition-all duration-200 ${
             isDarkMode 
-              ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+              ? 'hover:bg-slate-700 text-gray-300' 
               : 'hover:bg-[#FBFBFB] text-[#333333]'
           }`}
           title={isDarkMode ? 'تفعيل الوضع الفاتح' : 'تفعيل الوضع الداكن'}
@@ -352,7 +352,7 @@ const DashboardHeader = ({
             }}
             className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 ${
               isDarkMode 
-                ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                ? 'hover:bg-slate-700 text-gray-300' 
                 : 'hover:bg-[#FBFBFB] text-[#333333]'
             }`}
           >
@@ -370,7 +370,7 @@ const DashboardHeader = ({
               ></div>
               <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 sm:w-52 rounded-xl shadow-2xl py-2 z-20 border ${
                 isDarkMode 
-                  ? 'bg-[#114C5A] border-[#114C5A]/30' 
+                  ? 'bg-slate-800 border-slate-700' 
                   : 'bg-[#FBFBFB] border-[#114C5A]/10'
               }`}>
                 {languages.map((lang) => (
@@ -379,7 +379,7 @@ const DashboardHeader = ({
                     onClick={() => handleLanguageChange(lang)}
                     className={`w-full flex items-center gap-3 px-4 py-3 ${isRTL ? 'text-right' : 'text-left'} transition-all duration-200 ${
                       isDarkMode 
-                        ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                        ? 'hover:bg-slate-700 text-gray-300' 
                         : 'hover:bg-[#FBFBFB] text-[#333333]'
                     } ${
                       i18n.language === lang.code 
@@ -388,7 +388,7 @@ const DashboardHeader = ({
                     }`}
                   >
                     <span className="text-2xl">{lang.flag}</span>
-                    <span className={`text-sm font-semibold flex-1 ${isDarkMode ? 'text-[#FBFBFB]' : 'text-[#333333]'}`}>{lang.name}</span>
+                    <span className={`text-sm font-semibold flex-1 ${isDarkMode ? 'text-white' : 'text-[#333333]'}`}>{lang.name}</span>
                     {i18n.language === lang.code && (
                       <div className="w-2 h-2 bg-[#FFB200] rounded-full"></div>
                     )}
@@ -409,7 +409,7 @@ const DashboardHeader = ({
             }}
             className={`relative p-2 sm:p-2.5 rounded-lg transition-all duration-200 ${
               isDarkMode 
-                ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                ? 'hover:bg-slate-700 text-gray-300' 
                 : 'hover:bg-[#FBFBFB] text-[#333333]'
             }`}
           >
@@ -430,13 +430,13 @@ const DashboardHeader = ({
               ></div>
               <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-[calc(100vw-2rem)] sm:w-80 md:w-96 rounded-xl shadow-2xl z-20 max-h-[calc(100vh-8rem)] sm:max-h-[600px] flex flex-col border ${
                 isDarkMode 
-                  ? 'bg-[#114C5A] border-[#114C5A]/30' 
+                  ? 'bg-slate-800 border-slate-700' 
                   : 'bg-[#FBFBFB] border-[#114C5A]/10'
               }`}>
                 <div className={`p-4 sm:p-5 border-b flex items-center justify-between gap-3 ${
-                  isDarkMode ? 'border-[#114C5A]/30' : 'border-[#114C5A]/10'
+                  isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
                 }`}>
-                  <h3 className={`text-base sm:text-lg font-bold ${isDarkMode ? 'text-[#FBFBFB]' : 'text-[#333333]'}`}>{t('header.notifications')}</h3>
+                  <h3 className={`text-base sm:text-lg font-bold ${isDarkMode ? 'text-white' : 'text-[#333333]'}`}>{t('header.notifications')}</h3>
                   {unreadCount > 0 && (
                     <span className="text-xs sm:text-sm bg-[#FFB200] text-[#333333] px-3 py-1.5 rounded-full font-bold whitespace-nowrap shadow-sm">
                       {unreadCount} غير مقروء
@@ -465,7 +465,7 @@ const DashboardHeader = ({
                         }}
                         className={`p-4 sm:p-5 border-b transition-all duration-200 cursor-pointer ${
                           isDarkMode 
-                            ? `border-[#114C5A]/30 hover:bg-[#114C5A]/50 ${!notification.read ? 'bg-[#FFB200]/20' : ''}`
+                            ? `border-slate-700 hover:bg-slate-700 ${!notification.read ? 'bg-[#FFB200]/20' : ''}`
                             : `border-[#114C5A]/10 hover:bg-[#FBFBFB] ${!notification.read ? 'bg-[#FFB200]/10' : ''}`
                         }`}
                       >
@@ -473,7 +473,7 @@ const DashboardHeader = ({
                           <div className={`mt-0.5 sm:mt-1 p-2 sm:p-2.5 rounded-lg flex-shrink-0 ${
                             !notification.read 
                               ? 'bg-[#FFB200]/20 text-[#FFB200]' 
-                              : isDarkMode ? 'bg-[#114C5A]/50 text-[#FBFBFB]/60' : 'bg-[#FBFBFB] text-[#333333]/60'
+                              : isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-[#FBFBFB] text-[#333333]/60'
                           }`}>
                             <Calendar size={16} className="sm:w-4 sm:h-4" />
                           </div>
@@ -532,13 +532,17 @@ const DashboardHeader = ({
             }}
             className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-all duration-200 ${
               isDarkMode 
-                ? 'hover:bg-[#114C5A]/50' 
+                ? 'hover:bg-slate-700' 
                 : 'hover:bg-[#FBFBFB]'
             }`}
           >
             <div className="relative">
               {/* Avatar with initials */}
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#114C5A] bg-gradient-to-br from-[#114C5A] to-[#114C5A] flex items-center justify-center text-[#FBFBFB] font-bold text-sm sm:text-base shadow-md">
+                      <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm sm:text-base shadow-md ${
+                        isDarkMode
+                          ? 'border-slate-600 bg-slate-700 text-white'
+                          : 'border-[#114C5A] bg-gradient-to-br from-[#114C5A] to-[#114C5A] text-white'
+                      }`}>
                 {userInitials}
               </div>
               <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-[#FFB200] rounded-full border-2 border-white shadow-sm"></div>
@@ -559,7 +563,7 @@ const DashboardHeader = ({
               ></div>
               <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-[calc(100vw-2rem)] sm:w-72 rounded-xl shadow-2xl border py-2 z-20 ${
                 isDarkMode 
-                  ? 'bg-[#114C5A] border-[#114C5A]/30' 
+                  ? 'bg-slate-800 border-slate-700' 
                   : 'bg-[#FBFBFB] border-[#114C5A]/10'
               }`}>
                 {/* User Info */}
@@ -570,7 +574,11 @@ const DashboardHeader = ({
                 }`}>
                   <div className="flex items-center gap-3 sm:gap-4">
                     {/* Avatar with initials */}
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 sm:border-[3px] border-[#114C5A] bg-gradient-to-br from-[#114C5A] to-[#114C5A] flex items-center justify-center text-[#FBFBFB] font-bold text-lg sm:text-xl shadow-lg flex-shrink-0">
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 sm:border-[3px] flex items-center justify-center font-bold text-lg sm:text-xl shadow-lg flex-shrink-0 ${
+                      isDarkMode
+                        ? 'border-slate-600 bg-slate-700 text-white'
+                        : 'border-[#114C5A] bg-gradient-to-br from-[#114C5A] to-[#114C5A] text-white'
+                    }`}>
                       {userInitials}
                     </div>
                     <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -592,7 +600,7 @@ const DashboardHeader = ({
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 ${isRTL ? 'text-right' : 'text-left'} transition-all duration-200 ${
                       isDarkMode 
-                        ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                        ? 'hover:bg-slate-700 text-gray-300' 
                         : 'hover:bg-[#FBFBFB] text-[#333333]'
                     }`}
                   >

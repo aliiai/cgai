@@ -1,12 +1,13 @@
 import { User, Phone, Mail, Save, Loader2, Calendar, UserCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore, updateProfile } from '../../storeApi/storeApi';
+import { useAuthStore, updateProfile, useThemeStore } from '../../storeApi/storeApi';
 import Swal from 'sweetalert2';
 import DashboardPageHeader from '../../components/dashboard/DashboardPageHeader';
 
 const Settings = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const { user, setUser } = useAuthStore();
   
   // تحديد الاتجاه بناءً على اللغة
@@ -138,32 +139,58 @@ const Settings = () => {
       />
 
       {/* معلومات الحساب */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-8">
+      <div className={`rounded-xl border shadow-sm p-8 transition-colors duration-300 ${
+        isDarkMode
+          ? 'bg-slate-800 border-slate-700'
+          : 'bg-white border-[#114C5A]/10'
+      }`}>
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A] border border-[#114C5A]/20">
+          <div className={`w-16 h-16 rounded-xl flex items-center justify-center border transition-colors duration-300 ${
+            isDarkMode
+              ? 'bg-[#114C5A]/20 text-[#FFB200] border-[#114C5A]/30'
+              : 'bg-[#114C5A]/10 text-[#114C5A] border-[#114C5A]/20'
+          }`}>
             <User size={32} strokeWidth={1.5} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold mb-1 text-gray-900">{t('dashboard.settings.accountInfo')}</h2>
-            <p className="text-sm text-gray-600">{t('dashboard.settings.updateInfo')}</p>
+            <h2 className={`text-2xl font-bold mb-1 transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>{t('dashboard.settings.accountInfo')}</h2>
+            <p className={`text-sm transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>{t('dashboard.settings.updateInfo')}</p>
           </div>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* الاسم */}
           <div className="group">
-            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} text-gray-700`}>
+            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               {t('dashboard.settings.fullName')}
             </label>
             <div className="relative">
-              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center border border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A] transition-all duration-200`}>
-                <User size={20} className="text-[#114C5A] group-hover:text-white transition-colors" />
+              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-200 ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 border-[#114C5A]/30 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+                  : 'bg-[#114C5A]/10 border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+              }`}>
+                <User size={20} className={`transition-colors ${
+                  isDarkMode
+                    ? 'text-[#FFB200] group-hover:text-white'
+                    : 'text-[#114C5A] group-hover:text-white'
+                }`} />
               </div>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border border-[#114C5A]/10 rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold bg-gray-50 text-gray-900 placeholder:text-gray-400 hover:bg-white`}
+                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold ${
+                  isDarkMode
+                    ? 'border-slate-700 bg-slate-700 text-white placeholder:text-gray-400 hover:bg-slate-600'
+                    : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400 hover:bg-white'
+                }`}
                 placeholder={t('dashboard.settings.fullNamePlaceholder')}
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
@@ -172,12 +199,22 @@ const Settings = () => {
 
           {/* رقم الهاتف */}
           <div className="group">
-            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} text-gray-700`}>
+            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               {t('dashboard.settings.phone')}
             </label>
             <div className="relative">
-              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center border border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A] transition-all duration-200`}>
-                <Phone size={20} className="text-[#114C5A] group-hover:text-white transition-colors" />
+              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-200 ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 border-[#114C5A]/30 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+                  : 'bg-[#114C5A]/10 border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+              }`}>
+                <Phone size={20} className={`transition-colors ${
+                  isDarkMode
+                    ? 'text-[#FFB200] group-hover:text-white'
+                    : 'text-[#114C5A] group-hover:text-white'
+                }`} />
               </div>
               <input
                 type="tel"
@@ -186,7 +223,11 @@ const Settings = () => {
                   const value = e.target.value.replace(/\D/g, '');
                   handleInputChange('phone', value);
                 }}
-                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border border-[#114C5A]/10 rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold bg-gray-50 text-gray-900 placeholder:text-gray-400 hover:bg-white`}
+                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold ${
+                  isDarkMode
+                    ? 'border-slate-700 bg-slate-700 text-white placeholder:text-gray-400 hover:bg-slate-600'
+                    : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400 hover:bg-white'
+                }`}
                 placeholder="05xxxxxxxx"
                 dir="ltr"
                 inputMode="numeric"
@@ -196,18 +237,32 @@ const Settings = () => {
 
           {/* البريد الإلكتروني */}
           <div className="group">
-            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} text-gray-700`}>
+            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               {t('dashboard.settings.email')}
             </label>
             <div className="relative">
-              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center border border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A] transition-all duration-200`}>
-                <Mail size={20} className="text-[#114C5A] group-hover:text-white transition-colors" />
+              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-200 ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 border-[#114C5A]/30 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+                  : 'bg-[#114C5A]/10 border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+              }`}>
+                <Mail size={20} className={`transition-colors ${
+                  isDarkMode
+                    ? 'text-[#FFB200] group-hover:text-white'
+                    : 'text-[#114C5A] group-hover:text-white'
+                }`} />
               </div>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border border-[#114C5A]/10 rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold bg-gray-50 text-gray-900 placeholder:text-gray-400 hover:bg-white`}
+                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold ${
+                  isDarkMode
+                    ? 'border-slate-700 bg-slate-700 text-white placeholder:text-gray-400 hover:bg-slate-600'
+                    : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400 hover:bg-white'
+                }`}
                 placeholder="example@email.com"
                 dir="ltr"
               />
@@ -216,17 +271,31 @@ const Settings = () => {
 
           {/* الجنس */}
           <div className="group">
-            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} text-gray-700`}>
+            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               {t('dashboard.settings.gender')}
             </label>
             <div className="relative">
-              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center border border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A] transition-all duration-200 pointer-events-none z-10`}>
-                <UserCircle size={20} className="text-[#114C5A] group-hover:text-white transition-colors" />
+              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-200 pointer-events-none z-10 ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 border-[#114C5A]/30 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+                  : 'bg-[#114C5A]/10 border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+              }`}>
+                <UserCircle size={20} className={`transition-colors ${
+                  isDarkMode
+                    ? 'text-[#FFB200] group-hover:text-white'
+                    : 'text-[#114C5A] group-hover:text-white'
+                }`} />
               </div>
               <select
                 value={formData.gender}
                 onChange={(e) => handleInputChange('gender', e.target.value)}
-                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border border-[#114C5A]/10 rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold appearance-none bg-gray-50 text-gray-900 hover:bg-white`}
+                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold appearance-none ${
+                  isDarkMode
+                    ? 'border-slate-700 bg-slate-700 text-white hover:bg-slate-600'
+                    : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 hover:bg-white'
+                }`}
                 dir={isRTL ? 'rtl' : 'ltr'}
               >
                 <option value="">{t('dashboard.settings.selectGender')}</option>
@@ -238,25 +307,41 @@ const Settings = () => {
 
           {/* تاريخ الميلاد */}
           <div className="group">
-            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} text-gray-700`}>
+            <label className={`block text-sm font-semibold mb-3 ${isRTL ? 'text-right' : 'text-left'} transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               {t('dashboard.settings.dateOfBirth')}
             </label>
             <div className="relative">
-              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center border border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A] transition-all duration-200 pointer-events-none z-10`}>
-                <Calendar size={20} className="text-[#114C5A] group-hover:text-white transition-colors" />
+              <div className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-200 pointer-events-none z-10 ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 border-[#114C5A]/30 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+                  : 'bg-[#114C5A]/10 border-[#114C5A]/20 group-hover:bg-[#114C5A] group-hover:border-[#114C5A]'
+              }`}>
+                <Calendar size={20} className={`transition-colors ${
+                  isDarkMode
+                    ? 'text-[#FFB200] group-hover:text-white'
+                    : 'text-[#114C5A] group-hover:text-white'
+                }`} />
               </div>
               <input
                 type="date"
                 value={formData.date_of_birth}
                 onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border border-[#114C5A]/10 rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold bg-gray-50 text-gray-900 placeholder:text-gray-400 hover:bg-white`}
+                className={`w-full ${isRTL ? 'pr-20 pl-5' : 'pl-20 pr-5'} py-4 border rounded-xl focus:outline-none focus:border-[#114C5A] focus:ring-2 focus:ring-[#114C5A]/20 transition-all ${isRTL ? 'text-right' : 'text-left'} font-semibold ${
+                  isDarkMode
+                    ? 'border-slate-700 bg-slate-700 text-white placeholder:text-gray-400 hover:bg-slate-600'
+                    : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400 hover:bg-white'
+                }`}
                 dir="ltr"
               />
             </div>
           </div>
 
           {/* زر الحفظ */}
-          <div className="pt-6 border-t border-[#114C5A]/10">
+          <div className={`pt-6 border-t transition-colors duration-300 ${
+            isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+          }`}>
             <button
               type="submit"
               disabled={isLoading}

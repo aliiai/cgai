@@ -33,7 +33,9 @@
     "login": "Login",
     "register": "Register",
     "startNow": "Get Started",
-    "menu": "Menu"
+    "menu": "Menu",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -384,6 +386,8 @@
       "amountPaid": "Amount Paid",
       "availablePackages": "Available Packages",
       "noPackages": "No packages available currently",
+      "price": "Price",
+      "duration": "Subscription Duration",
       "pendingReview": "You have a request under review",
       "activateAccount": "Account will be activated upon approval",
       "noActiveMessage": "Choose one of the available packages below to start using all system features",
@@ -783,7 +787,66 @@
       "results": "results",
       "search": "Search",
       "gridView": "Grid View",
-      "listView": "List View"
+      "listView": "List View",
+      "addRating": "Add Rating",
+      "rateApp": "Rate App",
+      "rating": "Rating",
+      "comment": "Comment",
+      "commentPlaceholder": "Write your comment here...",
+      "submitRating": "Submit Rating",
+      "cancel": "Cancel",
+      "reviewsList": "Reviews & Comments",
+      "anonymous": "Anonymous"
+    },
+    "aiServiceDetails": {
+      "backToList": "Back to List",
+      "free": "Free",
+      "popular": "Popular",
+      "new": "New",
+      "reviews": "reviews",
+      "views": "Views",
+      "purchases": "Purchases",
+      "favorites": "Favorites",
+      "useService": "Use Service",
+      "share": "Share",
+      "media": "Gallery",
+      "screenshots": "Screenshots",
+      "fullDescription": "Full Description",
+      "features": "Features",
+      "qualityGuarantee": "Quality Guarantee",
+      "instantAccess": "Instant Access",
+      "support": "Technical Support",
+      "relatedServices": "Related Services",
+      "notFound": "Service Not Found",
+      "notFoundMessage": "The requested service was not found",
+      "comingSoon": "Coming Soon",
+      "comingSoonMessage": "This feature is under development",
+      "linkCopied": "Link Copied",
+      "linkCopiedMessage": "Service link copied to clipboard",
+      "anonymous": "Anonymous",
+      "purchaseRequest": "Service Purchase Request",
+      "pricingPlan": "Pricing Plan",
+      "optional": "Optional",
+      "pricingPlanPlaceholder": "Enter pricing plan number (optional)",
+      "notes": "Notes",
+      "notesPlaceholder": "Enter any additional notes or special requirements...",
+      "contactPreference": "Contact Preference",
+      "selectContactMethod": "-- Select Contact Method --",
+      "phone": "📞 Phone",
+      "email": "✉️ Email",
+      "submitRequest": "Submit Request",
+      "cancel": "Cancel",
+      "pleaseSelectContact": "⚠️ Please select contact preference",
+      "processing": "Processing...",
+      "pleaseWait": "Please wait",
+      "requestSentSuccessfully": "✅ Request sent successfully!",
+      "addRating": "Add Rating",
+      "rateService": "Rate Service",
+      "rating": "Rating",
+      "comment": "Comment",
+      "commentPlaceholder": "Write your comment here...",
+      "submitRating": "Submit Rating",
+      "visitWebsite": "Visit Website"
     },
     "myPurchases": {
       "title": "My Purchases",
@@ -842,6 +905,89 @@
     "error": {
       "loadingError": "Failed to load services",
       "connectionError": "An error occurred while connecting to the server"
+    },
+    "visitWebsite": "Visit Website"
+  },
+  "requestService": {
+    "loading": "Loading services...",
+    "errorFetching": "Failed to fetch services data",
+    "errorOccurred": "An error occurred while fetching services data",
+    "retry": "Retry",
+    "discoverServices": "Discover Services",
+    "noServices": "No services available at the moment",
+    "footerTitle": "Ready to start?",
+    "footerDescription": "We are here to help you achieve your goals through our outstanding services. Register now and start your journey with us today",
+    "registerNow": "Register Now",
+    "contactUs": "Contact Us"
+  },
+  "discoverServices": {
+    "title": "Discover Services",
+    "subtitle": "Explore all our available services and choose what suits your needs",
+    "all": "All",
+    "loadingSubCategories": "Loading sub-categories...",
+    "noDescription": "No description available",
+    "perHour": "SAR/hour",
+    "bookService": "Book Service",
+    "noServices": "No services available at the moment",
+    "notSpecified": "Not specified"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "We are here to answer your questions and listen to your suggestions. Contact us through the form below or via contact information",
+    "formTitle": "Send us a message",
+    "name": "Name",
+    "namePlaceholder": "Enter your full name",
+    "email": "Email",
+    "emailPlaceholder": "example@email.com",
+    "phone": "Phone",
+    "phonePlaceholder": "05xxxxxxxx",
+    "message": "Message",
+    "messagePlaceholder": "Write your message here...",
+    "sendButton": "Send Message",
+    "sending": "Sending...",
+    "successMessage": "Your message has been sent successfully! We will contact you soon.",
+    "contactInfoTitle": "Contact Information",
+    "workingHours": "Working Hours",
+    "workingHoursContent": "Sunday - Thursday: 9:00 AM - 6:00 PM<br />Friday - Saturday: Closed",
+    "helpTitle": "We are here to help you",
+    "helpDescription": "Our team is available to answer your inquiries and assist you at any time. Feel free to contact us, and we will be happy to help you."
+  },
+  "pricing": {
+    "title": "Choose the Right Plan for You",
+    "subtitle": "Flexible plans that allow you to benefit from integrated services and smart solutions according to your project size and needs.",
+    "startsFrom": "Starts from",
+    "subscribeNow": "Subscribe Now",
+    "basic": {
+      "name": "Basic Plan",
+      "features": {
+        "0": "AI solutions (ready-made models)",
+        "1": "Basic software development",
+        "2": "Basic design and user experience",
+        "3": "Limited data and analytics",
+        "4": "Basic support"
+      }
+    },
+    "professional": {
+      "name": "Professional Plan",
+      "features": {
+        "0": "Custom AI solutions",
+        "1": "Advanced software development",
+        "2": "Professional design and user experience",
+        "3": "Advanced data and analytics",
+        "4": "Expert booking by the hour",
+        "5": "Priority support"
+      }
+    },
+    "business": {
+      "name": "Business Plan",
+      "features": {
+        "0": "Advanced AI solutions",
+        "1": "Ready-made or custom software systems",
+        "2": "Custom design and user experience",
+        "3": "Comprehensive analytics and data",
+        "4": "Expert booking",
+        "5": "Continuous technical support"
+      }
     }
   }
 }

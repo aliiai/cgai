@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Sun, Moon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../../LanguageSelector';
 import AuthButtons from '../../AuthButtons';
 
@@ -18,6 +19,8 @@ const HeaderActions = ({
     setIsMobileMenuOpen,
     variants,
 }: HeaderActionsProps) => {
+    const { t } = useTranslation();
+    
     return (
         <motion.div
             className="flex items-center gap-2 sm:gap-4 flex-shrink-0"
@@ -37,7 +40,7 @@ const HeaderActions = ({
                         ? 'hover:bg-slate-800 text-amber-500'
                         : 'hover:bg-gray-100 text-gray-700'
                     }`}
-                title={isDarkMode ? 'الوضع الفاتح' : 'الوضع الداكن'}
+                title={isDarkMode ? t('header.lightMode') : t('header.darkMode')}
             >
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -52,7 +55,7 @@ const HeaderActions = ({
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`sm:hidden w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-gray-100'
                     }`}
-                aria-label="Menu"
+                aria-label={t('header.menu')}
             >
                 {isMobileMenuOpen ? (
                     <svg

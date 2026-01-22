@@ -960,7 +960,9 @@ export interface GetRatingsParams {
 }
 
 export interface CreateRatingRequest {
-  booking_id: number;
+  booking_id?: number;
+  ratable_id: number;
+  ratable_type: 'service' | 'consultation' | 'ai_service' | 'ready_app';
   rating: number;
   comment?: string;
 }

@@ -16,21 +16,23 @@ interface AuthButtonsProps {
   className?: string;
 }
 
-const defaultButtons: AuthButton[] = [
-  { label: 'تسجيل جديد', path: '/register', variant: 'secondary' },
-  { label: 'تسجيل الدخول', path: '/login', variant: 'primary' },
-];
-
 const AuthButtons = ({ 
-  buttons = defaultButtons,
+  buttons,
   className = '' 
 }: AuthButtonsProps) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const isRTL = i18n.language === 'ar';
+  
+  const defaultButtons: AuthButton[] = [
+    { label: t('header.register'), path: '/register', variant: 'secondary' },
+    { label: t('header.login'), path: '/login', variant: 'primary' },
+  ];
+  
+  const buttonsToUse = buttons || defaultButtons;
   
   return (
     <div className={`flex items-center gap-4 ${className}`}>
-      {buttons.map((button, index) => {
+      {buttonsToUse.map((button, index) => {
         const href = button.link || button.path || '#';
         const isExternal = href.startsWith('http://') || href.startsWith('https://');
         const target = button.target || (isExternal ? '_blank' : undefined);

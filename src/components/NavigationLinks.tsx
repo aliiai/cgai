@@ -29,11 +29,6 @@ const NavigationLinks = ({
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string, label: string) => {
     e.preventDefault();
 
-    // Prevent navigation for request-service and contact pages
-    if (path === '/request-service' || path === '/contact' || path === '/contact-us') {
-      return;
-    }
-
     if (externalActiveLink === undefined) {
       setInternalActiveLink(label);
     }

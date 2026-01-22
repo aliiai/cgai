@@ -41,11 +41,11 @@ const SidebarItem = ({ item, isActive, isOpen, onToggle, isCollapsed = false }: 
         <div
           className={`relative flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-lg transition-colors duration-200 ${
             isActive && !hasChildren
-              ? isDarkMode
-                ? 'bg-[#114C5A]/80 text-[#FBFBFB]'
+              ?               isDarkMode 
+                ? 'bg-slate-700 text-white'
                 : 'bg-[#114C5A]/10 text-[#114C5A]'
-              : isDarkMode
-                ? 'text-[#FBFBFB]/70 hover:bg-[#114C5A]/30 hover:text-[#FBFBFB]'
+              :               isDarkMode
+                ? 'text-gray-300 hover:bg-slate-700 hover:text-white'
                 : 'text-[#333333] hover:bg-[#FBFBFB] hover:text-[#114C5A]'
           }`}
         >
@@ -64,8 +64,8 @@ const SidebarItem = ({ item, isActive, isOpen, onToggle, isCollapsed = false }: 
 
             <div className={`flex-shrink-0 transition-colors ${
               isActive && !hasChildren
-                ? isDarkMode ? 'text-[#FBFBFB]' : 'text-[#114C5A]'
-                : isDarkMode ? 'text-[#FBFBFB]/60' : 'text-[#333333]/60'
+                ? isDarkMode ? 'text-white' : 'text-[#114C5A]'
+                : isDarkMode ? 'text-gray-300' : 'text-[#333333]/60'
             }`}>
               <div className="w-4.5 h-4.5 flex items-center justify-center">
                 {item.iconElement}
@@ -75,7 +75,7 @@ const SidebarItem = ({ item, isActive, isOpen, onToggle, isCollapsed = false }: 
             {!isCollapsed && (
               <span className={`text-sm font-medium truncate ${i18n.language === 'ar' ? 'text-right' : 'text-left'} ${
                 isActive && !hasChildren
-                  ? isDarkMode ? 'text-[#FBFBFB]' : 'text-[#114C5A]'
+                  ? isDarkMode ? 'text-white' : 'text-[#114C5A]'
                   : ''
               }`}>
                 {item.name}
@@ -86,8 +86,8 @@ const SidebarItem = ({ item, isActive, isOpen, onToggle, isCollapsed = false }: 
             {isCollapsed && (
               <div className={`absolute ${i18n.language === 'ar' ? 'right-full mr-2' : 'left-full ml-2'} top-1/2 -translate-y-1/2 z-50 px-2 py-1 rounded-lg text-xs font-medium whitespace-nowrap opacity-0 group-hover/item:opacity-100 transition-opacity pointer-events-none ${
                 isDarkMode 
-                  ? 'bg-[#114C5A] text-[#FBFBFB] shadow-lg' 
-                  : 'bg-[#333333] text-[#FBFBFB] shadow-lg'
+                  ? 'bg-slate-700 text-white shadow-lg' 
+                  : 'bg-slate-700 text-white shadow-lg'
               }`}>
                 {item.name}
                 <div className={`absolute top-1/2 -translate-y-1/2 ${i18n.language === 'ar' ? 'right-0 translate-x-full' : 'left-0 -translate-x-full'} w-0 h-0 border-4 border-transparent ${
@@ -100,7 +100,7 @@ const SidebarItem = ({ item, isActive, isOpen, onToggle, isCollapsed = false }: 
           </div>
 
           {hasChildren && !isCollapsed && (
-            <div className={`transition-colors ${isDarkMode ? 'text-[#FBFBFB]/60' : 'text-[#333333]/60'}`}>
+            <div className={`transition-colors ${isDarkMode ? 'text-gray-300' : 'text-[#333333]/60'}`}>
               {isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </div>
           )}
@@ -110,7 +110,7 @@ const SidebarItem = ({ item, isActive, isOpen, onToggle, isCollapsed = false }: 
       {/* Sub Items */}
       {hasChildren && isOpen && !isCollapsed && (
         <div className={`${i18n.language === 'ar' ? 'mr-3 pr-2 border-r' : 'ml-3 pl-2 border-l'} ${
-          isDarkMode ? 'border-[#114C5A]/30' : 'border-[#114C5A]/20'
+          isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/20'
         } space-y-0.5 mt-0.5`}>
           {item.children!.map((child) => {
             const isChildActive = location.pathname === child.path;
@@ -119,15 +119,15 @@ const SidebarItem = ({ item, isActive, isOpen, onToggle, isCollapsed = false }: 
                 <div
                   className={`flex items-center gap-2 px-2.5 py-1.5 rounded text-xs transition-colors ${
                     isChildActive
-                      ? isDarkMode
-                        ? 'bg-[#114C5A]/80 text-[#FBFBFB]'
-                        : 'bg-[#114C5A]/10 text-[#114C5A]'
+                      ?               isDarkMode 
+                ? 'bg-slate-700 text-white'
+                : 'bg-[#114C5A]/10 text-[#114C5A]'
                       : isDarkMode
-                        ? 'text-[#FBFBFB]/70 hover:bg-[#114C5A]/30 hover:text-[#FBFBFB]'
+                        ? 'text-gray-300 hover:bg-slate-700 hover:text-white'
                         : 'text-[#333333]/70 hover:bg-[#FBFBFB] hover:text-[#114C5A]'
                   }`}
                 >
-                  <div className={`flex-shrink-0 ${isChildActive ? (isDarkMode ? 'text-[#FBFBFB]' : 'text-[#114C5A]') : isDarkMode ? 'text-[#FBFBFB]/60' : 'text-[#333333]/60'}`}>
+                  <div className={`flex-shrink-0 ${isChildActive ? (isDarkMode ? 'text-white' : 'text-[#114C5A]') : isDarkMode ? 'text-gray-300' : 'text-[#333333]/60'}`}>
                     <div className="w-3.5 h-3.5 flex items-center justify-center">
                       {child.iconElement}
                     </div>
@@ -221,14 +221,14 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
         isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'
       } ${
         isDarkMode 
-          ? 'bg-[#114C5A] border-[#114C5A]/30' 
+          ? 'bg-slate-800 border-slate-700' 
           : 'bg-[#FBFBFB] border-[#114C5A]/10'
       }`} dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Mobile Sidebar Content */}
         <div className="flex flex-col h-full">
           {/* Logo/Header Section */}
           <div className={`h-18 flex items-center justify-center relative px-3.5 border-b shrink-0 ${
-            isDarkMode ? 'border-[#114C5A]/30' : 'border-[#114C5A]/10'
+            isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
           }`}>
             <Logo size="md" />
             {onClose && (
@@ -236,7 +236,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
                 onClick={onClose}
                 className={`absolute ${i18n.language === 'ar' ? 'left-3.5' : 'right-3.5'} p-1.5 rounded transition-colors ${
                   isDarkMode 
-                    ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                    ? 'hover:bg-slate-700 text-gray-300' 
                     : 'hover:bg-[#FBFBFB] text-[#333333]'
                 }`}
                 aria-label="Close menu"
@@ -274,13 +274,13 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
 
           {/* Logout Section */}
           <div className={`p-2.5 border-t shrink-0 ${
-            isDarkMode ? 'border-[#114C5A]/30' : 'border-[#114C5A]/10'
+            isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
           }`}>
             <button
               onClick={handleLogout}
               className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg transition-colors text-sm ${
                 isDarkMode
-                  ? 'text-[#FBFBFB]/70 hover:bg-[#114C5A]/50 hover:text-[#FBFBFB]'
+                  ? 'text-gray-300 hover:bg-slate-700 hover:text-white'
                   : 'text-[#333333] hover:bg-[#FBFBFB] hover:text-[#114C5A]'
               }`}
             >
@@ -294,7 +294,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
       {/* Desktop Sidebar */}
       <aside className={`hidden lg:flex ${isCollapsed ? 'w-20' : 'w-60'} flex-col ${borderClass} shadow-lg h-screen sticky top-0 transition-all duration-300 ${
         isDarkMode 
-          ? 'bg-[#114C5A] border-[#114C5A]/30' 
+          ? 'bg-slate-800 border-slate-700' 
           : 'bg-[#FBFBFB] border-[#114C5A]/10'
       }`} dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Logo/Header Section */}
@@ -308,7 +308,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={`absolute ${i18n.language === 'ar' ? 'left-2' : 'right-2'} top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors ${
               isDarkMode 
-                ? 'hover:bg-[#114C5A]/50 text-[#FBFBFB]' 
+                ? 'hover:bg-slate-700 text-gray-300' 
                 : 'hover:bg-[#FBFBFB] text-[#333333]'
             }`}
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -360,7 +360,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
                   {sectionNames[sectionKey] && !isCollapsed && (
                     <div className="px-2.5 mb-2.5 mt-5 first:mt-2">
                       <h3 className={`text-[10px] font-bold uppercase tracking-wider ${
-                        isDarkMode ? 'text-[#FBFBFB]/50' : 'text-[#333333]/50'
+                        isDarkMode ? 'text-gray-400' : 'text-[#333333]/50'
                       }`}>
                         {sectionNames[sectionKey]}
                       </h3>
@@ -398,7 +398,7 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
             onClick={handleLogout}
             className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} px-2.5 py-2 rounded-lg transition-colors text-sm group/logout ${
               isDarkMode
-                ? 'text-[#FBFBFB]/70 hover:bg-[#114C5A]/50 hover:text-[#FBFBFB]'
+                ? 'text-gray-300 hover:bg-slate-700 hover:text-white'
                 : 'text-[#333333] hover:bg-[#FBFBFB] hover:text-[#114C5A]'
             }`}
             title={isCollapsed ? t('common.logout') : ''}
@@ -409,8 +409,8 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
             {isCollapsed && (
               <div className={`absolute ${i18n.language === 'ar' ? 'right-full mr-2' : 'left-full ml-2'} top-1/2 -translate-y-1/2 z-50 px-2 py-1 rounded-lg text-xs font-medium whitespace-nowrap opacity-0 group-hover/logout:opacity-100 transition-opacity pointer-events-none ${
                 isDarkMode 
-                  ? 'bg-[#114C5A] text-[#FBFBFB] shadow-lg' 
-                  : 'bg-[#333333] text-[#FBFBFB] shadow-lg'
+                  ? 'bg-slate-700 text-white shadow-lg' 
+                  : 'bg-slate-700 text-white shadow-lg'
               }`}>
                 {t('common.logout')}
                 <div className={`absolute top-1/2 -translate-y-1/2 ${i18n.language === 'ar' ? 'right-0 translate-x-full' : 'left-0 -translate-x-full'} w-0 h-0 border-4 border-transparent ${

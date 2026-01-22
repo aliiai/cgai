@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import { Loader2, ChevronRight, ChevronLeft, Coins, X } from "lucide-react";
-import { getAvailableDates, createBooking, getWallet } from "../../storeApi/storeApi";
+import { getAvailableDates, createBooking, getWallet, useThemeStore } from "../../storeApi/storeApi";
 import Swal from "sweetalert2";
 import type { Service, AvailableDate, TimeSlot } from "../../types/types";
 
@@ -23,6 +23,7 @@ interface BookingData {
 
 const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupProps) => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   
   // تحديد الاتجاه بناءً على اللغة
@@ -33,22 +34,38 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
   const PrevArrow = ({ onClick }: any) => (
     <button
       onClick={onClick}
-      className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-[#114C5A]/20 rounded-full shadow-sm flex items-center justify-center hover:bg-[#114C5A] hover:text-white hover:border-[#114C5A] transition-all duration-300 group"
+      className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 border rounded-full shadow-sm flex items-center justify-center transition-all duration-300 group ${
+        isDarkMode
+          ? 'bg-slate-700 border-slate-600 hover:bg-[#114C5A] hover:border-[#114C5A]'
+          : 'bg-white border-[#114C5A]/20 hover:bg-[#114C5A] hover:border-[#114C5A]'
+      }`}
       aria-label={t('dashboard.booking.previousDay')}
       type="button"
     >
-      <ChevronLeft className="w-5 h-5 text-[#114C5A] group-hover:text-white transition-colors" />
+      <ChevronLeft className={`w-5 h-5 transition-colors ${
+        isDarkMode
+          ? 'text-gray-300 group-hover:text-white'
+          : 'text-[#114C5A] group-hover:text-white'
+      }`} />
     </button>
   );
 
   const NextArrow = ({ onClick }: any) => (
     <button
       onClick={onClick}
-      className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white border border-[#114C5A]/20 rounded-full shadow-sm flex items-center justify-center hover:bg-[#114C5A] hover:text-white hover:border-[#114C5A] transition-all duration-300 group"
+      className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 border rounded-full shadow-sm flex items-center justify-center transition-all duration-300 group ${
+        isDarkMode
+          ? 'bg-slate-700 border-slate-600 hover:bg-[#114C5A] hover:border-[#114C5A]'
+          : 'bg-white border-[#114C5A]/20 hover:bg-[#114C5A] hover:border-[#114C5A]'
+      }`}
       aria-label={t('dashboard.booking.nextDay')}
       type="button"
     >
-      <ChevronRight className="w-5 h-5 text-[#114C5A] group-hover:text-white transition-colors" />
+      <ChevronRight className={`w-5 h-5 transition-colors ${
+        isDarkMode
+          ? 'text-gray-300 group-hover:text-white'
+          : 'text-[#114C5A] group-hover:text-white'
+      }`} />
     </button>
   );
   const [availableDates, setAvailableDates] = useState<AvailableDate[]>([]);
@@ -643,21 +660,33 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative rounded-xl w-[90%] max-w-6xl h-[90vh] p-6 overflow-y-auto shadow-2xl bg-white">
+      <div className={`relative rounded-xl w-[90%] max-w-6xl h-[90vh] p-6 overflow-y-auto shadow-2xl transition-colors duration-300 ${
+        isDarkMode ? 'bg-slate-800' : 'bg-white'
+      }`}>
         {/* Close Button */}
         <button
           onClick={onClose}
-          className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} text-gray-400 hover:text-red-500 w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-50 transition-all duration-200 z-30`}
+          className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 z-30 ${
+            isDarkMode
+              ? 'text-slate-400 hover:text-red-400 hover:bg-red-900/30'
+              : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+          }`}
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
-        <div className="mb-6 pb-6 border-b border-[#114C5A]/10">
-          <h2 className={`text-2xl md:text-3xl font-bold mb-2 text-[#114C5A] ${textAlign}`}>
+        <div className={`mb-6 pb-6 border-b transition-colors duration-300 ${
+          isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+        }`}>
+          <h2 className={`text-2xl md:text-3xl font-bold mb-2 ${textAlign} transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-[#114C5A]'
+          }`}>
             {t('dashboard.services.book')}
           </h2>
-          <p className={`text-lg text-[#114C5A] font-semibold ${textAlign}`}>
+          <p className={`text-lg font-semibold ${textAlign} transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-300' : 'text-[#114C5A]'
+          }`}>
             {service.name}
           </p>
         </div>
@@ -665,11 +694,15 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
         {/* Loading or No Dates */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-[#114C5A] animate-spin" />
+            <Loader2 className={`w-8 h-8 animate-spin transition-colors duration-300 ${
+              isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+            }`} />
           </div>
         ) : availableDates.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-lg text-gray-600">
+            <p className={`text-lg transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>
               {t('dashboard.booking.noDates')}
             </p>
           </div>
@@ -677,7 +710,9 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
           <>
             {/* Days Slider */}
             <div className="mb-8">
-              <h3 className={`text-xl font-semibold mb-6 text-[#114C5A] ${textAlign}`}>
+              <h3 className={`text-xl font-semibold mb-6 ${textAlign} transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-[#114C5A]'
+              }`}>
                 {t('dashboard.booking.selectDate')}
               </h3>
               <div className="px-14 h-80 flex flex-col justify-center ">
@@ -698,7 +733,9 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
                           className={`group relative w-full rounded-xl transition-all duration-300 ease-out flex flex-col justify-center items-center gap-2 overflow-hidden ${
                             active
                               ? "h-36 bg-[#114C5A] text-white shadow-md shadow-[#114C5A]/30 scale-105 z-10"
-                              : "h-32 bg-white text-gray-600 border border-[#114C5A]/20 hover:border-[#114C5A]/40 hover:shadow-md scale-95 opacity-70 hover:opacity-100 mt-4"
+                              : isDarkMode
+                                ? "h-32 bg-slate-700 text-gray-300 border border-slate-600 hover:border-slate-500 hover:shadow-md scale-95 opacity-70 hover:opacity-100 mt-4"
+                                : "h-32 bg-white text-gray-600 border border-[#114C5A]/20 hover:border-[#114C5A]/40 hover:shadow-md scale-95 opacity-70 hover:opacity-100 mt-4"
                           }`}
                         >
                           <div className="relative z-10 flex flex-col items-center">
@@ -706,14 +743,20 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
                               className={`text-3xl font-semibold ${
                                 active
                                   ? "text-white"
-                                  : "text-gray-800 group-hover:text-[#114C5A] transition-colors"
+                                  : isDarkMode
+                                    ? "text-white group-hover:text-[#FFB200] transition-colors"
+                                    : "text-gray-800 group-hover:text-[#114C5A] transition-colors"
                               }`}
                             >
                               {date.day_name}
                             </span>
                             <span
                               className={`text-lg mt-1 ${
-                                active ? "text-white/90" : "text-gray-600"
+                                active 
+                                  ? "text-white/90" 
+                                  : isDarkMode 
+                                    ? "text-gray-400" 
+                                    : "text-gray-600"
                               }`}
                             >
                               {date.formatted_date}
@@ -723,7 +766,9 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
                                 className={`mt-2 px-3 py-1 rounded-lg text-xs font-medium ${
                                   active
                                     ? "bg-white/20 text-white"
-                                    : "bg-[#114C5A]/10 text-[#114C5A]"
+                                    : isDarkMode
+                                      ? "bg-[#114C5A]/30 text-[#FFB200]"
+                                      : "bg-[#114C5A]/10 text-[#114C5A]"
                                 }`}
                               >
                                 {t('dashboard.consultation.today')}
@@ -742,24 +787,36 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
             {selectedDay && (
               <>
                 <div className="mb-6">
-                  <h3 className={`text-xl font-semibold mb-2 text-[#114C5A] ${textAlign}`}>
+                  <h3 className={`text-xl font-semibold mb-2 ${textAlign} transition-colors duration-300 ${
+                    isDarkMode ? 'text-white' : 'text-[#114C5A]'
+                  }`}>
                     {t('dashboard.booking.selectTime')}
                   </h3>
-                  <p className={`text-sm text-gray-600 ${textAlign} mb-4`}>
+                  <p className={`text-sm ${textAlign} mb-4 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
                     {t('dashboard.booking.selectTime')}
                   </p>
                 </div>
 
                 {validFutureTimeSlots.length === 0 ? (
-                  <div className="text-center py-12 rounded-xl border-2 border-dashed bg-gray-50 border-[#114C5A]/20">
-                    <p className="text-lg font-medium text-gray-600">
+                  <div className={`text-center py-12 rounded-xl border-2 border-dashed transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'bg-slate-700/50 border-slate-600'
+                      : 'bg-gray-50 border-[#114C5A]/20'
+                  }`}>
+                    <p className={`text-lg font-medium transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
                       {t('dashboard.booking.noTimeSlots')}
                     </p>
                   </div>
                 ) : (
                   <>
                     <div className="mb-4">
-                      <p className={`text-sm text-gray-600 ${textAlign}`}>
+                      <p className={`text-sm ${textAlign} transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`}>
                         {t('dashboard.consultation.availableTimes', { date: selectedDay.formatted_date })}
                       </p>
                     </div>
@@ -779,7 +836,9 @@ const ServicePopup = ({ service, onClose, onOpenConsultations }: ServicePopupPro
                               ${
                                 isSelected
                                   ? "bg-[#114C5A] text-white border-[#114C5A] shadow-md shadow-[#114C5A]/25 scale-[1.02]"
-                                  : "bg-white text-gray-700 border-[#114C5A]/20 hover:border-[#114C5A]/40 hover:bg-[#114C5A]/5 hover:shadow-sm"
+                                  : isDarkMode
+                                    ? "bg-slate-700 text-gray-300 border-slate-600 hover:border-slate-500 hover:bg-slate-600 hover:shadow-sm"
+                                    : "bg-white text-gray-700 border-[#114C5A]/20 hover:border-[#114C5A]/40 hover:bg-[#114C5A]/5 hover:shadow-sm"
                               }
                               ${
                                 !timeSlot.is_available

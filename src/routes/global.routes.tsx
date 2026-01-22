@@ -71,6 +71,9 @@ const componentMap: Record<string, React.LazyExoticComponent<React.ComponentType
   HomePage: lazy(() => import('../pages/HomePage')),
   Technologies: lazy(() => import('../pages/Technologies')),
   News: lazy(() => import('../pages/News')),
+  RequestService: lazy(() => import('../pages/RequestService')),
+  Contact: lazy(() => import('../pages/Contact')),
+  DiscoverServices: lazy(() => import('../pages/DiscoverServices')),
 };
 
 // Global Routes Data
@@ -93,6 +96,24 @@ export const globalRoutes: PublicRouteType[] = [
     name: 'أخبار',
     path: '/news',
     component: 'News',
+  },
+  {
+    id: 'request-service',
+    name: 'طلب الخدمة',
+    path: '/request-service',
+    component: 'RequestService',
+  },
+  {
+    id: 'contact',
+    name: 'تواصل معنا',
+    path: '/contact',
+    component: 'Contact',
+  },
+  {
+    id: 'discover-services',
+    name: 'اكتشف الخدمات',
+    path: '/discover-services',
+    component: 'DiscoverServices',
   },
 ];
 

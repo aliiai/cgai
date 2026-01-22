@@ -12,6 +12,7 @@ import {
 import { useLocalized } from '../../hooks/useLocalized';
 import { STORAGE_BASE_URL } from '../../storeApi/config/constants';
 import type { ReadyApp } from '../../storeApi/api/ready-apps.api';
+import { useThemeStore } from '../../storeApi/storeApi';
 
 interface ReadyAppCardProps {
   app: ReadyApp;
@@ -19,6 +20,7 @@ interface ReadyAppCardProps {
 
 const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
   
@@ -70,7 +72,11 @@ const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
 
   return (
     <div
-      className="group bg-white rounded-xl border border-[#114C5A]/10 shadow-sm hover:shadow-md hover:border-[#114C5A]/20 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
+      className={`group rounded-xl border shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden flex flex-col ${
+        isDarkMode
+          ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+          : 'bg-white border-[#114C5A]/10 hover:border-[#114C5A]/20'
+      }`}
       onClick={handleViewDetails}
     >
       {/* Header with gradient */}
@@ -124,7 +130,9 @@ const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
       {/* Content Section */}
       <div className="p-4 space-y-3 flex-grow">
         {/* Description */}
-        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+        <p className={`text-sm line-clamp-2 leading-relaxed transition-colors duration-300 ${
+          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+        }`}>
           {localizedApp.short_description || localizedApp.description}
         </p>
 
@@ -134,13 +142,17 @@ const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
             {features.map((feature, index) => (
               <div key={index} className="flex items-center gap-2">
                 <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
-                <span className="text-xs text-gray-600">
+                <span className={`text-xs transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
                   {feature}
                 </span>
               </div>
             ))}
             {app.features && app.features.length > 2 && (
-              <span className="text-xs text-gray-500">
+              <span className={`text-xs transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>
                 +{app.features.length - 2} {t('dashboard.readyApps.moreFeatures') || 'ميزة أخرى'}
               </span>
             )}
@@ -149,7 +161,9 @@ const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
 
         {/* Rating */}
         {app.rating && (
-          <div className="flex items-center gap-2 pt-2 border-t border-[#114C5A]/10">
+          <div className={`flex items-center gap-2 pt-2 border-t transition-colors duration-300 ${
+            isDarkMode ? 'border-slate-700' : 'border-[#114C5A]/10'
+          }`}>
             <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
                 <Star
@@ -157,12 +171,16 @@ const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
                   className={`w-3.5 h-3.5 ${
                     i < Math.floor(app.rating!) 
                       ? 'text-[#FFB200] fill-current' 
-                      : 'text-gray-300'
+                      : isDarkMode
+                        ? 'text-slate-600'
+                        : 'text-gray-300'
                   }`}
                 />
               ))}
             </div>
-            <span className="text-xs font-semibold text-gray-600">
+            <span className={`text-xs font-semibold transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>
               {app.rating} ({app.reviews_count || 0})
             </span>
           </div>
@@ -170,19 +188,29 @@ const ReadyAppCard = ({ app }: ReadyAppCardProps) => {
       </div>
 
       {/* Footer */}
-      <div className="p-4 pt-3 border-t border-[#114C5A]/10 bg-gray-50">
+      <div className={`p-4 pt-3 border-t transition-colors duration-300 ${
+        isDarkMode
+          ? 'border-slate-700 bg-slate-700/30'
+          : 'border-[#114C5A]/10 bg-gray-50'
+      }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <span className="text-xl font-bold text-[#114C5A]">
+            <span className={`text-xl font-bold transition-colors duration-300 ${
+              isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+            }`}>
               {app.price.toLocaleString()} {app.currency || 'ر.س'}
             </span>
             {app.original_price && app.original_price > app.price && (
-              <span className="text-sm line-through text-gray-400">
+              <span className={`text-sm line-through transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-500' : 'text-gray-400'
+              }`}>
                 {app.original_price.toLocaleString()} {app.currency || 'ر.س'}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2 text-[#114C5A] font-semibold group-hover:gap-3 transition-all">
+          <div className={`flex items-center gap-2 font-semibold group-hover:gap-3 transition-all ${
+            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+          }`}>
             <ShoppingCart className="w-5 h-5" />
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
           </div>

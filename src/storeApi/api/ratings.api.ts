@@ -141,16 +141,23 @@ export const createRating = async (ratingData: CreateRatingRequest): Promise<Cre
       };
     }
 
+    // إنشاء FormData لإرسال البيانات كـ form-data
+    const formData = new FormData();
+    if (ratingData.booking_id) {
+      formData.append('booking_id', ratingData.booking_id.toString());
+    }
+    formData.append('ratable_id', ratingData.ratable_id.toString());
+    formData.append('ratable_type', ratingData.ratable_type);
+    formData.append('rating', ratingData.rating.toString());
+    if (ratingData.comment) {
+      formData.append('comment', ratingData.comment);
+    }
+
     const response = await axios.post(
       `${API_BASE}/customer/ratings`,
-      {
-        booking_id: ratingData.booking_id,
-        rating: ratingData.rating,
-        comment: ratingData.comment || '',
-      },
+      formData,
       {
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': `Bearer ${token.trim()}`
         },
@@ -174,9 +181,9 @@ export const createRating = async (ratingData: CreateRatingRequest): Promise<Cre
       } else if (error.response.status === 400) {
         errorMessage = error.response.data?.message || 'بيانات التقييم غير صحيحة.';
       } else if (error.response.status === 403) {
-        errorMessage = 'ليس لديك صلاحية لإضافة تقييم لهذا الحجز.';
+        errorMessage = 'ليس لديك صلاحية لإضافة تقييم لهذا العنصر.';
       } else if (error.response.status === 409) {
-        errorMessage = 'تم تقييم هذا الحجز مسبقاً.';
+        errorMessage = 'تم تقييم هذا العنصر مسبقاً.';
       } else {
         errorMessage = error.response.data?.message || errorMessage;
       }

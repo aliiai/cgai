@@ -5,13 +5,14 @@ import LoadingState from '../../components/dashboard/LoadingState';
 import EmptyState from '../../components/dashboard/EmptyState';
 import RatingPopup from '../../components/dashboard/RatingPopup';
 import { CheckCircle, FileCheck, Search, Calendar, Clock, DollarSign, User, Star, ChevronLeft, ChevronRight, MessageSquare, Tag, Loader2, ArrowRight } from 'lucide-react';
-import { getPastBookings } from '../../storeApi/storeApi';
+import { getPastBookings, useThemeStore } from '../../storeApi/storeApi';
 import type { CustomerBooking } from '../../types/types';
 import { useNavigate } from 'react-router-dom';
 import { useLocalizedName, useLocalizedDescription } from '../../hooks/useLocalized';
 
 const CompletedWorks = () => {
   const { t } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<CustomerBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,9 +153,15 @@ const CompletedWorks = () => {
       <div className="space-y-6">
         <DashboardPageHeader title={t('dashboard.completedWorks.title')} />
         <div className="flex flex-col justify-center items-center py-32">
-          <Loader2 className="w-10 h-10 text-[#114C5A] animate-spin mb-4" />
-          <p className="text-gray-600 font-semibold text-lg">{t('dashboard.bookings.loading')}</p>
-          <p className="text-gray-500 text-sm mt-2">{t('dashboard.bookings.pleaseWait')}</p>
+          <Loader2 className={`w-10 h-10 animate-spin mb-4 transition-colors duration-300 ${
+            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+          }`} />
+          <p className={`font-semibold text-lg transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>{t('dashboard.bookings.loading')}</p>
+          <p className={`text-sm mt-2 transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+          }`}>{t('dashboard.bookings.pleaseWait')}</p>
         </div>
       </div>
     );
@@ -165,21 +172,31 @@ const CompletedWorks = () => {
       <DashboardPageHeader title={t('dashboard.completedWorks.title')} />
       
       {/* Search Bar */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-4">
+      <div className={`rounded-xl border shadow-sm p-4 transition-colors duration-300 ${
+        isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-[#114C5A]/10'
+      }`}>
         <div className="relative">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className={`absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-400'
+          }`} />
           <input
             type="text"
             placeholder={t('dashboard.completedWorks.search')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pr-10 pl-4 py-3 border border-[#114C5A]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] bg-gray-50"
+            className={`w-full pr-10 pl-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-[#114C5A] transition-colors duration-300 ${
+              isDarkMode
+                ? 'bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-[#114C5A]/20'
+                : 'border-[#114C5A]/10 bg-gray-50 focus:ring-[#114C5A]/20'
+            }`}
           />
         </div>
       </div>
 
       {bookings.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-8">
+        <div className={`rounded-xl border shadow-sm p-8 transition-colors duration-300 ${
+          isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-[#114C5A]/10'
+        }`}>
           <EmptyState 
             message={searchTerm ? t('dashboard.completedWorks.noResults') : t('dashboard.completedWorks.noWorks')}
             description={searchTerm ? t('dashboard.completedWorks.tryDifferent') : t('dashboard.completedWorks.willShow')}
@@ -198,7 +215,11 @@ const CompletedWorks = () => {
               return (
                 <div
                   key={booking.id}
-                  className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm hover:shadow-md hover:border-[#114C5A]/20 transition-all duration-300 group overflow-hidden flex flex-col"
+                  className={`rounded-xl border shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden flex flex-col ${
+                    isDarkMode
+                      ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                      : 'bg-white border-[#114C5A]/10 hover:border-[#114C5A]/20'
+                  }`}
                 >
                   {/* Header with gradient */}
                   <div className="bg-gradient-to-br from-[#114C5A] to-[#114C5A]/90 p-4 text-white">
@@ -228,19 +249,39 @@ const CompletedWorks = () => {
                   <div className="p-4 space-y-3 flex-grow">
                     {/* Date & Time */}
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="p-2.5 rounded-lg border border-[#114C5A]/10 bg-[#114C5A]/5">
+                      <div className={`p-2.5 rounded-lg border transition-colors duration-300 ${
+                        isDarkMode
+                          ? 'border-[#114C5A]/30 bg-[#114C5A]/20'
+                          : 'border-[#114C5A]/10 bg-[#114C5A]/5'
+                      }`}>
                         <div className="flex items-center gap-1.5 mb-1">
-                          <Calendar size={12} className="text-[#114C5A]" />
-                          <p className="text-xs text-gray-600 font-medium">{t('dashboard.bookings.date')}</p>
+                          <Calendar size={12} className={`transition-colors duration-300 ${
+                            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                          }`} />
+                          <p className={`text-xs font-medium transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                          }`}>{t('dashboard.bookings.date')}</p>
                         </div>
-                        <p className="text-sm font-semibold text-gray-900">{formatDate(bookingDate)}</p>
+                        <p className={`text-sm font-semibold transition-colors duration-300 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>{formatDate(bookingDate)}</p>
                       </div>
-                      <div className="p-2.5 rounded-lg border border-[#114C5A]/10 bg-[#114C5A]/5">
+                      <div className={`p-2.5 rounded-lg border transition-colors duration-300 ${
+                        isDarkMode
+                          ? 'border-[#114C5A]/30 bg-[#114C5A]/20'
+                          : 'border-[#114C5A]/10 bg-[#114C5A]/5'
+                      }`}>
                         <div className="flex items-center gap-1.5 mb-1">
-                          <Clock size={12} className="text-[#114C5A]" />
-                          <p className="text-xs text-gray-600 font-medium">{t('dashboard.bookings.time')}</p>
+                          <Clock size={12} className={`transition-colors duration-300 ${
+                            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                          }`} />
+                          <p className={`text-xs font-medium transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                          }`}>{t('dashboard.bookings.time')}</p>
                         </div>
-                        <p className="text-sm font-semibold text-gray-900" dir="ltr">
+                        <p className={`text-sm font-semibold transition-colors duration-300 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`} dir="ltr">
                           {formatTime(startTime)} - {formatTime(endTime)}
                         </p>
                       </div>
@@ -248,12 +289,22 @@ const CompletedWorks = () => {
 
                     {/* Employee */}
                     {booking.employee && (
-                      <div className="p-2.5 rounded-lg border border-[#114C5A]/10 bg-[#114C5A]/5">
+                      <div className={`p-2.5 rounded-lg border transition-colors duration-300 ${
+                        isDarkMode
+                          ? 'border-[#114C5A]/30 bg-[#114C5A]/20'
+                          : 'border-[#114C5A]/10 bg-[#114C5A]/5'
+                      }`}>
                         <div className="flex items-center gap-2">
-                          <User size={14} className="text-[#114C5A]" />
+                          <User size={14} className={`transition-colors duration-300 ${
+                            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                          }`} />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-600 font-medium mb-0.5">{t('dashboard.bookings.serviceProvider')}</p>
-                            <p className="text-sm font-semibold text-gray-900 truncate">
+                            <p className={`text-xs font-medium mb-0.5 transition-colors duration-300 ${
+                              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                            }`}>{t('dashboard.bookings.serviceProvider')}</p>
+                            <p className={`text-sm font-semibold truncate transition-colors duration-300 ${
+                              isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>
                               {booking.employee.name || booking.employee.user?.name || t('dashboard.bookings.cgaiTeam')}
                             </p>
                           </div>
@@ -262,13 +313,25 @@ const CompletedWorks = () => {
                     )}
 
                     {/* Price */}
-                    <div className="p-2.5 rounded-lg border border-[#114C5A]/10 bg-[#114C5A]/5">
+                    <div className={`p-2.5 rounded-lg border transition-colors duration-300 ${
+                      isDarkMode
+                        ? 'border-[#114C5A]/30 bg-[#114C5A]/20'
+                        : 'border-[#114C5A]/10 bg-[#114C5A]/5'
+                    }`}>
                       <div className="flex items-center gap-2">
-                        <DollarSign size={14} className="text-[#114C5A]" />
+                        <DollarSign size={14} className={`transition-colors duration-300 ${
+                          isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                        }`} />
                         <div>
-                          <p className="text-xs text-gray-600 font-medium">{t('dashboard.bookings.totalCost')}</p>
-                          <p className="text-base font-bold text-[#114C5A]">
-                            {Math.abs(parseFloat(booking.total_price)).toFixed(2)} <span className="text-xs text-gray-600">{t('dashboard.stats.currency')}</span>
+                          <p className={`text-xs font-medium transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                          }`}>{t('dashboard.bookings.totalCost')}</p>
+                          <p className={`text-base font-bold transition-colors duration-300 ${
+                            isDarkMode ? 'text-[#FFB200]' : 'text-[#114C5A]'
+                          }`}>
+                            {Math.abs(parseFloat(booking.total_price)).toFixed(2)} <span className={`text-xs transition-colors duration-300 ${
+                              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                            }`}>{t('dashboard.stats.currency')}</span>
                           </p>
                         </div>
                       </div>
@@ -276,17 +339,27 @@ const CompletedWorks = () => {
 
                     {/* Rating Status */}
                     {booking.has_rating !== undefined && (
-                      <div className="p-2.5 rounded-lg border border-gray-200 bg-gray-50">
+                      <div className={`p-2.5 rounded-lg border transition-colors duration-300 ${
+                        isDarkMode
+                          ? 'border-slate-600 bg-slate-700/50'
+                          : 'border-gray-200 bg-gray-50'
+                      }`}>
                         <div className="flex items-center gap-2">
                           {booking.has_rating ? (
                             <>
                               <Star size={14} className="fill-amber-400 text-amber-400" />
-                              <span className="text-xs font-semibold text-amber-600">{t('dashboard.completedWorks.rated')}</span>
+                              <span className={`text-xs font-semibold transition-colors duration-300 ${
+                                isDarkMode ? 'text-amber-400' : 'text-amber-600'
+                              }`}>{t('dashboard.completedWorks.rated')}</span>
                             </>
                           ) : (
                             <>
-                              <MessageSquare size={14} className="text-gray-400" />
-                              <span className="text-xs font-semibold text-gray-600">{t('dashboard.completedWorks.notRated')}</span>
+                              <MessageSquare size={14} className={`transition-colors duration-300 ${
+                                isDarkMode ? 'text-gray-400' : 'text-gray-400'
+                              }`} />
+                              <span className={`text-xs font-semibold transition-colors duration-300 ${
+                                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                              }`}>{t('dashboard.completedWorks.notRated')}</span>
                             </>
                           )}
                         </div>
@@ -295,7 +368,11 @@ const CompletedWorks = () => {
                   </div>
 
                   {/* Footer */}
-                  <div className="p-4 pt-3 border-t border-[#114C5A]/10 bg-gray-50">
+                  <div className={`p-4 pt-3 border-t transition-colors duration-300 ${
+                    isDarkMode
+                      ? 'border-slate-700 bg-slate-700/30'
+                      : 'border-[#114C5A]/10 bg-gray-50'
+                  }`}>
                     <div className="flex items-center justify-between gap-2">
                       {!booking.has_rating && (
                         <button
@@ -334,8 +411,12 @@ const CompletedWorks = () => {
                 disabled={currentPage === 1}
                 className={`px-4 py-2 rounded-xl border transition-all duration-300 flex items-center gap-2 ${
                   currentPage === 1
-                    ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                    : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                    ? isDarkMode
+                      ? 'border-slate-700 bg-slate-700/50 text-gray-500 cursor-not-allowed'
+                      : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                    : isDarkMode
+                      ? 'border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                      : 'border-[#114C5A]/20 bg-white text-[#114C5A] hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                 }`}
               >
                 <ChevronRight size={18} />
@@ -362,7 +443,9 @@ const CompletedWorks = () => {
                       className={`w-10 h-10 rounded-xl font-semibold transition-all duration-300 ${
                         currentPage === pageNum
                           ? 'bg-[#114C5A] text-white shadow-md'
-                          : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
+                          : isDarkMode
+                            ? 'border border-slate-600 bg-slate-700 text-gray-300 hover:bg-slate-600 hover:border-slate-500'
+                            : 'border border-[#114C5A]/20 bg-white text-gray-700 hover:bg-[#114C5A]/5 hover:border-[#114C5A]/40'
                       }`}
                     >
                       {pageNum}
@@ -388,7 +471,9 @@ const CompletedWorks = () => {
 
           {/* Pagination Info */}
           {total > 0 && (
-            <div className="text-center text-sm text-gray-600">
+            <div className={`text-center text-sm transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-600'
+            }`}>
               {t('dashboard.completedWorks.showing', { from, to, total })}
             </div>
           )}

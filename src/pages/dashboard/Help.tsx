@@ -7,9 +7,11 @@ import { getHelpGuide, type HelpGuideItem } from '../../storeApi/api/help.api';
 import { localizeField } from '../../utils/localization';
 import LoadingState from '../../components/dashboard/LoadingState';
 import EmptyState from '../../components/dashboard/EmptyState';
+import { useThemeStore } from '../../storeApi/storeApi';
 
 const Help = () => {
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useThemeStore();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [helpData, setHelpData] = useState<HelpGuideItem[]>([]);
@@ -87,7 +89,11 @@ const Help = () => {
     return (
       <div className="space-y-6">
         <DashboardPageHeader title={t('dashboard.help.title')} />
-        <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-12">
+        <div className={`rounded-xl border shadow-sm p-12 transition-colors duration-300 ${
+          isDarkMode
+            ? 'bg-slate-800 border-slate-700'
+            : 'bg-white border-[#114C5A]/10'
+        }`}>
           <LoadingState />
         </div>
       </div>
@@ -98,8 +104,14 @@ const Help = () => {
     return (
       <div className="space-y-6">
         <DashboardPageHeader title={t('dashboard.help.title')} />
-        <div className="bg-white border border-red-200 rounded-xl p-8 text-center shadow-sm">
-          <p className="text-red-600 font-semibold mb-4">{error}</p>
+        <div className={`border rounded-xl p-8 text-center shadow-sm transition-colors duration-300 ${
+          isDarkMode
+            ? 'bg-slate-800 border-red-700/50'
+            : 'bg-white border-red-200'
+        }`}>
+          <p className={`font-semibold mb-4 transition-colors duration-300 ${
+            isDarkMode ? 'text-red-400' : 'text-red-600'
+          }`}>{error}</p>
           <button
             onClick={fetchHelpGuide}
             className="px-6 py-3 bg-[#114C5A] text-white rounded-xl font-semibold hover:bg-[#114C5A]/90 transition-all shadow-md hover:shadow-lg"
@@ -116,15 +128,27 @@ const Help = () => {
       <DashboardPageHeader title={t('dashboard.help.title')} subtitle={t('dashboard.help.subtitle')} />
       
       {/* Search Help */}
-      <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-4">
+      <div className={`rounded-xl border shadow-sm p-4 transition-colors duration-300 ${
+        isDarkMode
+          ? 'bg-slate-800 border-slate-700'
+          : 'bg-white border-[#114C5A]/10'
+      }`}>
         <div className="relative group">
-          <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#114C5A] transition-colors`} />
+          <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${
+            isDarkMode
+              ? 'text-gray-500 group-focus-within:text-[#FFB200]'
+              : 'text-gray-400 group-focus-within:text-[#114C5A]'
+          }`} />
           <input
             type="text"
             placeholder={t('dashboard.help.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border border-[#114C5A]/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] transition-all bg-gray-50 text-gray-900 placeholder:text-gray-400`}
+            className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#114C5A]/20 focus:border-[#114C5A] transition-all ${
+              isDarkMode
+                ? 'border-slate-700 bg-slate-700 text-white placeholder:text-gray-400'
+                : 'border-[#114C5A]/10 bg-gray-50 text-gray-900 placeholder:text-gray-400'
+            }`}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
@@ -132,13 +156,21 @@ const Help = () => {
 
       {/* Help Guide Items - Accordion Style */}
       {filteredData.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm p-12">
+        <div className={`rounded-xl border shadow-sm p-12 transition-colors duration-300 ${
+          isDarkMode
+            ? 'bg-slate-800 border-slate-700'
+            : 'bg-white border-[#114C5A]/10'
+        }`}>
           <EmptyState 
             message={t('dashboard.help.noDataMessage') || 'لا توجد نتائج'}
           />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[#114C5A]/10 shadow-sm overflow-hidden">
+        <div className={`rounded-xl border shadow-sm overflow-hidden transition-colors duration-300 ${
+          isDarkMode
+            ? 'bg-slate-800 border-slate-700'
+            : 'bg-white border-[#114C5A]/10'
+        }`}>
           {filteredData.map((item, index) => {
             const isExpanded = expandedItems.has(item.id);
             const title = localizeField(item.title, item.title_en);
@@ -148,9 +180,13 @@ const Help = () => {
               <div
                 key={item.id}
                 className={`border-b last:border-b-0 transition-all ${
-                  isExpanded 
-                    ? 'bg-[#114C5A]/5 border-[#114C5A]/20' 
-                    : 'bg-white hover:bg-gray-50/50 border-gray-100'
+                  isDarkMode
+                    ? isExpanded
+                      ? 'bg-slate-700/50 border-slate-600'
+                      : 'bg-slate-800 hover:bg-slate-700/50 border-slate-700'
+                    : isExpanded
+                      ? 'bg-[#114C5A]/5 border-[#114C5A]/20'
+                      : 'bg-white hover:bg-gray-50/50 border-gray-100'
                 }`}
               >
                 <button
@@ -161,14 +197,22 @@ const Help = () => {
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                       isExpanded
                         ? 'bg-[#114C5A] text-white'
-                        : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
+                        : isDarkMode
+                          ? 'bg-[#114C5A]/20 text-[#FFB200] group-hover:bg-[#114C5A]/30'
+                          : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
                     }`}>
                       <i className={`${getIconClass(item.icon)} text-lg`}></i>
                     </div>
                     <h3 className={`text-base font-bold flex-1 transition-colors ${
                       isRTL ? 'text-right' : 'text-left'
                     } ${
-                      isExpanded ? 'text-[#114C5A]' : 'text-gray-900 group-hover:text-[#114C5A]'
+                      isDarkMode
+                        ? isExpanded
+                          ? 'text-[#FFB200]'
+                          : 'text-white group-hover:text-[#FFB200]'
+                        : isExpanded
+                          ? 'text-[#114C5A]'
+                          : 'text-gray-900 group-hover:text-[#114C5A]'
                     }`}>
                       {title}
                     </h3>
@@ -176,11 +220,15 @@ const Help = () => {
                   <div className="flex-shrink-0">
                     {isExpanded ? (
                       <ChevronUp className={`w-5 h-5 transition-colors ${
-                        isExpanded ? 'text-[#114C5A]' : 'text-gray-400'
+                        isDarkMode
+                          ? 'text-[#FFB200]'
+                          : 'text-[#114C5A]'
                       }`} />
                     ) : (
                       <ChevronDown className={`w-5 h-5 transition-colors ${
-                        isExpanded ? 'text-[#114C5A]' : 'text-gray-400'
+                        isDarkMode
+                          ? 'text-gray-400'
+                          : 'text-gray-400'
                       }`} />
                     )}
                   </div>
@@ -188,7 +236,11 @@ const Help = () => {
 
                 {isExpanded && (
                   <div className={`px-6 pb-6 ${isRTL ? 'pr-20' : 'pl-20'} animate-fadeIn`}>
-                    <div className={`text-sm leading-relaxed whitespace-pre-line border-[#114C5A]/20 py-2 text-gray-700 ${
+                    <div className={`text-sm leading-relaxed whitespace-pre-line py-2 transition-colors duration-300 ${
+                      isDarkMode
+                        ? 'border-slate-600 text-gray-300'
+                        : 'border-[#114C5A]/20 text-gray-700'
+                    } ${
                       isRTL ? 'border-r-4 pr-4' : 'border-l-4 pl-4'
                     }`}>
                       {content}

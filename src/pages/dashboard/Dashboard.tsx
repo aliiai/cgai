@@ -20,12 +20,13 @@ import RatingsSection from '../../components/dashboard/RatingsSection';
 import InvoicesSection from '../../components/dashboard/InvoicesSection';
 import ActivitySection from '../../components/dashboard/ActivitySection';
 import UpcomingBookingsSection from '../../components/dashboard/UpcomingBookingsSection';
-import { getDashboard, getSubscriptions, useAuthStore } from '../../storeApi/storeApi';
+import { getDashboard, getSubscriptions, useAuthStore, useThemeStore } from '../../storeApi/storeApi';
 import type { DashboardData, Subscription } from '../../types/types';
 
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user } = useAuthStore();
+  const { isDarkMode } = useThemeStore();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [availableSubscriptions, setAvailableSubscriptions] = useState<Subscription[]>([]);
   const [activeSubscription, setActiveSubscription] = useState<any>(null);
@@ -143,12 +144,20 @@ const Dashboard = () => {
     return (
       <div className="space-y-4 px-4 sm:px-0">
         <DashboardPageHeader title={t('dashboard.title')} />
-        <div className="bg-white border border-gray-300 rounded-lg p-8 text-center max-w-2xl mx-auto shadow-sm">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 mx-auto mb-4">
+        <div className={`border rounded-lg p-8 text-center max-w-2xl mx-auto shadow-sm transition-colors duration-300 ${
+          isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-300'
+        }`}>
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300 ${
+            isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-600'
+          }`}>
             <AlertCircle className="w-8 h-8" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('dashboard.error.title')}</h3>
-          <p className="text-sm text-gray-600 mb-6">{error}</p>
+          <h3 className={`text-xl font-semibold mb-2 transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>{t('dashboard.error.title')}</h3>
+          <p className={`text-sm mb-6 transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="bg-[#114C5A] hover:bg-[#114C5A]/90 text-white px-6 py-2 rounded-lg font-medium transition-colors text-sm border border-[#114C5A]"
@@ -239,15 +248,27 @@ const Dashboard = () => {
         {statsData.map((stat, idx) => (
           <div
             key={idx}
-            className="bg-white border border-[#114C5A]/20 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#114C5A]/40 transition-all duration-200 group"
+            className={`border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 group ${
+              isDarkMode 
+                ? 'bg-slate-800 border-slate-700 hover:border-slate-600' 
+                : 'bg-white border-[#114C5A]/20 hover:border-[#114C5A]/40'
+            }`}
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-[#114C5A]/10 rounded-xl flex items-center justify-center text-[#114C5A] group-hover:bg-[#114C5A]/20 transition-colors">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                isDarkMode
+                  ? 'bg-[#114C5A]/20 text-[#FFB200] group-hover:bg-[#114C5A]/30'
+                  : 'bg-[#114C5A]/10 text-[#114C5A] group-hover:bg-[#114C5A]/20'
+              }`}>
                 {stat.icon}
               </div>
             </div>
-            <p className="text-xs text-gray-600 mb-2 leading-tight">{stat.title}</p>
-            <p className="text-2xl font-bold text-[#114C5A]">{stat.value}</p>
+            <p className={`text-xs mb-2 leading-tight transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>{stat.title}</p>
+            <p className={`text-2xl font-bold transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-[#114C5A]'
+            }`}>{stat.value}</p>
           </div>
         ))}
       </div>
